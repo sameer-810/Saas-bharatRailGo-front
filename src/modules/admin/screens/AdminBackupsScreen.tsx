@@ -96,7 +96,7 @@ export function AdminBackupsScreen() {
   return (
     <Screen
       title="Backups"
-      subtitle="Nightly full-database backup (Plusveda design): Google Drive, email fallback, failure alerts."
+      subtitle="Nightly full-database backup to Google Drive, with email fallback and failure alerts."
       actions={<Button title="Run backup now" icon={Play} loading={run.isPending} onPress={runNow} testID="admin-backup-run" />}
       testID="admin-backups"
     >

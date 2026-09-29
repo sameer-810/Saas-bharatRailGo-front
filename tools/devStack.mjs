@@ -46,17 +46,6 @@ function run(args, env) {
   });
 }
 
-async function call(method, url, { token, body, admin } = {}) {
-  const res = await fetch((admin ? `${API}/admin` : API) + url, {
-    method,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const json = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(`${method} ${url} → ${res.status} ${JSON.stringify(json)}`);
-  return json?.data;
-}
-
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript",
@@ -135,77 +124,18 @@ export async function startStack({ log = console.log } = {}) {
   }
 
   log("• extra fixtures…");
-  const adminToken = (await call("POST", "/auth/login", { admin: true, body: CREDS.admin })).accessToken;
-  let owner = await call("POST", "/auth/login", { body: CREDS.owner });
-  await call("PATCH", `/organizations/${owner.organization.id}/subscription`, {
-    admin: true,
-    token: adminToken,
-    body: { planCode: "growth", status: "active", billingCycle: "monthly", periodDays: 30 },
-  });
-  owner = await call("POST", "/auth/login", { body: CREDS.owner });
-  const token = owner.accessToken;
-
-  const delhi = await call("POST", "/branches", {
-    token,
-    body: { name: "Delhi Godown", code: "DEL", stationCode: "NDLS", address: "Paharganj, New Delhi" },
-  });
-  await call("POST", "/auth/users", {
-    token,
-    body: { name: "Ravi (Delhi)", email: CREDS.staff.email, password: CREDS.staff.password, branches: [delhi.id] },
-  });
-  await call("POST", "/auth/users", {
-    token,
-    body: { name: "Meena Manager", email: "manager@demo-parcel.test", password: "DemoManager#2026", role: "manager" },
-  });
-  for (const h of [
-    { name: "Freight", appliesTo: "freight", basis: "per_kg", rate: 12 },
-    { name: "Freight", appliesTo: "freight", basis: "per_kg", rate: 15, stationCode: "NDLS" },
-    { name: "Hamali", appliesTo: "hamali", basis: "per_package", rate: 10 },
-    { name: "Docket", appliesTo: "other", basis: "flat", rate: 20 },
-  ]) {
-    await call("POST", "/charge-heads", { token, body: h });
-  }
-  await call("PATCH", "/business-profile", {
-    token,
-    body: { paymentReceivers: ["Ramesh", "Suresh", "Iqbal"], podNumberPrefix: "SG/", brandColor: "#1F4FD6" },
-  });
-
-  // One finalised GST invoice from an on_bill party's open consignments.
-  const cons = await call("GET", "/consignments?limit=200", { token });
-  const byParty = new Map();
-  for (const c of cons) {
-    if (c.paymentMode === "on_bill" && !c.invoice) {
-      const pid = c.party?.id || c.party;
-      byParty.set(pid, [...(byParty.get(pid) || []), c.id]);
-    }
-  }
-  const [partyId, ids] = [...byParty.entries()].sort((a, b) => b[1].length - a[1].length)[0] || [];
-  if (partyId) {
-    const inv = await call("POST", "/invoices", {
-      token,
-      body: { party: partyId, date: new Date().toISOString().slice(0, 10), consignmentIds: ids.slice(0, 3) },
-    });
-    await call("POST", `/invoices/${inv.id}/finalize`, { token });
-    if (ids.length > 3) {
-      await call("POST", "/invoices", {
-        token,
-        body: { party: partyId, date: new Date().toISOString().slice(0, 10), consignmentIds: [ids[3]] },
-      });
-    }
-  }
-
-  // A signup waiting in the admin queue.
-  await call("POST", "/auth/signup", {
-    body: {
-      businessName: "Maa Durga Roadlines",
-      gstin: "19ABCDE1234F1Z5",
-      officeAddress: "Burrabazar, Kolkata",
-      city: "Kolkata",
-      name: "Subhash Das",
-      email: "subhash@maadurga.test",
-      password: "Pending#2026",
-      acceptTerms: true,
+  // Same fixtures the real showcase seed uses (bharatrailgo-back/scripts/seedShowcase.mjs).
+  const { applyShowcaseFixtures } = await import(pathToFileURL(path.join(BACK, "scripts", "seedShowcase.mjs")).href);
+  await applyShowcaseFixtures({
+    apiBase: API,
+    creds: {
+      admin: CREDS.admin,
+      owner: CREDS.owner,
+      staff: CREDS.staff,
+      manager: { email: "manager@demo-parcel.test", password: "DemoManager#2026" },
+      pending: { email: "subhash@maadurga.test", password: "Pending#2026" },
     },
+    log: () => {},
   });
 
   log("• serving web build on", WEB_PORT);

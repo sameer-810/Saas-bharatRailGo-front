@@ -423,7 +423,7 @@ function NumberingCard({
     <Card testID="business-numbering">
       <CardTitle title="Numbering" caption="How bill (invoice) and bilti numbers are generated." />
       <Grid>
-        <TF control={control} name="billNumberPrefix" label="Bill number prefix" mono autoCapitalize="characters" placeholder="e.g. SC/" />
+        <TF control={control} name="billNumberPrefix" label="Bill number prefix" mono autoCapitalize="characters" placeholder="e.g. SG/" />
         <TF control={control} name="podNumberPrefix" label="Bilti number prefix" mono autoCapitalize="characters" maxLength={10} placeholder="e.g. B-" />
       </Grid>
       <Col gap={14} style={{ marginTop: 14 }}>
