@@ -1,0 +1,17 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@api/*": ["./src/shared/api/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@navigation/*": ["./src/navigation/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@config/*": ["./src/config/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "app.d.ts"],
+  // Node-side test files run under tsx (`npm test`), not the app compiler.
+  "exclude": ["node_modules", "tests"]
+}

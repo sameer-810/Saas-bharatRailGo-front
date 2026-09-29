@@ -1,0 +1,46 @@
+node_modules/
+.expo/
+dist/
+web-build/
+npm-debug.*
+*.orig.*
+.DS_Store
+
+# local env files
+.env
+.env.*
+!.env.example
+.env.local
+.env*.local
+.env.*.local
+
+# generated native folders (recreated by `expo prebuild` / `eas build --local`)
+/ios
+/android
+
+# Build artifacts
+*.aab
+*.apk
+
+# Android signing. The upload key is what proves a Play Store update really
+# came from you — committing it hands anyone with repo access the ability to
+# publish as this app, and Google cannot revoke or reissue it.
+credentials/
+*.keystore
+*.jks
+keystore.properties
+
+# QA and exploratory browser tests. Scratch work driven against a throwaway
+# database: the scripts hardcode local ports, the *-state/*-auth files CACHE
+# ACCESS TOKENS, and the shot folders run to tens of megabytes of PNGs. None of
+# it ships. The durable tools here (verify*, shoot*, auditModules, demoCreds)
+# are tracked as before.
+tools/qa-*
+tools/qb-*
+tools/qp-*
+tools/qr-*
+tools/qv-*
+tools/qaProbe.mjs
+tools/*-shots/
+tools/*-state.json
+tools/*-auth.json

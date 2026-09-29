@@ -1,0 +1,73 @@
+# BharatRailGo app — CI on every push and pull request.
+#
+#   checks — typecheck, lint, unit tests (always).
+#   ui     — the full Playwright run against the real API on an in-memory database.
+#            It needs the API repo next to this one. Add a repository secret
+#            BACK_REPO_TOKEN (a fine-grained GitHub token with read access to
+#            Saas-bharatRailGo-back) to turn it on; without it the job is skipped.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Typecheck, lint, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+  ui:
+    name: UI flows (Playwright)
+    runs-on: ubuntu-latest
+    needs: checks
+    env:
+      HAS_BACK: ${{ secrets.BACK_REPO_TOKEN != '' }}
+    steps:
+      - if: env.HAS_BACK != 'true'
+        run: echo "BACK_REPO_TOKEN not set — skipping the UI run."
+      - if: env.HAS_BACK == 'true'
+        uses: actions/checkout@v4
+        with:
+          path: bharatrailgo-front
+      - if: env.HAS_BACK == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: sameer-810/Saas-bharatRailGo-back
+          token: ${{ secrets.BACK_REPO_TOKEN }}
+          path: bharatrailgo-back
+      - if: env.HAS_BACK == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - if: env.HAS_BACK == 'true'
+        run: npm ci
+        working-directory: bharatrailgo-back
+      - if: env.HAS_BACK == 'true'
+        run: npm ci && npx playwright install --with-deps chromium
+        working-directory: bharatrailgo-front
+      - if: env.HAS_BACK == 'true'
+        name: Playwright UI verification
+        run: npm run verify
+        working-directory: bharatrailgo-front
+        env:
+          OUT: ${{ github.workspace }}/ui-evidence
+      - if: always() && env.HAS_BACK == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-evidence
+          path: ui-evidence
+          retention-days: 14

@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "BharatRailGo",
+    "slug": "bharatrailgo",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "scheme": "bharatrailgo",
+    "android": {
+      "package": "com.bharatrailgo.app",
+      "permissions": [
+        "android.permission.INTERNET"
+      ],
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-font"
+    ]
+  }
+}
