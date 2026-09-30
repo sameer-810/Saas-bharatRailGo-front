@@ -2,7 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Building2 } from "lucide-react-native";
-import { Col, DataList, EmptyState, Row, Screen, SearchInput, Chip, Text, Button, type Column } from "@shared/ui";
+import {
+  Col,
+  DataList,
+  EmptyState,
+  Row,
+  Screen,
+  SearchInput,
+  Chip,
+  Text,
+  Button,
+  type Column,
+} from "@shared/ui";
 import { useLayout, useTheme } from "@shared/useTheme";
 import { formatDate } from "@shared/lib/format";
 import { useDebounced } from "@shared/hooks/useDebounced";
@@ -11,23 +22,49 @@ import { apiErrorMessage } from "@shared/api/apiClient";
 import { useAdminOrgs, type AdminOrg, type OrgListParams } from "../api";
 import { OrgPills, SubscriptionCell } from "../components/OrgBits";
 
-type FilterKey = "all" | "pending" | "trial" | "active" | "past_due" | "suspended" | "rejected" | "deletion";
+type FilterKey =
+  | "all"
+  | "pending"
+  | "trial"
+  | "active"
+  | "past_due"
+  | "suspended"
+  | "rejected"
+  | "deletion";
 
 const FILTERS: { key: FilterKey; label: string; params: OrgListParams }[] = [
   { key: "all", label: "All", params: {} },
   { key: "pending", label: "Pending", params: { approvalStatus: "pending" } },
   { key: "trial", label: "Trial", params: { subscriptionStatus: "trial" } },
   { key: "active", label: "Active", params: { subscriptionStatus: "active" } },
-  { key: "past_due", label: "Past due", params: { subscriptionStatus: "past_due" } },
+  {
+    key: "past_due",
+    label: "Past due",
+    params: { subscriptionStatus: "past_due" },
+  },
   { key: "suspended", label: "Suspended", params: { status: "suspended" } },
-  { key: "rejected", label: "Rejected", params: { approvalStatus: "rejected" } },
-  { key: "deletion", label: "Deletion requested", params: { deletionRequested: "true" } },
+  {
+    key: "rejected",
+    label: "Rejected",
+    params: { approvalStatus: "rejected" },
+  },
+  {
+    key: "deletion",
+    label: "Deletion requested",
+    params: { deletionRequested: "true" },
+  },
 ];
 
-type RouteParams = { approvalStatus?: string; subscriptionStatus?: string; status?: string; filter?: string };
+type RouteParams = {
+  approvalStatus?: string;
+  subscriptionStatus?: string;
+  status?: string;
+  filter?: string;
+};
 
 function filterFromParams(p: Partial<RouteParams>): FilterKey {
-  if (p.filter && FILTERS.some((f) => f.key === p.filter)) return p.filter as FilterKey;
+  if (p.filter && FILTERS.some((f) => f.key === p.filter))
+    return p.filter as FilterKey;
   if (p.approvalStatus === "pending") return "pending";
   if (p.approvalStatus === "rejected") return "rejected";
   if (p.status === "suspended") return "suspended";
@@ -42,7 +79,9 @@ export function AdminOrgsScreen() {
   const { isPhone } = useLayout();
   const nav = useAdminNav();
   const params = useParams<RouteParams>();
-  const [filter, setFilter] = useState<FilterKey>(() => filterFromParams(params));
+  const [filter, setFilter] = useState<FilterKey>(() =>
+    filterFromParams(params),
+  );
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const q = useDebounced(search);
@@ -51,12 +90,22 @@ export function AdminOrgsScreen() {
   useEffect(() => {
     setFilter(filterFromParams(params));
     setPage(1);
-  }, [params.approvalStatus, params.subscriptionStatus, params.status, params.filter]);
+  }, [
+    params.approvalStatus,
+    params.subscriptionStatus,
+    params.status,
+    params.filter,
+  ]);
 
   useEffect(() => setPage(1), [q]);
 
   const active = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
-  const list = useAdminOrgs({ ...active.params, search: q || undefined, page, limit: 20 });
+  const list = useAdminOrgs({
+    ...active.params,
+    search: q || undefined,
+    page,
+    limit: 20,
+  });
 
   const mono = { fontFamily: t.fonts.mono };
   const columns: Column<AdminOrg>[] = [
@@ -75,7 +124,12 @@ export function AdminOrgsScreen() {
         </Col>
       ),
     },
-    { key: "city", title: "City", flex: 1, render: (o) => <Text numberOfLines={1}>{o.city || "—"}</Text> },
+    {
+      key: "city",
+      title: "City",
+      flex: 1,
+      render: (o) => <Text numberOfLines={1}>{o.city || "—"}</Text>,
+    },
     {
       key: "gstin",
       title: "GSTIN",
@@ -87,7 +141,12 @@ export function AdminOrgsScreen() {
         </Text>
       ),
     },
-    { key: "status", title: "Approval / status", flex: 1.4, render: (o) => <OrgPills org={o} /> },
+    {
+      key: "status",
+      title: "Approval / status",
+      flex: 1.4,
+      render: (o) => <OrgPills org={o} />,
+    },
     {
       key: "sub",
       title: "Subscription",
@@ -110,13 +169,22 @@ export function AdminOrgsScreen() {
   const pickFilter = (k: FilterKey) => {
     setFilter(k);
     setPage(1);
-    nav.setParams({ filter: k, approvalStatus: undefined, subscriptionStatus: undefined, status: undefined });
+    nav.setParams({
+      filter: k,
+      approvalStatus: undefined,
+      subscriptionStatus: undefined,
+      status: undefined,
+    });
   };
 
   return (
     <Screen
       title="Agencies"
-      subtitle={list.data ? `${list.data.meta.total} ${active.key === "all" ? "total" : active.label.toLowerCase()}` : undefined}
+      subtitle={
+        list.data
+          ? `${list.data.meta.total} ${active.key === "all" ? "total" : active.label.toLowerCase()}`
+          : undefined
+      }
       testID="admin-orgs"
     >
       <Col gap={12} style={{ marginBottom: 16 }}>
@@ -147,7 +215,9 @@ export function AdminOrgsScreen() {
         keyOf={(o) => o.id}
         onRowPress={(o) => nav.navigate("AdminOrgDetail", { id: o.id })}
         loading={list.isLoading || list.isFetching}
-        error={list.error ? { message: apiErrorMessage(list.error) } : undefined}
+        error={
+          list.error ? { message: apiErrorMessage(list.error) } : undefined
+        }
         onRetry={() => list.refetch()}
         paging={list.data?.meta}
         onPage={setPage}
@@ -156,7 +226,11 @@ export function AdminOrgsScreen() {
           <EmptyState
             icon={Building2}
             title={q ? "No agencies match your search" : "No agencies here"}
-            message={q ? "Try a different name, GSTIN or city." : "Agencies in this state will be listed here."}
+            message={
+              q
+                ? "Try a different name, GSTIN or city."
+                : "Agencies in this state will be listed here."
+            }
             action={
               filter !== "all" || q ? (
                 <Button

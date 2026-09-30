@@ -28,7 +28,11 @@ export function BiltiHeaderPreview({
   const valid = /^#[0-9a-f]{6}$/i.test(color);
   const brand = valid ? color : t.c.accent;
   const onBrand = readableOn(brand);
-  const soft = mix(brand, t.isDark ? "#000000" : "#FFFFFF", t.isDark ? 0.7 : 0.9);
+  const soft = mix(
+    brand,
+    t.isDark ? "#000000" : "#FFFFFF",
+    t.isDark ? 0.7 : 0.9,
+  );
   const initial = (businessName || "?").trim().charAt(0).toUpperCase();
 
   return (
@@ -44,7 +48,13 @@ export function BiltiHeaderPreview({
     >
       <Row gap={14} style={{ backgroundColor: brand, padding: 16 }}>
         {logoDataUrl ? (
-          <View style={{ backgroundColor: "#FFFFFF", borderRadius: t.radius.md, padding: 4 }}>
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: t.radius.md,
+              padding: 4,
+            }}
+          >
             <Image
               testID="branding-preview-logo"
               source={{ uri: logoDataUrl }}
@@ -76,13 +86,26 @@ export function BiltiHeaderPreview({
             {businessName || "Your business name"}
           </Text>
           {tagline ? (
-            <Text variant="caption" style={{ color: onBrand, opacity: 0.85 }} numberOfLines={1}>
+            <Text
+              variant="caption"
+              style={{ color: onBrand, opacity: 0.85 }}
+              numberOfLines={1}
+            >
               {tagline}
             </Text>
           ) : null}
         </Col>
       </Row>
-      <Row justify="space-between" wrap gap={8} style={{ backgroundColor: soft, paddingHorizontal: 16, paddingVertical: 10 }}>
+      <Row
+        justify="space-between"
+        wrap
+        gap={8}
+        style={{
+          backgroundColor: soft,
+          paddingHorizontal: 16,
+          paddingVertical: 10,
+        }}
+      >
         <Text variant="overline" style={{ color: brand }}>
           Bilti / Parcel receipt
         </Text>
@@ -90,7 +113,11 @@ export function BiltiHeaderPreview({
           <Text variant="caption" tone="muted">
             No.
           </Text>
-          <Text variant="mono" style={{ color: brand, fontFamily: t.fonts.monoBold }} testID="branding-preview-number">
+          <Text
+            variant="mono"
+            style={{ color: brand, fontFamily: t.fonts.monoBold }}
+            testID="branding-preview-number"
+          >
             {`${biltiPrefix || ""}${biltiNumber ?? 1001}`}
           </Text>
         </Row>

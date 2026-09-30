@@ -75,7 +75,9 @@ export function AuditList({
             tone={onOrgPress ? "accent" : "default"}
             numberOfLines={1}
             testID={`admin-audit-org-${r._id}`}
-            onPress={onOrgPress ? () => onOrgPress(r.organization!._id) : undefined}
+            onPress={
+              onOrgPress ? () => onOrgPress(r.organization!._id) : undefined
+            }
           >
             {r.organization.name}
           </Text>
@@ -107,7 +109,13 @@ export function AuditList({
       onRetry={onRetry}
       paging={paging}
       onPage={onPage}
-      empty={<EmptyState icon={ClipboardList} title="No audit entries" message="Admin actions will be listed here." />}
+      empty={
+        <EmptyState
+          icon={ClipboardList}
+          title="No audit entries"
+          message="Admin actions will be listed here."
+        />
+      }
     />
   );
 }

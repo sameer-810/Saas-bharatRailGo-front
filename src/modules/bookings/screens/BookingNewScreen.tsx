@@ -18,11 +18,15 @@ function prefillFromParams(p: Record<string, unknown>): BookingPrefill | null {
   const out: BookingPrefill = {
     partyId: p.partyId ? String(p.partyId) : undefined,
     partyName: p.partyName ? String(p.partyName) : undefined,
-    destinationStation: p.destinationStation ? String(p.destinationStation) : undefined,
+    destinationStation: p.destinationStation
+      ? String(p.destinationStation)
+      : undefined,
     originStation: p.originStation ? String(p.originStation) : undefined,
     packages: num(p.packages),
     chargeableWeight: num(p.chargeableWeight),
-    paymentMode: p.paymentMode ? (String(p.paymentMode) as PaymentMode) : undefined,
+    paymentMode: p.paymentMode
+      ? (String(p.paymentMode) as PaymentMode)
+      : undefined,
     freightAmount: num(p.freightAmount),
   };
   return Object.values(out).some((v) => v !== undefined) ? out : null;
@@ -32,7 +36,9 @@ export function BookingNewScreen() {
   const params = useParams<Record<string, unknown>>();
   const readOnly = useReadOnly();
   const paramKey = JSON.stringify(params);
-  const [prefill, setPrefill] = useState<BookingPrefill | null>(() => prefillFromParams(params));
+  const [prefill, setPrefill] = useState<BookingPrefill | null>(() =>
+    prefillFromParams(params),
+  );
 
   useEffect(() => {
     const p = prefillFromParams(params);
@@ -41,7 +47,13 @@ export function BookingNewScreen() {
   }, [paramKey]);
 
   return (
-    <Screen title="New booking" back backTo="Bookings" maxWidth={960} testID="booking-new-screen">
+    <Screen
+      title="New booking"
+      back
+      backTo="Bookings"
+      maxWidth={960}
+      testID="booking-new-screen"
+    >
       <Col gap={16}>
         {!readOnly ? (
           <QuickEntryBar

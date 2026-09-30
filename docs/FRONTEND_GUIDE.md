@@ -31,19 +31,70 @@ Read this guide before building a module.
 ## Imports cheat-sheet
 
 ```ts
-import { Screen, Card, Row, Col, Text, Button, IconButton, TextField, NumberField, SearchInput,
-  Select, Combobox, DateField, SegmentedControl, Toggle, Chip, StatusPill, Money, Badge,
-  DataList, type Column, KeyValue, StatTile, SectionHeader, EmptyState, ErrorState, LoadingBlock,
-  Banner, Dialog, Divider, toast, confirm, Board, BoardText, FlapText, humanize } from "@shared/ui";
+import {
+  Screen,
+  Card,
+  Row,
+  Col,
+  Text,
+  Button,
+  IconButton,
+  TextField,
+  NumberField,
+  SearchInput,
+  Select,
+  Combobox,
+  DateField,
+  SegmentedControl,
+  Toggle,
+  Chip,
+  StatusPill,
+  Money,
+  Badge,
+  DataList,
+  type Column,
+  KeyValue,
+  StatTile,
+  SectionHeader,
+  EmptyState,
+  ErrorState,
+  LoadingBlock,
+  Banner,
+  Dialog,
+  Divider,
+  toast,
+  confirm,
+  Board,
+  BoardText,
+  FlapText,
+  humanize,
+} from "@shared/ui";
 import { useTheme, useLayout } from "@shared/useTheme";
 import { useApiList, useApiGet, useApiMutation } from "@shared/api/query";
-import { apiClient, apiErrorMessage, apiErrorCode } from "@shared/api/apiClient";
+import {
+  apiClient,
+  apiErrorMessage,
+  apiErrorCode,
+} from "@shared/api/apiClient";
 import { openPdf, downloadFile } from "@shared/api/files";
-import { loadPartyOptions, loadStationOptions, useBranches, useBusinessProfile, useMe } from "@shared/api/lookups";
+import {
+  loadPartyOptions,
+  loadStationOptions,
+  useBranches,
+  useBusinessProfile,
+  useMe,
+} from "@shared/api/lookups";
 import { useCan, useReadOnly } from "@shared/lib/permissions";
-import { formatMoney, formatDate, formatDateTime, isoDay, addDays, startOfMonth } from "@shared/lib/format";
+import {
+  formatMoney,
+  formatDate,
+  formatDateTime,
+  isoDay,
+  addDays,
+  startOfMonth,
+} from "@shared/lib/format";
 import { useDebounced } from "@shared/hooks/useDebounced";
-import { useAppNav, useParams } from "@navigation/useAppNav";   // admin screens: useAdminNav
+import { useAppNav, useParams } from "@navigation/useAppNav"; // admin screens: useAdminNav
 import { useAuthStore } from "@shared/store/useAuthStore";
 ```
 
@@ -55,14 +106,26 @@ Read the component source in `src/shared/ui/*.tsx` for the exact props. The file
 const [page, setPage] = useState(1);
 const [search, setSearch] = useState("");
 const q = useDebounced(search);
-const list = useApiList<Party>("parties", "/parties", { page, limit: 20, search: q });
+const list = useApiList<Party>("parties", "/parties", {
+  page,
+  limit: 20,
+  search: q,
+});
 // list.data?.items, list.data?.meta, list.isLoading, list.error, list.refetch
 
 const one = useApiGet<Party>(["parties", id], id ? `/parties/${id}` : null);
 
-const create = useApiMutation<Party, PartyInput>("post", "/parties", { invalidate: ["parties"] });
-const update = useApiMutation<Party, PartyInput>("patch", `/parties/${id}`, { invalidate: ["parties"] });
-const remove = useApiMutation("delete", (v: { id: string }) => `/parties/${v.id}`, { invalidate: ["parties"] });
+const create = useApiMutation<Party, PartyInput>("post", "/parties", {
+  invalidate: ["parties"],
+});
+const update = useApiMutation<Party, PartyInput>("patch", `/parties/${id}`, {
+  invalidate: ["parties"],
+});
+const remove = useApiMutation(
+  "delete",
+  (v: { id: string }) => `/parties/${v.id}`,
+  { invalidate: ["parties"] },
+);
 ```
 
 - The first element of a query key is the resource name: `parties`, `consignments`, `pods`,

@@ -39,7 +39,11 @@ export async function loadStationOptions(q: string): Promise<Option<string>[]> {
   const res = await apiClient.get<Envelope<Station[]>>("/stations", {
     params: { search: q || undefined },
   });
-  return (res.data.data || []).map((s) => ({ value: s.code, label: `${s.code} — ${s.name}`, hint: s.state }));
+  return (res.data.data || []).map((s) => ({
+    value: s.code,
+    label: `${s.code} — ${s.name}`,
+    hint: s.state,
+  }));
 }
 
 export interface Branch {
@@ -54,7 +58,9 @@ export interface Branch {
 }
 
 export function useBranches(includeInactive = false) {
-  return useApiGet<Branch[]>(["branches"], "/branches", { includeInactive: includeInactive || undefined });
+  return useApiGet<Branch[]>(["branches"], "/branches", {
+    includeInactive: includeInactive || undefined,
+  });
 }
 
 export interface BusinessProfile {

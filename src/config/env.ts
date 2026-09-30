@@ -14,4 +14,7 @@ const ENV = {
 export const environment = __DEV__ ? ENV.development : ENV.production;
 
 /** Public marketing site (landing/) — Terms and Privacy Policy live there. */
-export const SITE_URL = (process.env.EXPO_PUBLIC_SITE_URL || "https://saas-bharat-rail-go-web.vercel.app").replace(/\/$/, "");
+export const SITE_URL = (
+  process.env.EXPO_PUBLIC_SITE_URL ||
+  "https://saas-bharat-rail-go-web.vercel.app"
+).replace(/\/$/, "");

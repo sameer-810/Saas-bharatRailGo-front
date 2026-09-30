@@ -70,7 +70,11 @@ interface AuthState {
     organization: Organization;
     subscription?: Subscription | null;
   }) => void;
-  setMe: (p: { user: User; organization: Organization; subscription: Subscription }) => void;
+  setMe: (p: {
+    user: User;
+    organization: Organization;
+    subscription: Subscription;
+  }) => void;
   setLiveSubscriptionState: (s: "ok" | "grace" | "expired" | null) => void;
   refreshSession: () => Promise<string | null>;
   initialize: () => Promise<void>;
@@ -102,7 +106,13 @@ export const useAuthStore = create<AuthState>()(
       isHydrated: false,
       isAuthChecked: false,
 
-      setSession: ({ accessToken, refreshToken, user, organization, subscription }) =>
+      setSession: ({
+        accessToken,
+        refreshToken,
+        user,
+        organization,
+        subscription,
+      }) =>
         set({
           token: accessToken,
           refreshToken,
@@ -113,10 +123,16 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       setMe: ({ user, organization, subscription }) =>
-        set({ user, organization, subscription, liveSubscriptionState: subscription.state }),
+        set({
+          user,
+          organization,
+          subscription,
+          liveSubscriptionState: subscription.state,
+        }),
 
       setLiveSubscriptionState: (s) => {
-        if (s !== get().liveSubscriptionState) set({ liveSubscriptionState: s });
+        if (s !== get().liveSubscriptionState)
+          set({ liveSubscriptionState: s });
       },
 
       refreshSession: async () => {
@@ -125,12 +141,15 @@ export const useAuthStore = create<AuthState>()(
           const { refreshToken } = get();
           if (!refreshToken) return null;
           try {
-            const res = await axios.post(`${environment.apiUrl}/auth/refresh`, { refreshToken });
+            const res = await axios.post(`${environment.apiUrl}/auth/refresh`, {
+              refreshToken,
+            });
             const { accessToken, refreshToken: next } = res.data.data;
             set({ token: accessToken, refreshToken: next });
             return accessToken as string;
           } catch (err) {
-            const status = (err as { response?: { status?: number } })?.response?.status;
+            const status = (err as { response?: { status?: number } })?.response
+              ?.status;
             if (status === 401 || status === 403) await get().logout();
             return null;
           } finally {
@@ -185,5 +204,6 @@ export const useAuthStore = create<AuthState>()(
 );
 
 /** Convenience selectors. */
-export const useIsAuthenticated = () => useAuthStore((s) => !!s.token && !!s.user);
+export const useIsAuthenticated = () =>
+  useAuthStore((s) => !!s.token && !!s.user);
 export const useRole = () => useAuthStore((s) => s.user?.role ?? "staff");

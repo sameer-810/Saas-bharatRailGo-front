@@ -26,9 +26,18 @@ import { apiErrorMessage } from "@shared/api/apiClient";
 import { formatDate, formatDateTime } from "@shared/lib/format";
 import { useCan, useReadOnly } from "@shared/lib/permissions";
 import { useAppNav, useParams } from "@navigation/useAppNav";
-import { PaymentEditDialog, PAYMENT_INVALIDATE } from "../components/PaymentEditDialog";
+import {
+  PaymentEditDialog,
+  PAYMENT_INVALIDATE,
+} from "../components/PaymentEditDialog";
 import { consignmentLabel, round2 } from "../lib";
-import { PAYMENT_MODE_LABEL, partyId, partyName, type ConsignmentLite, type Payment } from "../types";
+import {
+  PAYMENT_MODE_LABEL,
+  partyId,
+  partyName,
+  type ConsignmentLite,
+  type Payment,
+} from "../types";
 
 export function PaymentDetailScreen() {
   const t = useTheme();
@@ -54,7 +63,9 @@ export function PaymentDetailScreen() {
     [partyBookings.data],
   );
 
-  const remove = useApiMutation<unknown, void>("delete", `/payments/${id}`, { invalidate: PAYMENT_INVALIDATE });
+  const remove = useApiMutation<unknown, void>("delete", `/payments/${id}`, {
+    invalidate: PAYMENT_INVALIDATE,
+  });
 
   const onDelete = async () => {
     if (!p) return;
@@ -78,21 +89,38 @@ export function PaymentDetailScreen() {
 
   if (q.isLoading) {
     return (
-      <Screen title="Payment" back backTo="Payments" testID="payment-detail-screen">
+      <Screen
+        title="Payment"
+        back
+        backTo="Payments"
+        testID="payment-detail-screen"
+      >
         <LoadingBlock />
       </Screen>
     );
   }
   if (q.error || !p) {
     return (
-      <Screen title="Payment" back backTo="Payments" testID="payment-detail-screen">
-        <ErrorState message={q.error ? apiErrorMessage(q.error) : "Payment not found"} onRetry={() => q.refetch()} />
+      <Screen
+        title="Payment"
+        back
+        backTo="Payments"
+        testID="payment-detail-screen"
+      >
+        <ErrorState
+          message={q.error ? apiErrorMessage(q.error) : "Payment not found"}
+          onRetry={() => q.refetch()}
+        />
       </Screen>
     );
   }
 
   const allocated = round2(p.amount - (p.unallocatedAmount || 0));
-  const receivedBy = p.receivedBy ? (typeof p.receivedBy === "string" ? p.receivedBy : p.receivedBy.name) : "—";
+  const receivedBy = p.receivedBy
+    ? typeof p.receivedBy === "string"
+      ? p.receivedBy
+      : p.receivedBy.name
+    : "—";
 
   return (
     <Screen
@@ -130,7 +158,11 @@ export function PaymentDetailScreen() {
     >
       <Col gap={16}>
         {readOnly ? (
-          <Banner tone="warning" title="Read-only" message="Your subscription has expired, so this payment cannot be changed." />
+          <Banner
+            tone="warning"
+            title="Read-only"
+            message="Your subscription has expired, so this payment cannot be changed."
+          />
         ) : null}
 
         <Card>
@@ -151,7 +183,11 @@ export function PaymentDetailScreen() {
                   <Text variant="caption" tone="faint">
                     Advance
                   </Text>
-                  <Money value={p.unallocatedAmount} variant="bodyStrong" tone="accent" />
+                  <Money
+                    value={p.unallocatedAmount}
+                    variant="bodyStrong"
+                    tone="accent"
+                  />
                 </>
               ) : null}
             </Col>
@@ -162,7 +198,11 @@ export function PaymentDetailScreen() {
               [
                 "Party",
                 pid ? (
-                  <Text tone="accent" onPress={() => nav.navigate("PartyDetail", { id: pid })} testID="payment-party-link">
+                  <Text
+                    tone="accent"
+                    onPress={() => nav.navigate("PartyDetail", { id: pid })}
+                    testID="payment-party-link"
+                  >
                     {partyName(p.party)}
                   </Text>
                 ) : (
@@ -192,7 +232,9 @@ export function PaymentDetailScreen() {
         </Card>
 
         <Card>
-          <SectionHeader title={`Allocated to ${p.allocations.length} booking${p.allocations.length === 1 ? "" : "s"}`} />
+          <SectionHeader
+            title={`Allocated to ${p.allocations.length} booking${p.allocations.length === 1 ? "" : "s"}`}
+          />
           {p.allocations.length === 0 ? (
             <EmptyState
               title="Not allocated"
@@ -207,28 +249,45 @@ export function PaymentDetailScreen() {
                     key={a.consignment}
                     justify="space-between"
                     gap={12}
-                    style={{ paddingVertical: 12, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: t.c.border }}
+                    style={{
+                      paddingVertical: 12,
+                      borderTopWidth: i === 0 ? 0 : 1,
+                      borderTopColor: t.c.border,
+                    }}
                   >
                     <Col gap={4} flex={1}>
                       <Text
                         tone="accent"
-                        onPress={() => nav.navigate("BookingDetail", { id: a.consignment })}
+                        onPress={() =>
+                          nav.navigate("BookingDetail", { id: a.consignment })
+                        }
                         testID={`payment-alloc-${a.consignment}`}
                         numberOfLines={1}
                       >
-                        {c ? consignmentLabel(c) : `Booking …${a.consignment.slice(-6)}`}
+                        {c
+                          ? consignmentLabel(c)
+                          : `Booking …${a.consignment.slice(-6)}`}
                       </Text>
                       {c ? (
                         <Row gap={8} wrap>
                           <StatusPill status={c.paymentStatus} />
                           {c.railwayReceiptNumber ? (
-                            <Text variant="caption" tone="faint" style={{ fontFamily: t.fonts.mono }}>
+                            <Text
+                              variant="caption"
+                              tone="faint"
+                              style={{ fontFamily: t.fonts.mono }}
+                            >
                               RR {c.railwayReceiptNumber}
                             </Text>
                           ) : null}
                           {c.balanceDue > 0 ? (
                             <Text variant="caption" tone="warning">
-                              <Money value={c.balanceDue} variant="caption" tone="warning" /> still due
+                              <Money
+                                value={c.balanceDue}
+                                variant="caption"
+                                tone="warning"
+                              />{" "}
+                              still due
                             </Text>
                           ) : null}
                         </Row>
@@ -247,17 +306,26 @@ export function PaymentDetailScreen() {
                 <Col gap={2} flex={1}>
                   <Text variant="bodyStrong">Unallocated advance</Text>
                   <Text variant="caption" tone="faint">
-                    More than the party owed at the time. It stays as a credit on this payment.
+                    More than the party owed at the time. It stays as a credit
+                    on this payment.
                   </Text>
                 </Col>
-                <Money value={p.unallocatedAmount} variant="bodyStrong" tone="accent" />
+                <Money
+                  value={p.unallocatedAmount}
+                  variant="bodyStrong"
+                  tone="accent"
+                />
               </Row>
             </>
           ) : null}
         </Card>
       </Col>
 
-      <PaymentEditDialog payment={p} visible={editing} onClose={() => setEditing(false)} />
+      <PaymentEditDialog
+        payment={p}
+        visible={editing}
+        onClose={() => setEditing(false)}
+      />
     </Screen>
   );
 }

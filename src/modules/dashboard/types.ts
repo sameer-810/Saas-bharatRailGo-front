@@ -1,14 +1,28 @@
 /** Response shapes used by the dashboard (mirrors bharatrailgo-back dashboard.service.js). */
 
 export interface DashboardMetrics {
-  today: { consignmentCount: number; totalRevenue: number; totalPackages: number };
+  today: {
+    consignmentCount: number;
+    totalRevenue: number;
+    totalPackages: number;
+  };
   outstanding: { totalAmount: number; consignmentCount: number };
   pendingPods: number;
   activeInvoices: number;
   recentConsignments: RecentConsignment[];
-  monthlyTrend: { month: string; label: string; revenue: number; consignments: number }[];
+  monthlyTrend: {
+    month: string;
+    label: string;
+    revenue: number;
+    consignments: number;
+  }[];
   paymentModeMix: { mode: string; count: number; amount: number }[];
-  topStations: { station: string; revenue: number; consignments: number; packages: number }[];
+  topStations: {
+    station: string;
+    revenue: number;
+    consignments: number;
+    packages: number;
+  }[];
   pendingByTrain: PendingTrain[];
 }
 

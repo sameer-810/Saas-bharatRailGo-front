@@ -31,5 +31,7 @@ export function useCan(permission: Permission): boolean {
 
 /** True when the subscription is read-only (writes will return 402). */
 export function useReadOnly(): boolean {
-  return useAuthStore((s) => s.liveSubscriptionState === "expired" || !!s.subscription?.readOnly);
+  return useAuthStore(
+    (s) => s.liveSubscriptionState === "expired" || !!s.subscription?.readOnly,
+  );
 }

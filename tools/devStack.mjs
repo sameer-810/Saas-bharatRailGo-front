@@ -38,11 +38,19 @@ export const CREDS = {
 
 function run(args, env) {
   return new Promise((resolve, reject) => {
-    const p = spawn(process.execPath, args, { cwd: BACK, env, stdio: ["ignore", "pipe", "pipe"] });
+    const p = spawn(process.execPath, args, {
+      cwd: BACK,
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     let out = "";
     p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (out += d));
-    p.on("close", (code) => (code === 0 ? resolve(out) : reject(new Error(`${args.join(" ")} failed:\n${out}`))));
+    p.on("close", (code) =>
+      code === 0
+        ? resolve(out)
+        : reject(new Error(`${args.join(" ")} failed:\n${out}`)),
+    );
   });
 }
 
@@ -68,7 +76,9 @@ function serveDist(dir, port) {
     }
     try {
       const body = await readFile(file);
-      res.writeHead(200, { "Content-Type": MIME[path.extname(file)] || "application/octet-stream" });
+      res.writeHead(200, {
+        "Content-Type": MIME[path.extname(file)] || "application/octet-stream",
+      });
       res.end(body);
     } catch {
       res.writeHead(404).end();
@@ -113,7 +123,11 @@ export async function startStack({ log = console.log } = {}) {
   await run(["scripts/seedDemoData.js"], env);
 
   log("• starting API on", API_PORT);
-  const api = spawn(process.execPath, ["server.js"], { cwd: BACK, env, stdio: "ignore" });
+  const api = spawn(process.execPath, ["server.js"], {
+    cwd: BACK,
+    env,
+    stdio: "ignore",
+  });
   for (let i = 0; i < 80; i++) {
     try {
       if ((await fetch(`http://localhost:${API_PORT}/health`)).ok) break;
@@ -125,14 +139,19 @@ export async function startStack({ log = console.log } = {}) {
 
   log("• extra fixtures…");
   // Same fixtures the real showcase seed uses (bharatrailgo-back/scripts/seedShowcase.mjs).
-  const { applyShowcaseFixtures } = await import(pathToFileURL(path.join(BACK, "scripts", "seedShowcase.mjs")).href);
+  const { applyShowcaseFixtures } = await import(
+    pathToFileURL(path.join(BACK, "scripts", "seedShowcase.mjs")).href
+  );
   await applyShowcaseFixtures({
     apiBase: API,
     creds: {
       admin: CREDS.admin,
       owner: CREDS.owner,
       staff: CREDS.staff,
-      manager: { email: "manager@demo-parcel.test", password: "DemoManager#2026" },
+      manager: {
+        email: "manager@demo-parcel.test",
+        password: "DemoManager#2026",
+      },
       pending: { email: "subhash@maadurga.test", password: "Pending#2026" },
     },
     log: () => {},
@@ -156,7 +175,9 @@ export async function startStack({ log = console.log } = {}) {
 // CLI
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   const stack = await startStack();
-  console.log(`\nReady:\n  web   ${WEB}\n  api   ${API}\n  owner ${CREDS.owner.email} / ${CREDS.owner.password}\n  staff ${CREDS.staff.email} / ${CREDS.staff.password}\n  admin ${WEB}/admin  ${CREDS.admin.email} / ${CREDS.admin.password}\n`);
+  console.log(
+    `\nReady:\n  web   ${WEB}\n  api   ${API}\n  owner ${CREDS.owner.email} / ${CREDS.owner.password}\n  staff ${CREDS.staff.email} / ${CREDS.staff.password}\n  admin ${WEB}/admin  ${CREDS.admin.email} / ${CREDS.admin.password}\n`,
+  );
   const shutdown = async () => {
     await stack.stop();
     process.exit(0);

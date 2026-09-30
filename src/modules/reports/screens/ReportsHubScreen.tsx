@@ -1,19 +1,35 @@
 /** Reports hub: one card per report. */
 import React from "react";
 import { View } from "react-native";
-import { CalendarDays, ChevronRight, Hourglass, MapPin, ReceiptIndianRupee, type LucideIcon } from "lucide-react-native";
+import {
+  CalendarDays,
+  ChevronRight,
+  Hourglass,
+  MapPin,
+  ReceiptIndianRupee,
+  type LucideIcon,
+} from "lucide-react-native";
 import { Card, Col, Row, Screen, Text } from "@shared/ui";
 import { useLayout, useTheme } from "@shared/useTheme";
 import { useAppNav } from "@navigation/useAppNav";
 
-type ReportRoute = "ReportDaily" | "ReportOutstanding" | "ReportStation" | "ReportGst";
+type ReportRoute =
+  "ReportDaily" | "ReportOutstanding" | "ReportStation" | "ReportGst";
 
-const REPORTS: { route: ReportRoute; id: string; title: string; description: string; icon: LucideIcon; tag: string }[] = [
+const REPORTS: {
+  route: ReportRoute;
+  id: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  tag: string;
+}[] = [
   {
     route: "ReportDaily",
     id: "daily",
     title: "Daily bookings",
-    description: "Bookings, packages, weight and charges for each day in a date range.",
+    description:
+      "Bookings, packages, weight and charges for each day in a date range.",
     icon: CalendarDays,
     tag: "DATE RANGE",
   },
@@ -21,7 +37,8 @@ const REPORTS: { route: ReportRoute; id: string; title: string; description: str
     route: "ReportOutstanding",
     id: "outstanding",
     title: "Party outstanding",
-    description: "What each party still owes on to-pay and on-bill parcels, split by age.",
+    description:
+      "What each party still owes on to-pay and on-bill parcels, split by age.",
     icon: Hourglass,
     tag: "AGING",
   },
@@ -29,7 +46,8 @@ const REPORTS: { route: ReportRoute; id: string; title: string; description: str
     route: "ReportStation",
     id: "station",
     title: "Station-wise revenue",
-    description: "Which destinations carried the most parcels and brought in the most revenue.",
+    description:
+      "Which destinations carried the most parcels and brought in the most revenue.",
     icon: MapPin,
     tag: "DATE RANGE",
   },
@@ -37,7 +55,8 @@ const REPORTS: { route: ReportRoute; id: string; title: string; description: str
     route: "ReportGst",
     id: "gst",
     title: "Monthly GST",
-    description: "CGST, SGST and IGST on every bill in a month, ready for your return.",
+    description:
+      "CGST, SGST and IGST on every bill in a month, ready for your return.",
     icon: ReceiptIndianRupee,
     tag: "MONTH",
   },
@@ -48,7 +67,11 @@ export function ReportsHubScreen() {
   const nav = useAppNav();
   const { isPhone } = useLayout();
   return (
-    <Screen title="Reports" subtitle="Summaries you can check on screen or export to Excel" testID="reports-hub">
+    <Screen
+      title="Reports"
+      subtitle="Summaries you can check on screen or export to Excel"
+      testID="reports-hub"
+    >
       <Row wrap gap={16} align="stretch">
         {REPORTS.map((r) => {
           const Icon = r.icon;

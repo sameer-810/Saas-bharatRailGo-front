@@ -46,15 +46,19 @@ import {
   type PaymentInput,
 } from "../types";
 
-const schema = z
-  .object({
-    party: z.string().min(1, "Pick the party who paid"),
-    amount: z.number({ required_error: "Enter the amount", invalid_type_error: "Enter the amount" }).positive("Amount must be above zero"),
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date"),
-    mode: z.enum(PAYMENT_MODES),
-    referenceNumber: z.string().trim().optional(),
-    notes: z.string().trim().optional(),
-  });
+const schema = z.object({
+  party: z.string().min(1, "Pick the party who paid"),
+  amount: z
+    .number({
+      required_error: "Enter the amount",
+      invalid_type_error: "Enter the amount",
+    })
+    .positive("Amount must be above zero"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date"),
+  mode: z.enum(PAYMENT_MODES),
+  referenceNumber: z.string().trim().optional(),
+  notes: z.string().trim().optional(),
+});
 type Form = z.infer<typeof schema>;
 
 export function PaymentNewScreen() {
@@ -66,24 +70,32 @@ export function PaymentNewScreen() {
   const [partyLabel, setPartyLabel] = useState<string | undefined>();
   const [expired, setExpired] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [saved, setSaved] = useState<{ payment: Payment; lookup: Map<string, ConsignmentLite> } | null>(null);
+  const [saved, setSaved] = useState<{
+    payment: Payment;
+    lookup: Map<string, ConsignmentLite>;
+  } | null>(null);
 
-  const { control, handleSubmit, watch, setValue, reset, formState } = useForm<Form>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      party: paramPartyId || "",
-      amount: undefined as unknown as number,
-      date: isoDay(),
-      mode: "cash",
-      referenceNumber: "",
-      notes: "",
-    },
-  });
+  const { control, handleSubmit, watch, setValue, reset, formState } =
+    useForm<Form>({
+      resolver: zodResolver(schema),
+      defaultValues: {
+        party: paramPartyId || "",
+        amount: undefined as unknown as number,
+        date: isoDay(),
+        mode: "cash",
+        referenceNumber: "",
+        notes: "",
+      },
+    });
 
   // Pre-selected party from the route: fetch its name for the combobox.
-  const preParty = useApiGet<PartyLite>(["parties", paramPartyId], paramPartyId ? `/parties/${paramPartyId}` : null);
+  const preParty = useApiGet<PartyLite>(
+    ["parties", paramPartyId],
+    paramPartyId ? `/parties/${paramPartyId}` : null,
+  );
   useEffect(() => {
-    if (preParty.data && watch("party") === preParty.data.id) setPartyLabel(preParty.data.name);
+    if (preParty.data && watch("party") === preParty.data.id)
+      setPartyLabel(preParty.data.name);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preParty.data]);
 
@@ -92,7 +104,9 @@ export function PaymentNewScreen() {
   const mode = watch("mode");
   const open = useOpenConsignments(party || undefined);
 
-  const create = useApiMutation<Payment, PaymentInput>("post", "/payments", { invalidate: PAYMENT_INVALIDATE });
+  const create = useApiMutation<Payment, PaymentInput>("post", "/payments", {
+    invalidate: PAYMENT_INVALIDATE,
+  });
 
   const onSubmit = handleSubmit(async (v) => {
     setFormError(null);
@@ -104,7 +118,8 @@ export function PaymentNewScreen() {
         amount: v.amount,
         date: v.date,
         mode: v.mode,
-        referenceNumber: v.mode === "cash" ? undefined : v.referenceNumber || undefined,
+        referenceNumber:
+          v.mode === "cash" ? undefined : v.referenceNumber || undefined,
         notes: v.notes || undefined,
       });
       toast.success("Payment recorded");
@@ -119,7 +134,14 @@ export function PaymentNewScreen() {
   const startAnother = () => {
     const keepParty = saved ? party : "";
     setSaved(null);
-    reset({ party: keepParty, amount: undefined as unknown as number, date: isoDay(), mode: "cash", referenceNumber: "", notes: "" });
+    reset({
+      party: keepParty,
+      amount: undefined as unknown as number,
+      date: isoDay(),
+      mode: "cash",
+      referenceNumber: "",
+      notes: "",
+    });
   };
 
   const expiredBanner =
@@ -128,14 +150,28 @@ export function PaymentNewScreen() {
         tone="danger"
         title="Subscription expired"
         message="Your account is read-only, so new payments cannot be saved. Renew your plan in Settings → Plan."
-        action={<Button title="View plan" size="sm" variant="secondary" onPress={() => nav.navigate("Plan")} testID="payment-view-plan" />}
+        action={
+          <Button
+            title="View plan"
+            size="sm"
+            variant="secondary"
+            onPress={() => nav.navigate("Plan")}
+            testID="payment-view-plan"
+          />
+        }
         testID="payment-subscription-expired"
       />
     ) : null;
 
   if (saved) {
     return (
-      <Screen title="Payment recorded" back backTo="Payments" testID="payment-new-screen" maxWidth={820}>
+      <Screen
+        title="Payment recorded"
+        back
+        backTo="Payments"
+        testID="payment-new-screen"
+        maxWidth={820}
+      >
         <SavedResult
           payment={saved.payment}
           lookup={saved.lookup}
@@ -184,7 +220,9 @@ export function PaymentNewScreen() {
                 error={fieldState.error?.message}
                 testID="payment-amount"
               />
-              {field.value ? <Money value={field.value} variant="h1" tone="accent" /> : null}
+              {field.value ? (
+                <Money value={field.value} variant="h1" tone="accent" />
+              ) : null}
             </Col>
           )}
         />
@@ -192,7 +230,13 @@ export function PaymentNewScreen() {
           control={control}
           name="date"
           render={({ field, fieldState }) => (
-            <DateField label="Date" value={field.value} onChange={field.onChange} error={fieldState.error?.message} testID="payment-date" />
+            <DateField
+              label="Date"
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              testID="payment-date"
+            />
           )}
         />
         <Col gap={6}>
@@ -216,7 +260,13 @@ export function PaymentNewScreen() {
                 value={field.value}
                 onChangeText={field.onChange}
                 mono
-                placeholder={mode === "cheque" ? "Cheque number" : mode === "upi" ? "UPI transaction ID" : "Reference"}
+                placeholder={
+                  mode === "cheque"
+                    ? "Cheque number"
+                    : mode === "upi"
+                      ? "UPI transaction ID"
+                      : "Reference"
+                }
                 testID="payment-reference"
               />
             )}
@@ -226,7 +276,13 @@ export function PaymentNewScreen() {
           control={control}
           name="notes"
           render={({ field }) => (
-            <TextField label="Notes" value={field.value} onChangeText={field.onChange} multiline testID="payment-notes" />
+            <TextField
+              label="Notes"
+              value={field.value}
+              onChangeText={field.onChange}
+              multiline
+              testID="payment-notes"
+            />
           )}
         />
         {formError ? (
@@ -258,17 +314,44 @@ export function PaymentNewScreen() {
     />
   ) : (
     <Card tone="sunken" testID="payment-preview-empty">
-      <Text tone="muted">Pick a party to see their open balance and how this payment will be split.</Text>
+      <Text tone="muted">
+        Pick a party to see their open balance and how this payment will be
+        split.
+      </Text>
     </Card>
   );
 
   return (
-    <Screen title="Record payment" back backTo="Payments" testID="payment-new-screen" maxWidth={1100}>
+    <Screen
+      title="Record payment"
+      back
+      backTo="Payments"
+      testID="payment-new-screen"
+      maxWidth={1100}
+    >
       <Col gap={16}>
         {expiredBanner}
-        <Row gap={20} align="flex-start" wrap={!isDesktop} style={{ flexDirection: isDesktop ? "row" : "column" }}>
-          <View style={{ flex: isDesktop ? 1 : undefined, width: isDesktop ? undefined : "100%" }}>{formCard}</View>
-          <View style={{ flex: isDesktop ? 1 : undefined, width: isDesktop ? undefined : "100%", gap: 8 }}>
+        <Row
+          gap={20}
+          align="flex-start"
+          wrap={!isDesktop}
+          style={{ flexDirection: isDesktop ? "row" : "column" }}
+        >
+          <View
+            style={{
+              flex: isDesktop ? 1 : undefined,
+              width: isDesktop ? undefined : "100%",
+            }}
+          >
+            {formCard}
+          </View>
+          <View
+            style={{
+              flex: isDesktop ? 1 : undefined,
+              width: isDesktop ? undefined : "100%",
+              gap: 8,
+            }}
+          >
             <SectionHeader title="Allocation preview" />
             {previewCol}
           </View>
@@ -299,10 +382,12 @@ function SavedResult({
           <CheckCircle2 size={24} color={t.c.success} />
           <Col gap={4} flex={1}>
             <Text variant="h3">
-              <Money value={payment.amount} variant="h3" /> from {partyName(payment.party)}
+              <Money value={payment.amount} variant="h3" /> from{" "}
+              {partyName(payment.party)}
             </Text>
             <Text tone="muted">
-              {formatDate(payment.date)} · {PAYMENT_MODE_LABEL[payment.mode] ?? payment.mode}
+              {formatDate(payment.date)} ·{" "}
+              {PAYMENT_MODE_LABEL[payment.mode] ?? payment.mode}
               {payment.referenceNumber ? ` · ${payment.referenceNumber}` : ""}
             </Text>
           </Col>
@@ -320,7 +405,11 @@ function SavedResult({
               <Row
                 key={a.consignment}
                 justify="space-between"
-                style={{ paddingVertical: 10, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: t.c.border }}
+                style={{
+                  paddingVertical: 10,
+                  borderTopWidth: i === 0 ? 0 : 1,
+                  borderTopColor: t.c.border,
+                }}
               >
                 <Text
                   tone="accent"
@@ -329,7 +418,9 @@ function SavedResult({
                   numberOfLines={1}
                   style={{ flex: 1 }}
                 >
-                  {c ? consignmentLabel(c) : `Booking …${a.consignment.slice(-6)}`}
+                  {c
+                    ? consignmentLabel(c)
+                    : `Booking …${a.consignment.slice(-6)}`}
                 </Text>
                 <Money value={a.amount} tone="success" />
               </Row>
@@ -341,15 +432,29 @@ function SavedResult({
             <Divider style={{ marginVertical: 8 }} />
             <Row justify="space-between" testID="payment-saved-advance">
               <Text variant="bodyStrong">Kept as advance</Text>
-              <Money value={payment.unallocatedAmount} variant="bodyStrong" tone="accent" />
+              <Money
+                value={payment.unallocatedAmount}
+                variant="bodyStrong"
+                tone="accent"
+              />
             </Row>
           </>
         ) : null}
       </Card>
 
       <Row gap={8} wrap>
-        <Button title="Open payment" onPress={onOpen} testID="payment-saved-open" />
-        <Button title="Record another" icon={Plus} variant="secondary" onPress={onAnother} testID="payment-saved-another" />
+        <Button
+          title="Open payment"
+          onPress={onOpen}
+          testID="payment-saved-open"
+        />
+        <Button
+          title="Record another"
+          icon={Plus}
+          variant="secondary"
+          onPress={onAnother}
+          testID="payment-saved-another"
+        />
       </Row>
     </Col>
   );

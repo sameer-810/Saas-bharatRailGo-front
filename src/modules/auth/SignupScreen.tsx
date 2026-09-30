@@ -18,7 +18,10 @@ const schema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/, "Enter a valid 15-character GSTIN"),
+    .regex(
+      /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/,
+      "Enter a valid 15-character GSTIN",
+    ),
   officeAddress: z.string().trim().min(5, "Enter your office address"),
   city: z.string().trim().optional(),
   mobile: z
@@ -31,11 +34,17 @@ const schema = z.object({
   email: z.string().trim().email("Enter a valid email"),
   password: z.string().min(8, "At least 8 characters"),
   // DPDP Act 2023: notice + consent before any personal data is collected.
-  acceptTerms: z.boolean().refine((v) => v, "Please accept the Terms and Privacy Policy"),
+  acceptTerms: z
+    .boolean()
+    .refine((v) => v, "Please accept the Terms and Privacy Policy"),
 });
 type Form = z.infer<typeof schema>;
 
-export function SignupScreen({ navigation }: { navigation: { navigate: (r: string, p?: object) => void } }) {
+export function SignupScreen({
+  navigation,
+}: {
+  navigation: { navigate: (r: string, p?: object) => void };
+}) {
   const { isPhone } = useLayout();
   const t = useTheme();
   const setSession = useAuthStore((s) => s.setSession);
@@ -58,10 +67,15 @@ export function SignupScreen({ navigation }: { navigation: { navigate: (r: strin
   const onSubmit = handleSubmit(async (values) => {
     setError(null);
     try {
-      const body = { ...values, mobile: values.mobile || undefined, city: values.city || undefined };
+      const body = {
+        ...values,
+        mobile: values.mobile || undefined,
+        city: values.city || undefined,
+      };
       const res = await apiClient.post("/auth/signup", body);
       const data = res.data.data;
-      if (data.requiresApproval) navigation.navigate("Pending", { businessName: values.businessName });
+      if (data.requiresApproval)
+        navigation.navigate("Pending", { businessName: values.businessName });
       else setSession(data);
     } catch (err) {
       setError(apiErrorMessage(err, "Could not create the account"));
@@ -96,14 +110,26 @@ export function SignupScreen({ navigation }: { navigation: { navigate: (r: strin
           <Text variant="display">Start your free trial</Text>
           <Text tone="muted">14 days, every feature. No card needed.</Text>
         </Col>
-        {error ? <Banner tone="danger" title={error} testID="signup-error" /> : null}
+        {error ? (
+          <Banner tone="danger" title={error} testID="signup-error" />
+        ) : null}
         <Text variant="overline" tone="muted">
           Your agency
         </Text>
-        {field("businessName", "Agency name", { placeholder: "e.g. Shree Ram Parcel Services" })}
-        <Row gap={12} align="flex-start" style={{ flexDirection: isPhone ? "column" : "row" }}>
+        {field("businessName", "Agency name", {
+          placeholder: "e.g. Shree Ram Parcel Services",
+        })}
+        <Row
+          gap={12}
+          align="flex-start"
+          style={{ flexDirection: isPhone ? "column" : "row" }}
+        >
           <Col flex={1} style={{ alignSelf: "stretch" }}>
-            {field("gstin", "GSTIN", { autoCapitalize: "characters", mono: true, maxLength: 15 })}
+            {field("gstin", "GSTIN", {
+              autoCapitalize: "characters",
+              mono: true,
+              maxLength: 15,
+            })}
           </Col>
           <Col flex={1} style={{ alignSelf: "stretch" }}>
             {field("city", "City")}
@@ -114,9 +140,18 @@ export function SignupScreen({ navigation }: { navigation: { navigate: (r: strin
           Owner account
         </Text>
         {field("name", "Your name")}
-        {field("mobile", "Mobile", { keyboardType: "phone-pad", maxLength: 10 })}
-        {field("email", "Email", { autoCapitalize: "none", keyboardType: "email-address" })}
-        {field("password", "Password", { secureTextEntry: true, hint: "At least 8 characters" })}
+        {field("mobile", "Mobile", {
+          keyboardType: "phone-pad",
+          maxLength: 10,
+        })}
+        {field("email", "Email", {
+          autoCapitalize: "none",
+          keyboardType: "email-address",
+        })}
+        {field("password", "Password", {
+          secureTextEntry: true,
+          hint: "At least 8 characters",
+        })}
         <Controller
           control={control}
           name="acceptTerms"
@@ -138,29 +173,48 @@ export function SignupScreen({ navigation }: { navigation: { navigate: (r: strin
                       marginTop: 1,
                       borderRadius: 6,
                       borderWidth: 1.5,
-                      borderColor: f.value ? t.c.accent : fieldState.error ? t.c.danger : t.c.borderStrong,
+                      borderColor: f.value
+                        ? t.c.accent
+                        : fieldState.error
+                          ? t.c.danger
+                          : t.c.borderStrong,
                       backgroundColor: f.value ? t.c.accent : "transparent",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    {f.value ? <Check size={15} color={t.c.accentText} /> : null}
+                    {f.value ? (
+                      <Check size={15} color={t.c.accentText} />
+                    ) : null}
                   </View>
                 </Pressable>
                 <Text variant="caption" tone="muted" style={{ flex: 1 }}>
                   I accept the{" "}
-                  <Text variant="caption" tone="accent" onPress={() => Linking.openURL(`${SITE_URL}/#/terms`)}>
+                  <Text
+                    variant="caption"
+                    tone="accent"
+                    onPress={() => Linking.openURL(`${SITE_URL}/#/terms`)}
+                  >
                     Terms of Service
                   </Text>{" "}
                   and{" "}
-                  <Text variant="caption" tone="accent" onPress={() => Linking.openURL(`${SITE_URL}/#/privacy`)}>
+                  <Text
+                    variant="caption"
+                    tone="accent"
+                    onPress={() => Linking.openURL(`${SITE_URL}/#/privacy`)}
+                  >
                     Privacy Policy
                   </Text>
-                  , and agree that my agency&apos;s data is processed to provide the service.
+                  , and agree that my agency&apos;s data is processed to provide
+                  the service.
                 </Text>
               </Row>
               {fieldState.error ? (
-                <Text variant="caption" tone="danger" testID="signup-acceptTerms-error">
+                <Text
+                  variant="caption"
+                  tone="danger"
+                  testID="signup-acceptTerms-error"
+                >
                   {fieldState.error.message}
                 </Text>
               ) : null}
@@ -175,7 +229,10 @@ export function SignupScreen({ navigation }: { navigation: { navigate: (r: strin
           loading={formState.isSubmitting}
           onPress={onSubmit}
         />
-        <Pressable onPress={() => navigation.navigate("Login")} testID="go-login">
+        <Pressable
+          onPress={() => navigation.navigate("Login")}
+          testID="go-login"
+        >
           <Text variant="label" tone="accent">
             Already have an account? Sign in
           </Text>

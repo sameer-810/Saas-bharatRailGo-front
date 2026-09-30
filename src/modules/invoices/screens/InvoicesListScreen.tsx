@@ -53,10 +53,12 @@ export function InvoicesListScreen() {
   });
 
   const filtered = !!(status || party || startDate || endDate);
-  const withReset = <T,>(fn: (v: T) => void) => (v: T) => {
-    setPage(1);
-    fn(v);
-  };
+  const withReset =
+    <T,>(fn: (v: T) => void) =>
+    (v: T) => {
+      setPage(1);
+      fn(v);
+    };
 
   const mono = { fontFamily: t.fonts.mono };
   const columns: Column<Invoice>[] = [
@@ -70,14 +72,17 @@ export function InvoicesListScreen() {
         </Text>
       ),
     },
-    { key: "date", title: "Date", flex: 0.9, render: (i) => <Text>{formatDate(i.date)}</Text> },
+    {
+      key: "date",
+      title: "Date",
+      flex: 0.9,
+      render: (i) => <Text>{formatDate(i.date)}</Text>,
+    },
     {
       key: "party",
       title: "Party",
       flex: 1.8,
-      render: (i) => (
-        <Text numberOfLines={1}>{invoicePartyName(i)}</Text>
-      ),
+      render: (i) => <Text numberOfLines={1}>{invoicePartyName(i)}</Text>,
     },
     {
       key: "lines",
@@ -87,8 +92,19 @@ export function InvoicesListScreen() {
       hideOnPhone: true,
       render: (i) => <Text tone="muted">{i.consignments?.length ?? 0}</Text>,
     },
-    { key: "status", title: "Status", flex: 0.9, render: (i) => <StatusPill status={i.status} /> },
-    { key: "gross", title: "Gross total", flex: 1.1, align: "right", render: (i) => <Money value={i.grossTotal} variant="bodyStrong" /> },
+    {
+      key: "status",
+      title: "Status",
+      flex: 0.9,
+      render: (i) => <StatusPill status={i.status} />,
+    },
+    {
+      key: "gross",
+      title: "Gross total",
+      flex: 1.1,
+      align: "right",
+      render: (i) => <Money value={i.grossTotal} variant="bodyStrong" />,
+    },
   ];
 
   return (
@@ -119,7 +135,12 @@ export function InvoicesListScreen() {
         ) : null}
 
         <Row gap={8} wrap>
-          <Chip label="All" selected={!status} onPress={() => withReset(setStatus)(null)} testID="invoices-status-all" />
+          <Chip
+            label="All"
+            selected={!status}
+            onPress={() => withReset(setStatus)(null)}
+            testID="invoices-status-all"
+          />
           {INVOICE_STATUSES.map((s) => (
             <Chip
               key={s}
@@ -148,10 +169,22 @@ export function InvoicesListScreen() {
             />
           </Col>
           <Col style={{ flexGrow: 1, flexBasis: isPhone ? "45%" : 170 }}>
-            <DateField label="From" value={startDate} onChange={withReset(setStartDate)} quick={false} testID="invoices-filter-from" />
+            <DateField
+              label="From"
+              value={startDate}
+              onChange={withReset(setStartDate)}
+              quick={false}
+              testID="invoices-filter-from"
+            />
           </Col>
           <Col style={{ flexGrow: 1, flexBasis: isPhone ? "45%" : 170 }}>
-            <DateField label="To" value={endDate} onChange={withReset(setEndDate)} quick={false} testID="invoices-filter-to" />
+            <DateField
+              label="To"
+              value={endDate}
+              onChange={withReset(setEndDate)}
+              quick={false}
+              testID="invoices-filter-to"
+            />
           </Col>
           {filtered ? (
             <Button
@@ -191,11 +224,15 @@ export function InvoicesListScreen() {
               </Text>
             </Col>
           )}
-          phoneRight={(i) => <Money value={i.grossTotal} variant="bodyStrong" />}
+          phoneRight={(i) => (
+            <Money value={i.grossTotal} variant="bodyStrong" />
+          )}
           empty={
             <EmptyState
               icon={FileText}
-              title={filtered ? "No invoices match these filters" : "No invoices yet"}
+              title={
+                filtered ? "No invoices match these filters" : "No invoices yet"
+              }
               message={
                 filtered
                   ? "Try another status, party or date range."

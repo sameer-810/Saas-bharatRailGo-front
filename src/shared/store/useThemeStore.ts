@@ -24,6 +24,9 @@ export const useThemeStore = create<ThemeState>()(
       setPreference: (preference) => set({ preference }),
       setBrandColor: (brandColor) => set({ brandColor }),
     }),
-    { name: "bharatrailgo-theme", storage: createJSONStorage(() => secureStorage) },
+    {
+      name: "bharatrailgo-theme",
+      storage: createJSONStorage(() => secureStorage),
+    },
   ),
 );

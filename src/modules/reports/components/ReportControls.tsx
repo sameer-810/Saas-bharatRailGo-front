@@ -2,7 +2,17 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import { Download } from "lucide-react-native";
-import { Button, Card, Chip, Col, DateField, Row, Skeleton, Text, toast } from "@shared/ui";
+import {
+  Button,
+  Card,
+  Chip,
+  Col,
+  DateField,
+  Row,
+  Skeleton,
+  Text,
+  toast,
+} from "@shared/ui";
 import { useLayout, useTheme } from "@shared/useTheme";
 import { downloadFile } from "@shared/api/files";
 import { apiErrorMessage } from "@shared/api/apiClient";
@@ -17,12 +27,22 @@ const PRESETS: { key: RangePreset; label: string }[] = [
 
 export function rangeError(r: DateRange): string | undefined {
   if (!r.startDate || !r.endDate) return "Pick both dates";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(r.startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(r.endDate)) return "Use YYYY-MM-DD";
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(r.startDate) ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(r.endDate)
+  )
+    return "Use YYYY-MM-DD";
   if (r.startDate > r.endDate) return "Start date is after end date";
   return undefined;
 }
 
-export function DateRangeBar({ value, onChange }: { value: DateRange; onChange: (r: DateRange) => void }) {
+export function DateRangeBar({
+  value,
+  onChange,
+}: {
+  value: DateRange;
+  onChange: (r: DateRange) => void;
+}) {
   const { isPhone } = useLayout();
   const active = PRESETS.find((p) => {
     const r = presetRange(p.key);
@@ -159,12 +179,21 @@ export function FigureRow({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function MonoNum({ value, strong }: { value: React.ReactNode; strong?: boolean }) {
+export function MonoNum({
+  value,
+  strong,
+}: {
+  value: React.ReactNode;
+  strong?: boolean;
+}) {
   const t = useTheme();
   return (
     <Text
       variant={strong ? "h2" : "body"}
-      style={{ fontFamily: strong ? t.fonts.monoBold : t.fonts.mono, fontVariant: ["tabular-nums"] }}
+      style={{
+        fontFamily: strong ? t.fonts.monoBold : t.fonts.mono,
+        fontVariant: ["tabular-nums"],
+      }}
     >
       {value}
     </Text>

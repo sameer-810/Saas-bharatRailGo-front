@@ -39,14 +39,24 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
 
     // Picked branch no longer allowed (removed from the user, deactivated) → fall back to all.
-    if (status === 403 && apiErrorCode(error) === "BRANCH_FORBIDDEN" && original && !original._retry) {
+    if (
+      status === 403 &&
+      apiErrorCode(error) === "BRANCH_FORBIDDEN" &&
+      original &&
+      !original._retry
+    ) {
       useBranchStore.getState().setBranchId("all");
       original._retry = true;
       delete original.headers["X-Branch-Id"];
       return apiClient(original);
     }
 
-    if (status === 401 && original && !original._retry && !original.url?.includes("/auth/")) {
+    if (
+      status === 401 &&
+      original &&
+      !original._retry &&
+      !original.url?.includes("/auth/")
+    ) {
       original._retry = true;
       const token = await useAuthStore.getState().refreshSession();
       if (token) {
@@ -81,7 +91,10 @@ export function apiErrorStatus(err: unknown): number | undefined {
 }
 
 /** Human message, including the first few validation issues when present. */
-export function apiErrorMessage(err: unknown, fallback = "Something went wrong"): string {
+export function apiErrorMessage(
+  err: unknown,
+  fallback = "Something went wrong",
+): string {
   const e = (err as ApiErrorBody)?.response?.data?.error;
   if (!e) {
     if ((err as { message?: string })?.message === "Network Error") {
@@ -89,11 +102,15 @@ export function apiErrorMessage(err: unknown, fallback = "Something went wrong")
     }
     return (err instanceof Error && err.message) || fallback;
   }
-  const details = e.details as { path?: string; message?: string }[] | undefined;
+  const details = e.details as
+    { path?: string; message?: string }[] | undefined;
   if (Array.isArray(details) && details.length) {
     const parts = details
       .slice(0, 3)
-      .map((d) => `${String(d.path || "").replace(/^(body|query|params)\./, "")}: ${d.message}`);
+      .map(
+        (d) =>
+          `${String(d.path || "").replace(/^(body|query|params)\./, "")}: ${d.message}`,
+      );
     return `${e.message || fallback} — ${parts.join(" · ")}`;
   }
   return e.message || fallback;
@@ -120,6 +137,8 @@ export interface Paging {
 export function cleanParams(params?: Record<string, unknown>) {
   if (!params) return undefined;
   return Object.fromEntries(
-    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""),
+    Object.entries(params).filter(
+      ([, v]) => v !== undefined && v !== null && v !== "",
+    ),
   );
 }

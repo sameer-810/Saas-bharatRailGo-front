@@ -1,9 +1,25 @@
 /** Create / edit a plan. Mirrors plan.validation.js (code only on create). */
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
-import { Button, Col, Dialog, NumberField, Row, Text, TextField, Toggle, toast } from "@shared/ui";
+import {
+  Button,
+  Col,
+  Dialog,
+  NumberField,
+  Row,
+  Text,
+  TextField,
+  Toggle,
+  toast,
+} from "@shared/ui";
 import { apiErrorMessage } from "@shared/api/apiClient";
-import { adminActions, useAdminMutation, type Limits, type Plan, type PlanInput } from "../api";
+import {
+  adminActions,
+  useAdminMutation,
+  type Limits,
+  type Plan,
+  type PlanInput,
+} from "../api";
 
 interface FormState {
   code: string;
@@ -67,12 +83,14 @@ function validate(f: FormState, creating: boolean): Errors {
   }
   if (!f.name.trim()) e.name = "Name is required";
   else if (f.name.trim().length > 60) e.name = "At most 60 characters";
-  if (f.description.trim().length > 200) e.description = "At most 200 characters";
+  if (f.description.trim().length > 200)
+    e.description = "At most 200 characters";
   if (f.priceMonthly == null) e.priceMonthly = "Required (0 for free)";
   if (f.priceYearly == null) e.priceYearly = "Required (0 for free)";
   const feats = splitFeatures(f.features);
   if (feats.length > 20) e.features = "At most 20 features";
-  else if (feats.some((x) => x.length > 80)) e.features = "Each feature at most 80 characters";
+  else if (feats.some((x) => x.length > 80))
+    e.features = "Each feature at most 80 characters";
   return e;
 }
 
@@ -83,12 +101,22 @@ function splitFeatures(s: string) {
     .filter(Boolean);
 }
 
-export function PlanDialog({ plan, visible, onClose }: { plan: Plan | null; visible: boolean; onClose: () => void }) {
+export function PlanDialog({
+  plan,
+  visible,
+  onClose,
+}: {
+  plan: Plan | null;
+  visible: boolean;
+  onClose: () => void;
+}) {
   const creating = !plan;
   const [f, setF] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const save = useAdminMutation((body: PlanInput) =>
-    plan ? adminActions.updatePlan(plan.id, body) : adminActions.createPlan(body),
+    plan
+      ? adminActions.updatePlan(plan.id, body)
+      : adminActions.createPlan(body),
   );
 
   useEffect(() => {
@@ -97,7 +125,8 @@ export function PlanDialog({ plan, visible, onClose }: { plan: Plan | null; visi
     setErrors({});
   }, [visible, plan]);
 
-  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setF((s) => ({ ...s, [k]: v }));
+  const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
+    setF((s) => ({ ...s, [k]: v }));
   const int = (v: number | undefined) => (v == null ? null : Math.floor(v));
 
   const submit = async () => {
@@ -125,7 +154,9 @@ export function PlanDialog({ plan, visible, onClose }: { plan: Plan | null; visi
     if (creating) body.code = f.code.trim().toLowerCase();
     try {
       await save.mutateAsync(body);
-      toast.success(creating ? `Plan ${body.code} created` : `Plan ${plan?.code} updated`);
+      toast.success(
+        creating ? `Plan ${body.code} created` : `Plan ${plan?.code} updated`,
+      );
       onClose();
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -143,8 +174,18 @@ export function PlanDialog({ plan, visible, onClose }: { plan: Plan | null; visi
       testID="admin-plan-dialog"
       footer={
         <>
-          <Button title="Cancel" variant="secondary" onPress={onClose} testID="admin-plan-cancel" />
-          <Button title={creating ? "Create plan" : "Save plan"} loading={save.isPending} onPress={submit} testID="admin-plan-save" />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onPress={onClose}
+            testID="admin-plan-cancel"
+          />
+          <Button
+            title={creating ? "Create plan" : "Save plan"}
+            loading={save.isPending}
+            onPress={submit}
+            testID="admin-plan-save"
+          />
         </>
       }
     >
@@ -164,7 +205,13 @@ export function PlanDialog({ plan, visible, onClose }: { plan: Plan | null; visi
           </View>
         ) : null}
         <View style={half}>
-          <TextField testID="admin-plan-name" label="Name" value={f.name} onChangeText={(v) => set("name", v)} error={errors.name} />
+          <TextField
+            testID="admin-plan-name"
+            label="Name"
+            value={f.name}
+            onChangeText={(v) => set("name", v)}
+            error={errors.name}
+          />
         </View>
       </Row>
       <TextField
@@ -205,10 +252,22 @@ export function PlanDialog({ plan, visible, onClose }: { plan: Plan | null; visi
       </Col>
       <Row gap={12} wrap align="flex-start">
         <View style={{ flexGrow: 1, flexBasis: 150 }}>
-          <NumberField testID="admin-plan-max-users" label="Users" value={f.maxUsers} onChange={(v) => set("maxUsers", v)} placeholder="Unlimited" />
+          <NumberField
+            testID="admin-plan-max-users"
+            label="Users"
+            value={f.maxUsers}
+            onChange={(v) => set("maxUsers", v)}
+            placeholder="Unlimited"
+          />
         </View>
         <View style={{ flexGrow: 1, flexBasis: 150 }}>
-          <NumberField testID="admin-plan-max-branches" label="Branches" value={f.maxBranches} onChange={(v) => set("maxBranches", v)} placeholder="Unlimited" />
+          <NumberField
+            testID="admin-plan-max-branches"
+            label="Branches"
+            value={f.maxBranches}
+            onChange={(v) => set("maxBranches", v)}
+            placeholder="Unlimited"
+          />
         </View>
         <View style={{ flexGrow: 1, flexBasis: 150 }}>
           <NumberField
@@ -229,13 +288,42 @@ export function PlanDialog({ plan, visible, onClose }: { plan: Plan | null; visi
         error={errors.features}
       />
       <Col gap={12}>
-        <Toggle testID="admin-plan-is-active" label="Active" hint="Can be assigned to agencies" value={f.isActive} onChange={(v) => set("isActive", v)} />
-        <Toggle testID="admin-plan-is-public" label="Public" hint="Shown on the pricing page" value={f.isPublic} onChange={(v) => set("isPublic", v)} />
-        <Toggle testID="admin-plan-is-featured" label="Featured" hint="Highlighted on the pricing page" value={f.isFeatured} onChange={(v) => set("isFeatured", v)} />
-        <Toggle testID="admin-plan-is-trial" label="Trial plan" hint="Used for free trials" value={f.isTrial} onChange={(v) => set("isTrial", v)} />
+        <Toggle
+          testID="admin-plan-is-active"
+          label="Active"
+          hint="Can be assigned to agencies"
+          value={f.isActive}
+          onChange={(v) => set("isActive", v)}
+        />
+        <Toggle
+          testID="admin-plan-is-public"
+          label="Public"
+          hint="Shown on the pricing page"
+          value={f.isPublic}
+          onChange={(v) => set("isPublic", v)}
+        />
+        <Toggle
+          testID="admin-plan-is-featured"
+          label="Featured"
+          hint="Highlighted on the pricing page"
+          value={f.isFeatured}
+          onChange={(v) => set("isFeatured", v)}
+        />
+        <Toggle
+          testID="admin-plan-is-trial"
+          label="Trial plan"
+          hint="Used for free trials"
+          value={f.isTrial}
+          onChange={(v) => set("isTrial", v)}
+        />
       </Col>
       <View style={{ maxWidth: 180 }}>
-        <NumberField testID="admin-plan-sort-order" label="Sort order" value={f.sortOrder} onChange={(v) => set("sortOrder", v)} />
+        <NumberField
+          testID="admin-plan-sort-order"
+          label="Sort order"
+          value={f.sortOrder}
+          onChange={(v) => set("sortOrder", v)}
+        />
       </View>
     </Dialog>
   );

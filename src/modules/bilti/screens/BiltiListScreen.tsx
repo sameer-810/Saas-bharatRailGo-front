@@ -26,7 +26,13 @@ import { useReadOnly } from "@shared/lib/permissions";
 import { formatDate } from "@shared/lib/format";
 import { useDebounced } from "@shared/hooks/useDebounced";
 import { useAppNav } from "@navigation/useAppNav";
-import { DELIVERY_STATUSES, STATUS_LABEL, biltiNo, type DeliveryStatus, type Pod } from "../types";
+import {
+  DELIVERY_STATUSES,
+  STATUS_LABEL,
+  biltiNo,
+  type DeliveryStatus,
+  type Pod,
+} from "../types";
 
 export function BiltiListScreen() {
   const t = useTheme();
@@ -55,10 +61,12 @@ export function BiltiListScreen() {
     endDate,
   });
 
-  const reset = <T,>(setter: (v: T) => void) => (v: T) => {
-    setter(v);
-    setPage(1);
-  };
+  const reset =
+    <T,>(setter: (v: T) => void) =>
+    (v: T) => {
+      setter(v);
+      setPage(1);
+    };
 
   const hasFilters = !!(q || status || destination || startDate || endDate);
 
@@ -73,7 +81,12 @@ export function BiltiListScreen() {
         </Text>
       ),
     },
-    { key: "date", title: "Date", flex: 1, render: (p) => <Text tone="muted">{formatDate(p.date)}</Text> },
+    {
+      key: "date",
+      title: "Date",
+      flex: 1,
+      render: (p) => <Text tone="muted">{formatDate(p.date)}</Text>,
+    },
     {
       key: "parties",
       title: "Consignor → Consignee",
@@ -88,17 +101,33 @@ export function BiltiListScreen() {
       key: "dest",
       title: "To",
       flex: 0.8,
-      render: (p) => <Text style={{ fontFamily: t.fonts.mono }}>{p.destinationStation}</Text>,
+      render: (p) => (
+        <Text style={{ fontFamily: t.fonts.mono }}>{p.destinationStation}</Text>
+      ),
     },
     {
       key: "pkgs",
       title: "Pkgs",
       flex: 0.6,
       align: "right",
-      render: (p) => <Text style={{ fontFamily: t.fonts.mono }}>{p.packages}</Text>,
+      render: (p) => (
+        <Text style={{ fontFamily: t.fonts.mono }}>{p.packages}</Text>
+      ),
     },
-    { key: "total", title: "Total", flex: 1.1, align: "right", hideOnPhone: true, render: (p) => <Money value={p.totalAmount} /> },
-    { key: "status", title: "Status", flex: 1.1, render: (p) => <StatusPill status={p.deliveryStatus} /> },
+    {
+      key: "total",
+      title: "Total",
+      flex: 1.1,
+      align: "right",
+      hideOnPhone: true,
+      render: (p) => <Money value={p.totalAmount} />,
+    },
+    {
+      key: "status",
+      title: "Status",
+      flex: 1.1,
+      render: (p) => <StatusPill status={p.deliveryStatus} />,
+    },
   ];
 
   return (
@@ -138,14 +167,25 @@ export function BiltiListScreen() {
           </Col>
           <Button
             testID="bilti-filters-toggle"
-            title={isPhone ? "Filters" : showFilters ? "Hide filters" : "More filters"}
+            title={
+              isPhone
+                ? "Filters"
+                : showFilters
+                  ? "Hide filters"
+                  : "More filters"
+            }
             variant="secondary"
             onPress={() => setShowFilters((s) => !s)}
           />
         </Row>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <Row gap={6}>
-            <Chip testID="bilti-status-all" label="All" selected={!status} onPress={() => reset(setStatus)("")} />
+            <Chip
+              testID="bilti-status-all"
+              label="All"
+              selected={!status}
+              onPress={() => reset(setStatus)("")}
+            />
             {DELIVERY_STATUSES.map((s) => (
               <Chip
                 key={s}
@@ -172,10 +212,22 @@ export function BiltiListScreen() {
               />
             </Col>
             <Col style={{ minWidth: 160, flexGrow: 1, flexBasis: 160 }}>
-              <DateField testID="bilti-filter-from" label="From" value={startDate} onChange={reset(setStartDate)} quick={false} />
+              <DateField
+                testID="bilti-filter-from"
+                label="From"
+                value={startDate}
+                onChange={reset(setStartDate)}
+                quick={false}
+              />
             </Col>
             <Col style={{ minWidth: 160, flexGrow: 1, flexBasis: 160 }}>
-              <DateField testID="bilti-filter-to" label="To" value={endDate} onChange={reset(setEndDate)} quick={false} />
+              <DateField
+                testID="bilti-filter-to"
+                label="To"
+                value={endDate}
+                onChange={reset(setEndDate)}
+                quick={false}
+              />
             </Col>
             {hasFilters ? (
               <Col style={{ alignSelf: "flex-end" }}>

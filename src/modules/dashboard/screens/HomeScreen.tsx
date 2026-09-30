@@ -18,11 +18,42 @@ import { apiErrorMessage } from "@shared/api/apiClient";
 import { DepartureBoard } from "../components/DepartureBoard";
 import { MoneyStrip, type MoneyTileSpec } from "../components/MoneyStrip";
 import { TrendCard } from "../components/TrendCard";
-import { ModeMix, PendingByTrain, RecentBookings, TopStations } from "../components/Insights";
-import type { BoardConsignment, DailyRow, DashboardMetrics, PaymentLite } from "../types";
+import {
+  ModeMix,
+  PendingByTrain,
+  RecentBookings,
+  TopStations,
+} from "../components/Insights";
+import type {
+  BoardConsignment,
+  DailyRow,
+  DashboardMetrics,
+  PaymentLite,
+} from "../types";
 
-const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const WEEKDAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 function greeting(d: Date) {
   const h = d.getHours();
@@ -55,10 +86,14 @@ export function HomeScreen() {
     endDate: today,
     limit: 500,
   });
-  const daily = useApiGet<DailyRow[]>(["dashboard", "daily14"], "/reports/daily", {
-    startDate: from14,
-    endDate: today,
-  });
+  const daily = useApiGet<DailyRow[]>(
+    ["dashboard", "daily14"],
+    "/reports/daily",
+    {
+      startDate: from14,
+      endDate: today,
+    },
+  );
 
   const refresh = useCallback(() => {
     metrics.refetch();
@@ -68,16 +103,25 @@ export function HomeScreen() {
   }, [metrics, board, collections, daily]);
 
   const m = metrics.data;
-  const branch = branchId !== "all" ? branches.data?.find((b) => b.id === branchId) : undefined;
-  const collected = (collections.data?.items || []).reduce((s, p) => s + (p.amount || 0), 0);
-  const receipts = collections.data?.meta.total ?? collections.data?.items.length ?? 0;
+  const branch =
+    branchId !== "all"
+      ? branches.data?.find((b) => b.id === branchId)
+      : undefined;
+  const collected = (collections.data?.items || []).reduce(
+    (s, p) => s + (p.amount || 0),
+    0,
+  );
+  const receipts =
+    collections.data?.meta.total ?? collections.data?.items.length ?? 0;
 
   const tiles: MoneyTileSpec[] = [
     {
       key: "booked-today",
       label: "Booked today",
       amount: m?.today.totalRevenue ?? 0,
-      hint: m ? `${m.today.consignmentCount} bookings · ${formatNumber(m.today.totalPackages)} pkgs` : undefined,
+      hint: m
+        ? `${m.today.consignmentCount} bookings · ${formatNumber(m.today.totalPackages)} pkgs`
+        : undefined,
       onPress: () => nav.navigate("ReportDaily"),
     },
     {
@@ -85,7 +129,9 @@ export function HomeScreen() {
       label: "Collected today",
       amount: collections.error ? undefined : collected,
       count: collections.error ? 0 : undefined,
-      hint: collections.error ? "Could not load payments" : `${receipts} ${receipts === 1 ? "receipt" : "receipts"}`,
+      hint: collections.error
+        ? "Could not load payments"
+        : `${receipts} ${receipts === 1 ? "receipt" : "receipts"}`,
       onPress: () => nav.navigate("Payments"),
     },
     {
@@ -105,17 +151,28 @@ export function HomeScreen() {
   ];
 
   const header = (
-    <Row justify="space-between" align="flex-end" wrap gap={16} style={{ marginBottom: 20 }}>
+    <Row
+      justify="space-between"
+      align="flex-end"
+      wrap
+      gap={16}
+      style={{ marginBottom: 20 }}
+    >
       <Col gap={4} style={{ flexShrink: 1 }}>
         <Text variant="overline" tone="accent" testID="home-date">
           {`${WEEKDAYS[now.getDay()]} · ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`}
         </Text>
-        <Text variant={isPhone ? "h1" : "display"} accessibilityRole="header" testID="screen-title">
+        <Text
+          variant={isPhone ? "h1" : "display"}
+          accessibilityRole="header"
+          testID="screen-title"
+        >
           {greeting(now)}
           {userName ? `, ${userName.split(" ")[0]}` : ""}
         </Text>
         <Text tone="muted">
-          {branch ? `${branch.name} branch` : "All branches"} · here is how the day is moving.
+          {branch ? `${branch.name} branch` : "All branches"} · here is how the
+          day is moving.
         </Text>
       </Col>
       <Row gap={8} wrap>
@@ -155,13 +212,25 @@ export function HomeScreen() {
       onRetry={() => board.refetch()}
       truncated={(board.data?.meta.total ?? 0) > (boardRows?.length ?? 0)}
       stationOrigin={branch?.stationCode}
-      onStation={(code) => nav.navigate("Bookings", { destinationStation: code, startDate: today, endDate: today })}
+      onStation={(code) =>
+        nav.navigate("Bookings", {
+          destinationStation: code,
+          startDate: today,
+          endDate: today,
+        })
+      }
       onNewBooking={() => nav.navigate("BookingNew")}
       canCreate={!readOnly}
     />
   );
 
-  const trend = <TrendCard daily={daily.data} dailyLoading={daily.isLoading} monthly={m?.monthlyTrend} />;
+  const trend = (
+    <TrendCard
+      daily={daily.data}
+      dailyLoading={daily.isLoading}
+      monthly={m?.monthlyTrend}
+    />
+  );
   const recent = (
     <RecentBookings
       rows={m?.recentConsignments}
@@ -176,7 +245,9 @@ export function HomeScreen() {
     <TopStations
       rows={m?.topStations}
       loading={metrics.isLoading}
-      onStation={(code) => nav.navigate("Bookings", { destinationStation: code })}
+      onStation={(code) =>
+        nav.navigate("Bookings", { destinationStation: code })
+      }
     />
   );
   const trains = (
@@ -189,7 +260,10 @@ export function HomeScreen() {
   const mix = <ModeMix rows={m?.paymentModeMix} loading={metrics.isLoading} />;
 
   const metricsError = metrics.error ? (
-    <ErrorState message={apiErrorMessage(metrics.error)} onRetry={() => metrics.refetch()} />
+    <ErrorState
+      message={apiErrorMessage(metrics.error)}
+      onRetry={() => metrics.refetch()}
+    />
   ) : null;
 
   return (
@@ -211,7 +285,9 @@ export function HomeScreen() {
         </View>
       ) : null}
 
-      {metrics.error ? null : <MoneyStrip tiles={tiles} loading={metrics.isLoading} />}
+      {metrics.error ? null : (
+        <MoneyStrip tiles={tiles} loading={metrics.isLoading} />
+      )}
 
       <View style={{ height: 20 }} />
 

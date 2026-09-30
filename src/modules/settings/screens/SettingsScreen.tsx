@@ -15,7 +15,15 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useTheme } from "@shared/useTheme";
-import { Card, Col, Row, SectionHeader, Screen, StatusPill, Text } from "@shared/ui";
+import {
+  Card,
+  Col,
+  Row,
+  SectionHeader,
+  Screen,
+  StatusPill,
+  Text,
+} from "@shared/ui";
 import { useCan } from "@shared/lib/permissions";
 import { useAppNav } from "@navigation/useAppNav";
 import type { AppRoute } from "@navigation/routes";
@@ -37,7 +45,11 @@ function HubCard({ item }: { item: Item }) {
   const Icon = item.icon;
   return (
     <View style={{ flexGrow: 1, flexBasis: 300, minWidth: 240 }}>
-      <Card testID={item.testID} onPress={() => nav.navigate(item.route)} style={{ height: "100%" }}>
+      <Card
+        testID={item.testID}
+        onPress={() => nav.navigate(item.route)}
+        style={{ height: "100%" }}
+      >
         <Row gap={14} align="flex-start">
           <View
             style={{
@@ -111,7 +123,8 @@ export function SettingsScreen() {
     business.push({
       route: "SettingsBranding",
       title: "Branding",
-      description: "Logo, brand colour for the app and bilti, and light / dark theme.",
+      description:
+        "Logo, brand colour for the app and bilti, and light / dark theme.",
       icon: Palette,
       testID: "settings-card-branding",
     });
@@ -122,20 +135,28 @@ export function SettingsScreen() {
     people.push({
       route: "Team",
       title: "Team",
-      description: isOwner ? "Add managers and staff, reset passwords, assign branches." : "Add staff, reset passwords, assign branches.",
+      description: isOwner
+        ? "Add managers and staff, reset passwords, assign branches."
+        : "Add staff, reset passwords, assign branches.",
       icon: Users,
       testID: "settings-card-team",
-      badge: sub?.limits ? usageBadge(sub.usage?.users, sub.limits.maxUsers, "users") : undefined,
+      badge: sub?.limits
+        ? usageBadge(sub.usage?.users, sub.limits.maxUsers, "users")
+        : undefined,
     });
   }
   if (canUsers) {
     people.push({
       route: "Branches",
       title: "Branches",
-      description: canBranches ? "Head office and branch counters, codes and stations." : "Branch list (view only).",
+      description: canBranches
+        ? "Head office and branch counters, codes and stations."
+        : "Branch list (view only).",
       icon: Store,
       testID: "settings-card-branches",
-      badge: sub?.limits ? usageBadge(sub.usage?.branches, sub.limits.maxBranches, "branches") : undefined,
+      badge: sub?.limits
+        ? usageBadge(sub.usage?.branches, sub.limits.maxBranches, "branches")
+        : undefined,
     });
   }
 
@@ -143,7 +164,9 @@ export function SettingsScreen() {
     {
       route: "Stations",
       title: "Stations",
-      description: canMasters ? "Railway station codes used on bookings and rates." : "Railway station codes (view only).",
+      description: canMasters
+        ? "Railway station codes used on bookings and rates."
+        : "Railway station codes (view only).",
       icon: MapPin,
       testID: "settings-card-stations",
     },
@@ -174,7 +197,8 @@ export function SettingsScreen() {
     account.push({
       route: "Activity",
       title: "Activity log",
-      description: "Who created, edited, deleted, exported or signed in — and when.",
+      description:
+        "Who created, edited, deleted, exported or signed in — and when.",
       icon: History,
       testID: "settings-card-activity",
     });
@@ -183,17 +207,25 @@ export function SettingsScreen() {
     account.push({
       route: "Privacy",
       title: "Privacy & data",
-      description: "Download all your data, see your consent record, or close the account.",
+      description:
+        "Download all your data, see your consent record, or close the account.",
       icon: ShieldCheck,
       testID: "settings-card-privacy",
     });
   }
 
   return (
-    <Screen title="Settings" subtitle="Set up your agency once — everything else follows." testID="settings-screen">
+    <Screen
+      title="Settings"
+      subtitle="Set up your agency once — everything else follows."
+      testID="settings-screen"
+    >
       {sub ? (
         <Row gap={8} style={{ marginBottom: 12 }}>
-          <StatusPill status={sub.state} label={sub.state === "ok" ? "Subscription active" : undefined} />
+          <StatusPill
+            status={sub.state}
+            label={sub.state === "ok" ? "Subscription active" : undefined}
+          />
           {sub.planName ? (
             <Text variant="caption" tone="muted">
               {sub.planName}
@@ -210,6 +242,10 @@ export function SettingsScreen() {
   );
 }
 
-function usageBadge(used: number | undefined, limit: number | null, noun: string) {
+function usageBadge(
+  used: number | undefined,
+  limit: number | null,
+  noun: string,
+) {
   return limit == null ? undefined : `${used ?? 0}/${limit} ${noun}`;
 }

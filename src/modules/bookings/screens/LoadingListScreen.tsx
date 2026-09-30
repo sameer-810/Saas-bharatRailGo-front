@@ -6,7 +6,14 @@
  */
 import React, { useMemo, useState } from "react";
 import { Platform, Pressable, View } from "react-native";
-import { Check, ChevronLeft, ChevronRight, PackagePlus, Printer, RotateCcw } from "lucide-react-native";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  PackagePlus,
+  Printer,
+  RotateCcw,
+} from "lucide-react-native";
 import {
   Board,
   BoardText,
@@ -27,9 +34,20 @@ import {
 import { useLayout, useTheme } from "@shared/useTheme";
 import { useApiGet } from "@shared/api/query";
 import { apiErrorMessage } from "@shared/api/apiClient";
-import { addDays, formatDate, formatMoney, formatNumber, isoDay } from "@shared/lib/format";
+import {
+  addDays,
+  formatDate,
+  formatMoney,
+  formatNumber,
+  isoDay,
+} from "@shared/lib/format";
 import { useAppNav, useParams } from "@navigation/useAppNav";
-import { PAYMENT_MODE_LABEL, partyName, type Consignment, type LoadingList } from "../lib/types";
+import {
+  PAYMENT_MODE_LABEL,
+  partyName,
+  type Consignment,
+  type LoadingList,
+} from "../lib/types";
 
 type GroupBy = "station" | "train";
 
@@ -62,18 +80,28 @@ export function LoadingListScreen() {
   const { isPhone } = useLayout();
   const nav = useAppNav();
   const params = useParams<{ date: string }>();
-  const [date, setDate] = useState<string>(params.date ? String(params.date) : isoDay());
+  const [date, setDate] = useState<string>(
+    params.date ? String(params.date) : isoDay(),
+  );
   const [groupBy, setGroupBy] = useState<GroupBy>("station");
-  const [ticks, setTicks] = useState<Record<string, Record<string, boolean>>>({});
+  const [ticks, setTicks] = useState<Record<string, Record<string, boolean>>>(
+    {},
+  );
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(date);
   const q = useApiGet<LoadingList>(
     ["consignments", "loading-list", date],
     valid ? `/consignments/daily-loading-list/${date}` : null,
   );
-  const mono = { fontFamily: t.fonts.mono, fontVariant: ["tabular-nums" as const] };
+  const mono = {
+    fontFamily: t.fonts.mono,
+    fontVariant: ["tabular-nums" as const],
+  };
   const ticked = ticks[date] || {};
   const toggle = (id: string) =>
-    setTicks((all) => ({ ...all, [date]: { ...(all[date] || {}), [id]: !(all[date] || {})[id] } }));
+    setTicks((all) => ({
+      ...all,
+      [date]: { ...(all[date] || {}), [id]: !(all[date] || {})[id] },
+    }));
 
   const groups: Group[] = useMemo(() => {
     const data = q.data;
@@ -89,7 +117,10 @@ export function LoadingListScreen() {
     const map = new Map<string, Consignment[]>();
     for (const s of data.stations) {
       for (const c of s.consignments) {
-        const k = [c.trainNumber?.trim() || "", c.bogieNumber?.trim() || ""].join("|");
+        const k = [
+          c.trainNumber?.trim() || "",
+          c.bogieNumber?.trim() || "",
+        ].join("|");
         map.set(k, [...(map.get(k) || []), c]);
       }
     }
@@ -100,7 +131,11 @@ export function LoadingListScreen() {
         return {
           key: k,
           title: train ? `TR ${train}` : "NO TRAIN",
-          subtitle: bogie ? `Bogie ${bogie}` : train ? "Bogie not set" : "Train / bogie not entered",
+          subtitle: bogie
+            ? `Bogie ${bogie}`
+            : train
+              ? "Bogie not set"
+              : "Train / bogie not entered",
           consignments: list,
           totals: totalsOf(list),
         };
@@ -109,7 +144,9 @@ export function LoadingListScreen() {
 
   const all = groups.flatMap((g) => g.consignments);
   const doneCount = all.filter((c) => ticked[c.id]).length;
-  const donePkgs = all.filter((c) => ticked[c.id]).reduce((a, c) => a + (c.packages || 0), 0);
+  const donePkgs = all
+    .filter((c) => ticked[c.id])
+    .reduce((a, c) => a + (c.packages || 0), 0);
   const grand = q.data?.grandTotals;
 
   const print = () => {
@@ -154,11 +191,26 @@ export function LoadingListScreen() {
       <Col gap={16}>
         <Row gap={8} align="flex-end" wrap justify="space-between">
           <Row gap={8} align="flex-end">
-            <IconButton icon={ChevronLeft} label="Previous day" testID="loading-prev" onPress={() => valid && setDate(shift(date, -1))} />
+            <IconButton
+              icon={ChevronLeft}
+              label="Previous day"
+              testID="loading-prev"
+              onPress={() => valid && setDate(shift(date, -1))}
+            />
             <View style={{ minWidth: 200 }}>
-              <DateField testID="loading-date" label="Date" value={date} onChange={setDate} />
+              <DateField
+                testID="loading-date"
+                label="Date"
+                value={date}
+                onChange={setDate}
+              />
             </View>
-            <IconButton icon={ChevronRight} label="Next day" testID="loading-next" onPress={() => valid && setDate(shift(date, 1))} />
+            <IconButton
+              icon={ChevronRight}
+              label="Next day"
+              testID="loading-next"
+              onPress={() => valid && setDate(shift(date, 1))}
+            />
           </Row>
           <SegmentedControl<GroupBy>
             testID="loading-group"
@@ -181,20 +233,36 @@ export function LoadingListScreen() {
           <EmptyState
             title={`Nothing to load on ${formatDate(date)}`}
             message="Bookings for this date will appear here, grouped for the platform."
-            action={<Button title="New booking" icon={PackagePlus} onPress={() => nav.navigate("BookingNew")} testID="loading-new" />}
+            action={
+              <Button
+                title="New booking"
+                icon={PackagePlus}
+                onPress={() => nav.navigate("BookingNew")}
+                testID="loading-new"
+              />
+            }
           />
         ) : (
           <>
             <Board
               testID="loading-grand"
               title={`Loading · ${formatDate(date)}`}
-              right={<BoardText>{`${doneCount}/${grand.totalConsignments} LOADED`}</BoardText>}
+              right={
+                <BoardText>{`${doneCount}/${grand.totalConsignments} LOADED`}</BoardText>
+              }
             >
               <Row gap={20} wrap>
-                <BoardText size={18}>{`${grand.totalConsignments} BKG`}</BoardText>
+                <BoardText
+                  size={18}
+                >{`${grand.totalConsignments} BKG`}</BoardText>
                 <BoardText size={18}>{`${grand.packages} PKG`}</BoardText>
-                <BoardText size={18}>{`${formatNumber(grand.weight)} KG`}</BoardText>
-                <BoardText size={18} dim>{`${donePkgs}/${grand.packages} PKG TICKED`}</BoardText>
+                <BoardText
+                  size={18}
+                >{`${formatNumber(grand.weight)} KG`}</BoardText>
+                <BoardText
+                  size={18}
+                  dim
+                >{`${donePkgs}/${grand.packages} PKG TICKED`}</BoardText>
               </Row>
             </Board>
 
@@ -204,20 +272,38 @@ export function LoadingListScreen() {
               return (
                 <Col key={g.key} gap={0} testID={`loading-group-${g.key}`}>
                   <Board
-                    style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
-                    right={<BoardText dim={!complete}>{`${gDone}/${g.consignments.length}${complete ? " ✓" : ""}`}</BoardText>}
+                    style={{
+                      borderBottomLeftRadius: 0,
+                      borderBottomRightRadius: 0,
+                    }}
+                    right={
+                      <BoardText
+                        dim={!complete}
+                      >{`${gDone}/${g.consignments.length}${complete ? " ✓" : ""}`}</BoardText>
+                    }
                   >
                     <Row gap={14} wrap align="center">
                       {groupBy === "station" ? (
-                        <FlapText text={g.title} width={Math.max(4, g.title.length)} size={isPhone ? 18 : 22} />
+                        <FlapText
+                          text={g.title}
+                          width={Math.max(4, g.title.length)}
+                          size={isPhone ? 18 : 22}
+                        />
                       ) : (
-                        <BoardText size={isPhone ? 18 : 22}>{g.title}</BoardText>
+                        <BoardText size={isPhone ? 18 : 22}>
+                          {g.title}
+                        </BoardText>
                       )}
-                      {g.subtitle ? <BoardText dim>{g.subtitle.toUpperCase()}</BoardText> : null}
+                      {g.subtitle ? (
+                        <BoardText dim>{g.subtitle.toUpperCase()}</BoardText>
+                      ) : null}
                       <BoardText>{`${g.totals.packages} PKG · ${formatNumber(g.totals.weight)} KG`}</BoardText>
                     </Row>
                   </Board>
-                  <Card padding={0} style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+                  <Card
+                    padding={0}
+                    style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
+                  >
                     {g.consignments.map((c, i) => {
                       const on = !!ticked[c.id];
                       return (
@@ -236,7 +322,11 @@ export function LoadingListScreen() {
                             paddingVertical: 12,
                             borderTopWidth: i === 0 ? 0 : 1,
                             borderTopColor: t.c.border,
-                            backgroundColor: on ? t.c.successSoft : hovered ? t.c.surfaceAlt : "transparent",
+                            backgroundColor: on
+                              ? t.c.successSoft
+                              : hovered
+                                ? t.c.surfaceAlt
+                                : "transparent",
                           })}
                         >
                           <View
@@ -252,28 +342,52 @@ export function LoadingListScreen() {
                               justifyContent: "center",
                             }}
                           >
-                            {on ? <Check size={20} color={t.c.surface} /> : null}
+                            {on ? (
+                              <Check size={20} color={t.c.surface} />
+                            ) : null}
                           </View>
-                          <Text style={[mono, { fontSize: 24, lineHeight: 30, minWidth: 54 }]} tone={on ? "muted" : "default"}>
+                          <Text
+                            style={[
+                              mono,
+                              { fontSize: 24, lineHeight: 30, minWidth: 54 },
+                            ]}
+                            tone={on ? "muted" : "default"}
+                          >
                             {c.packages}
                             <Text variant="caption" tone="faint">
-                              {" "}pkg
+                              {" "}
+                              pkg
                             </Text>
                           </Text>
                           <Col gap={2} flex={1}>
                             <Text
                               variant="bodyStrong"
                               numberOfLines={1}
-                              style={{ fontSize: 17, textDecorationLine: on ? "line-through" : "none" }}
+                              style={{
+                                fontSize: 17,
+                                textDecorationLine: on
+                                  ? "line-through"
+                                  : "none",
+                              }}
                             >
                               {partyName(c)}
                             </Text>
-                            <Text variant="caption" tone="muted" style={mono} numberOfLines={isPhone ? 2 : 1}>
+                            <Text
+                              variant="caption"
+                              tone="muted"
+                              style={mono}
+                              numberOfLines={isPhone ? 2 : 1}
+                            >
                               {[
                                 `${formatNumber(c.chargeableWeight)} kg`,
-                                groupBy === "train" ? `→ ${c.destinationStation}` : null,
-                                c.railwayReceiptNumber ? `RR ${c.railwayReceiptNumber}` : null,
-                                groupBy === "station" && (c.trainNumber || c.bogieNumber)
+                                groupBy === "train"
+                                  ? `→ ${c.destinationStation}`
+                                  : null,
+                                c.railwayReceiptNumber
+                                  ? `RR ${c.railwayReceiptNumber}`
+                                  : null,
+                                groupBy === "station" &&
+                                (c.trainNumber || c.bogieNumber)
                                   ? `TR ${c.trainNumber || "—"}/${c.bogieNumber || "—"}`
                                   : null,
                                 c.contents || null,
@@ -284,7 +398,9 @@ export function LoadingListScreen() {
                           </Col>
                           {!isPhone ? (
                             <Col gap={0} align="flex-end">
-                              <Text style={mono}>{formatMoney(c.totalAmount)}</Text>
+                              <Text style={mono}>
+                                {formatMoney(c.totalAmount)}
+                              </Text>
                               <Text variant="caption" tone="faint">
                                 {PAYMENT_MODE_LABEL[c.paymentMode]}
                               </Text>

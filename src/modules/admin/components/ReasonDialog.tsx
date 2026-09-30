@@ -30,7 +30,10 @@ export function ReasonDialog({
     }
   }, [visible]);
   const trimmed = reason.trim();
-  const error = touched && trimmed.length < 3 ? "Give a reason (at least 3 characters)" : undefined;
+  const error =
+    touched && trimmed.length < 3
+      ? "Give a reason (at least 3 characters)"
+      : undefined;
   return (
     <Dialog
       visible={visible}
@@ -40,7 +43,12 @@ export function ReasonDialog({
       width={460}
       footer={
         <>
-          <Button title="Cancel" variant="secondary" onPress={onClose} testID={`${testID}-cancel`} />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onPress={onClose}
+            testID={`${testID}-cancel`}
+          />
           <Button
             title={confirmLabel}
             variant="danger"
@@ -48,7 +56,8 @@ export function ReasonDialog({
             testID={`${testID}-submit`}
             onPress={() => {
               setTouched(true);
-              if (trimmed.length >= 3 && trimmed.length <= 300) onSubmit(trimmed);
+              if (trimmed.length >= 3 && trimmed.length <= 300)
+                onSubmit(trimmed);
             }}
           />
         </>

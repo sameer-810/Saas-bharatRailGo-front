@@ -51,10 +51,40 @@ export interface ParsedQuickEntry {
 }
 
 const PKG_UNITS = new Set([
-  "pkg", "pkgs", "pk", "pks", "pkt", "pkts", "pcs", "pc", "pce", "nag", "nags",
-  "package", "packages", "packet", "packets", "bag", "bags", "box", "boxes", "ctn", "ctns", "carton", "cartons", "parcel", "parcels",
+  "pkg",
+  "pkgs",
+  "pk",
+  "pks",
+  "pkt",
+  "pkts",
+  "pcs",
+  "pc",
+  "pce",
+  "nag",
+  "nags",
+  "package",
+  "packages",
+  "packet",
+  "packets",
+  "bag",
+  "bags",
+  "box",
+  "boxes",
+  "ctn",
+  "ctns",
+  "carton",
+  "cartons",
+  "parcel",
+  "parcels",
 ]);
-const KG_UNITS = new Set(["kg", "kgs", "kilo", "kilos", "kilogram", "kilograms"]);
+const KG_UNITS = new Set([
+  "kg",
+  "kgs",
+  "kilo",
+  "kilos",
+  "kilogram",
+  "kilograms",
+]);
 
 const MODE_WORDS: Record<string, PaymentMode> = {
   topay: "to_pay",
@@ -73,9 +103,21 @@ const MODE_WORDS: Record<string, PaymentMode> = {
   slip: "slip",
 };
 /** Two-word modes: "to pay", "on bill". */
-const MODE_PAIRS: Record<string, PaymentMode> = { "to pay": "to_pay", "on bill": "on_bill" };
+const MODE_PAIRS: Record<string, PaymentMode> = {
+  "to pay": "to_pay",
+  "on bill": "on_bill",
+};
 
-const MONEY_PREFIX = new Set(["rs", "rs.", "₹", "inr", "amt", "amount", "freight", "fr"]);
+const MONEY_PREFIX = new Set([
+  "rs",
+  "rs.",
+  "₹",
+  "inr",
+  "amt",
+  "amount",
+  "freight",
+  "fr",
+]);
 
 const NUM = /^\d+(?:\.\d+)?$/;
 const WORD = /^[a-z][a-z.&'-]*$/i;
@@ -103,7 +145,11 @@ function explode(token: string): string[] {
   }
   // unit glued before a number: "pkg3", "kg60"
   const unitFirst = /^([a-z]+)(\d+(?:\.\d+)?)$/i.exec(t);
-  if (unitFirst && (PKG_UNITS.has(unitFirst[1].toLowerCase()) || KG_UNITS.has(unitFirst[1].toLowerCase()))) {
+  if (
+    unitFirst &&
+    (PKG_UNITS.has(unitFirst[1].toLowerCase()) ||
+      KG_UNITS.has(unitFirst[1].toLowerCase()))
+  ) {
     return [`${unitFirst[2]}${unitFirst[1]}`];
   }
   return [t];
@@ -124,7 +170,10 @@ export function parseQuickEntry(input: string): ParsedQuickEntry {
     .split(/\s+/)
     .flatMap(explode)
     .filter(Boolean);
-  const pieces: Piece[] = rawTokens.map((raw) => ({ raw, lower: raw.toLowerCase() }));
+  const pieces: Piece[] = rawTokens.map((raw) => ({
+    raw,
+    lower: raw.toLowerCase(),
+  }));
 
   // Output groups: each group is a list of piece indexes that form one token.
   const groups: { idx: number[]; kind: QuickTokenKind }[] = [];
@@ -136,7 +185,9 @@ export function parseQuickEntry(input: string): ParsedQuickEntry {
 
   /* 1. station pair "mum-dli" / "mum>dli" / "mum→dli" / "mum->dli" */
   for (let i = 0; i < pieces.length && !result.destinationStation; i++) {
-    const m = /^([a-z]{2,5})(?:-|>|->|→|\/|2)([a-z]{2,5})$/i.exec(pieces[i].raw);
+    const m = /^([a-z]{2,5})(?:-|>|->|→|\/|2)([a-z]{2,5})$/i.exec(
+      pieces[i].raw,
+    );
     if (m && !MODE_WORDS[pieces[i].lower]) {
       result.originStation = m[1].toUpperCase();
       result.destinationStation = m[2].toUpperCase();
@@ -235,14 +286,27 @@ export function parseQuickEntry(input: string): ParsedQuickEntry {
   }
 
   /* 5. destination station: ALL-CAPS code, else first short word */
-  const isKeyword = (l: string) => !!MODE_WORDS[l] || PKG_UNITS.has(l) || KG_UNITS.has(l) || MONEY_PREFIX.has(l);
+  const isKeyword = (l: string) =>
+    !!MODE_WORDS[l] ||
+    PKG_UNITS.has(l) ||
+    KG_UNITS.has(l) ||
+    MONEY_PREFIX.has(l);
   if (!result.destinationStation) {
     let at = pieces.findIndex(
-      (p, i) => free(i) && STATION_CODE.test(p.raw) && p.raw === p.raw.toUpperCase() && !isKeyword(p.lower),
+      (p, i) =>
+        free(i) &&
+        STATION_CODE.test(p.raw) &&
+        p.raw === p.raw.toUpperCase() &&
+        !isKeyword(p.lower),
     );
     if (at < 0) {
       const first = pieces.findIndex((_, i) => free(i));
-      if (first >= 0 && STATION_CODE.test(pieces[first].raw) && !isKeyword(pieces[first].lower)) at = first;
+      if (
+        first >= 0 &&
+        STATION_CODE.test(pieces[first].raw) &&
+        !isKeyword(pieces[first].lower)
+      )
+        at = first;
     }
     if (at >= 0) {
       result.destinationStation = pieces[at].raw.toUpperCase();
@@ -251,16 +315,23 @@ export function parseQuickEntry(input: string): ParsedQuickEntry {
   }
 
   /* 6. bare leftover numbers → amount (largest), then packages (small integer) */
-  const bare = () => pieces.map((p, i) => ({ i, v: toNumber(p.raw) })).filter((x) => free(x.i) && x.v !== undefined) as {
-    i: number;
-    v: number;
-  }[];
+  const bare = () =>
+    pieces
+      .map((p, i) => ({ i, v: toNumber(p.raw) }))
+      .filter((x) => free(x.i) && x.v !== undefined) as {
+      i: number;
+      v: number;
+    }[];
   if (result.amount === undefined) {
     const nums = bare();
     if (nums.length) {
       const top = nums.reduce((a, b) => (b.v > a.v ? b : a));
       // A freight under ₹50 is implausible: a lone small integer is a package count.
-      if (top.v < 50 && Number.isInteger(top.v) && result.packages === undefined) {
+      if (
+        top.v < 50 &&
+        Number.isInteger(top.v) &&
+        result.packages === undefined
+      ) {
         result.packages = top.v;
         claim([top.i], "packages");
       } else {
@@ -270,7 +341,9 @@ export function parseQuickEntry(input: string): ParsedQuickEntry {
     }
   }
   if (result.packages === undefined) {
-    const small = bare().find((x) => Number.isInteger(x.v) && x.v >= 1 && x.v <= 999);
+    const small = bare().find(
+      (x) => Number.isInteger(x.v) && x.v >= 1 && x.v <= 999,
+    );
     if (small) {
       result.packages = small.v;
       claim([small.i], "packages");
@@ -278,10 +351,17 @@ export function parseQuickEntry(input: string): ParsedQuickEntry {
   }
 
   /* 7. party: first contiguous run of free words */
-  const start = pieces.findIndex((p, i) => free(i) && WORD.test(p.raw) && !isKeyword(p.lower));
+  const start = pieces.findIndex(
+    (p, i) => free(i) && WORD.test(p.raw) && !isKeyword(p.lower),
+  );
   if (start >= 0) {
     const run: number[] = [];
-    for (let i = start; i < pieces.length && free(i) && WORD_CONT.test(pieces[i].raw); i++) run.push(i);
+    for (
+      let i = start;
+      i < pieces.length && free(i) && WORD_CONT.test(pieces[i].raw);
+      i++
+    )
+      run.push(i);
     result.partyQuery = run.map((i) => pieces[i].raw).join(" ");
     claim(run, "party");
   }
@@ -324,7 +404,10 @@ export function hasUsefulQuickEntry(p: ParsedQuickEntry): boolean {
  * Pick the best party option for a free-text query:
  * exact name > name starts with query > a word starts with query > contains > first result.
  */
-export function bestPartyMatch<T extends { label: string }>(query: string, options: T[]): T | undefined {
+export function bestPartyMatch<T extends { label: string }>(
+  query: string,
+  options: T[],
+): T | undefined {
   const q = query.trim().toLowerCase();
   if (!q || options.length === 0) return undefined;
   const score = (label: string) => {

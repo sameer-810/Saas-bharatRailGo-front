@@ -1,10 +1,23 @@
 /** Bilti (POD) types — mirror of bharatrailgo-back/src/modules/pod/pod.dto.js */
 
-export const DELIVERY_STATUSES = ["received", "loaded", "in_transit", "unloaded", "delivered", "returned"] as const;
+export const DELIVERY_STATUSES = [
+  "received",
+  "loaded",
+  "in_transit",
+  "unloaded",
+  "delivered",
+  "returned",
+] as const;
 export type DeliveryStatus = (typeof DELIVERY_STATUSES)[number];
 
 /** The forward path shown in the stepper; "returned" is a side exit. */
-export const STATUS_FLOW: DeliveryStatus[] = ["received", "loaded", "in_transit", "unloaded", "delivered"];
+export const STATUS_FLOW: DeliveryStatus[] = [
+  "received",
+  "loaded",
+  "in_transit",
+  "unloaded",
+  "delivered",
+];
 
 export const STATUS_LABEL: Record<DeliveryStatus, string> = {
   received: "Received",
@@ -84,7 +97,10 @@ export interface SmsResult {
   reason?: string;
 }
 
-export function biltiNo(prefix: string | undefined, podNumber: number | undefined | null): string {
+export function biltiNo(
+  prefix: string | undefined,
+  podNumber: number | undefined | null,
+): string {
   if (podNumber == null) return "—";
   return `${prefix || ""}${podNumber}`;
 }

@@ -42,7 +42,13 @@ export function AllocationPreview({
   const t = useTheme();
   const preview = useMemo(() => fifoPreview(amount || 0, open), [amount, open]);
 
-  if (error) return <ErrorState message="Could not load this party's open bookings." onRetry={onRetry} />;
+  if (error)
+    return (
+      <ErrorState
+        message="Could not load this party's open bookings."
+        onRetry={onRetry}
+      />
+    );
   if (loading) return <LoadingBlock rows={3} />;
 
   return (
@@ -56,7 +62,8 @@ export function AllocationPreview({
             <Money value={totalDue} variant="h2" />
           </View>
           <Text variant="caption" tone="faint">
-            {open.length} open to-pay / on-bill booking{open.length === 1 ? "" : "s"}
+            {open.length} open to-pay / on-bill booking
+            {open.length === 1 ? "" : "s"}
           </Text>
         </Col>
         <View
@@ -83,7 +90,8 @@ export function AllocationPreview({
       ) : (
         <Col gap={0}>
           <Text variant="caption" tone="muted" style={{ marginBottom: 8 }}>
-            How this payment will be split (oldest first). The server confirms the final split when you save.
+            How this payment will be split (oldest first). The server confirms
+            the final split when you save.
           </Text>
           {preview.lines.map((l, i) => (
             <Row
@@ -100,7 +108,11 @@ export function AllocationPreview({
             >
               <Col gap={2} flex={1}>
                 <Text
-                  onPress={onOpenConsignment ? () => onOpenConsignment(l.consignment.id) : undefined}
+                  onPress={
+                    onOpenConsignment
+                      ? () => onOpenConsignment(l.consignment.id)
+                      : undefined
+                  }
                   numberOfLines={1}
                 >
                   {consignmentLabel(l.consignment)}
@@ -113,10 +125,18 @@ export function AllocationPreview({
                 </Row>
               </Col>
               <Col gap={2} align="flex-end">
-                <Money value={l.applied} tone={l.applied > 0 ? "success" : "faint"} />
+                <Money
+                  value={l.applied}
+                  tone={l.applied > 0 ? "success" : "faint"}
+                />
                 {l.applied > 0 && l.remainingDue > 0 ? (
                   <Text variant="caption" tone="warning">
-                    <Money value={l.remainingDue} variant="caption" tone="warning" /> still due
+                    <Money
+                      value={l.remainingDue}
+                      variant="caption"
+                      tone="warning"
+                    />{" "}
+                    still due
                   </Text>
                 ) : l.applied > 0 ? (
                   <Text variant="caption" tone="success">
@@ -130,7 +150,11 @@ export function AllocationPreview({
       )}
 
       {preview.advance > 0 ? (
-        <Row justify="space-between" style={{ marginTop: 12 }} testID="payment-preview-advance">
+        <Row
+          justify="space-between"
+          style={{ marginTop: 12 }}
+          testID="payment-preview-advance"
+        >
           <Row gap={6}>
             <Text variant="bodyStrong">Advance (unallocated)</Text>
             <Badge>+</Badge>

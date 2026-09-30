@@ -33,15 +33,30 @@ import {
   type Column,
 } from "@shared/ui";
 import { useApiGet, useApiMutation } from "@shared/api/query";
-import { apiClient, apiErrorMessage, type Envelope } from "@shared/api/apiClient";
+import {
+  apiClient,
+  apiErrorMessage,
+  type Envelope,
+} from "@shared/api/apiClient";
 import { loadStationOptions } from "@shared/api/lookups";
 import { useCan, useReadOnly } from "@shared/lib/permissions";
 import { formatNumber } from "@shared/lib/format";
-import { APPLIES_TO_LABEL, BASIS_LABEL, type AppliesTo, type Basis, type ChargeHead, type Quote } from "../types";
+import {
+  APPLIES_TO_LABEL,
+  BASIS_LABEL,
+  type AppliesTo,
+  type Basis,
+  type ChargeHead,
+  type Quote,
+} from "../types";
 import { CardTitle, Grid, ReadOnlyBanner } from "../components/common";
 
 const GROUPS: AppliesTo[] = ["freight", "hamali", "other", "reimbursement"];
-const BASIS_UNIT: Record<Basis, string> = { per_kg: "/kg", per_package: "/pkg", flat: "flat" };
+const BASIS_UNIT: Record<Basis, string> = {
+  per_kg: "/kg",
+  per_package: "/pkg",
+  flat: "flat",
+};
 
 interface HeadInput {
   name: string;
@@ -56,8 +71,20 @@ interface HeadInput {
 function StationTag({ code }: { code: string }) {
   const t = useTheme();
   return (
-    <View style={{ alignSelf: "flex-start", paddingHorizontal: 8, paddingVertical: 2, borderRadius: t.radius.pill, backgroundColor: t.c.accentSoft }}>
-      <Text variant="caption" tone="accent" style={{ fontFamily: t.fonts.mono }}>
+    <View
+      style={{
+        alignSelf: "flex-start",
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: t.radius.pill,
+        backgroundColor: t.c.accentSoft,
+      }}
+    >
+      <Text
+        variant="caption"
+        tone="accent"
+        style={{ fontFamily: t.fonts.mono }}
+      >
         Only to {code}
       </Text>
     </View>
@@ -78,11 +105,16 @@ function HeadDialog({
   onClose: () => void;
 }) {
   const isEdit = !!head;
-  const [form, setForm] = useState<HeadInput>({ name: "", appliesTo: "freight", basis: "per_kg", rate: 0 });
+  const [form, setForm] = useState<HeadInput>({
+    name: "",
+    appliesTo: "freight",
+    basis: "per_kg",
+    rate: 0,
+  });
   const [rate, setRate] = useState<number | undefined>(undefined);
   const [touched, setTouched] = useState(false);
   const [openedFor, setOpenedFor] = useState<string | null>(null);
-  const key = visible ? head?.id ?? `new-${defaultGroup}` : null;
+  const key = visible ? (head?.id ?? `new-${defaultGroup}`) : null;
   if (key !== openedFor) {
     setOpenedFor(key);
     setTouched(false);
@@ -97,16 +129,28 @@ function HeadDialog({
     });
     setRate(head?.rate);
   }
-  const set = <K extends keyof HeadInput>(k: K, v: HeadInput[K]) => setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof HeadInput>(k: K, v: HeadInput[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
-  const create = useApiMutation<ChargeHead, HeadInput>("post", "/charge-heads", { invalidate: ["charge-heads"] });
-  const update = useApiMutation<ChargeHead, { id: string; body: Partial<HeadInput> }>("patch", (v) => `/charge-heads/${v.id}`, {
+  const create = useApiMutation<ChargeHead, HeadInput>(
+    "post",
+    "/charge-heads",
+    { invalidate: ["charge-heads"] },
+  );
+  const update = useApiMutation<
+    ChargeHead,
+    { id: string; body: Partial<HeadInput> }
+  >("patch", (v) => `/charge-heads/${v.id}`, {
     invalidate: ["charge-heads"],
     body: (v) => v.body,
   });
 
-  const nameErr = touched && !form.name.trim() ? "Enter a name, e.g. Freight or Hamali" : undefined;
-  const rateErr = touched && rate == null ? "Enter a rate (0 is allowed)" : undefined;
+  const nameErr =
+    touched && !form.name.trim()
+      ? "Enter a name, e.g. Freight or Hamali"
+      : undefined;
+  const rateErr =
+    touched && rate == null ? "Enter a rate (0 is allowed)" : undefined;
 
   const save = async () => {
     setTouched(true);
@@ -121,7 +165,10 @@ function HeadDialog({
     };
     try {
       if (head) {
-        await update.mutateAsync({ id: head.id, body: { ...body, isActive: form.isActive } });
+        await update.mutateAsync({
+          id: head.id,
+          body: { ...body, isActive: form.isActive },
+        });
         toast.success("Charge head updated");
       } else {
         await create.mutateAsync(body);
@@ -141,12 +188,30 @@ function HeadDialog({
       testID="rate-dialog"
       footer={
         <>
-          <Button testID="rate-cancel" title="Cancel" variant="secondary" onPress={onClose} />
-          <Button testID="rate-save" title={isEdit ? "Save" : "Add"} loading={create.isPending || update.isPending} onPress={save} />
+          <Button
+            testID="rate-cancel"
+            title="Cancel"
+            variant="secondary"
+            onPress={onClose}
+          />
+          <Button
+            testID="rate-save"
+            title={isEdit ? "Save" : "Add"}
+            loading={create.isPending || update.isPending}
+            onPress={save}
+          />
         </>
       }
     >
-      <TextField testID="rate-name" label="Name" value={form.name} onChangeText={(s) => set("name", s)} maxLength={60} error={nameErr} placeholder="e.g. Freight, Hamali, Packing" />
+      <TextField
+        testID="rate-name"
+        label="Name"
+        value={form.name}
+        onChangeText={(s) => set("name", s)}
+        maxLength={60}
+        error={nameErr}
+        placeholder="e.g. Freight, Hamali, Packing"
+      />
       <Select<AppliesTo>
         testID="rate-appliesTo"
         label="Adds to"
@@ -162,13 +227,20 @@ function HeadDialog({
           testID="rate-basis"
           value={form.basis}
           onChange={(v) => set("basis", v)}
-          options={(Object.keys(BASIS_LABEL) as Basis[]).map((b) => ({ value: b, label: BASIS_LABEL[b] }))}
+          options={(Object.keys(BASIS_LABEL) as Basis[]).map((b) => ({
+            value: b,
+            label: BASIS_LABEL[b],
+          }))}
         />
       </Col>
       <Grid basis={180}>
         <NumberField
           testID="rate-rate"
-          label={form.basis === "flat" ? "Amount (₹)" : `Rate (₹ ${BASIS_UNIT[form.basis]})`}
+          label={
+            form.basis === "flat"
+              ? "Amount (₹)"
+              : `Rate (₹ ${BASIS_UNIT[form.basis]})`
+          }
           value={rate}
           onChange={setRate}
           error={rateErr}
@@ -192,10 +264,17 @@ function HeadDialog({
         clearable
       />
       <Text variant="caption" tone="faint">
-        A station-specific head replaces the general head with the same name for that destination.
+        A station-specific head replaces the general head with the same name for
+        that destination.
       </Text>
       {isEdit ? (
-        <Toggle testID="rate-active" label="Active" hint="Inactive heads are not used in quotes." value={!!form.isActive} onChange={(v) => set("isActive", v)} />
+        <Toggle
+          testID="rate-active"
+          label="Active"
+          hint="Inactive heads are not used in quotes."
+          value={!!form.isActive}
+          onChange={(v) => set("isActive", v)}
+        />
       ) : null}
     </Dialog>
   );
@@ -212,7 +291,12 @@ function QuoteTester() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const valid = weight != null && packages != null && packages >= 1 && Number.isInteger(packages) && !!dest;
+  const valid =
+    weight != null &&
+    packages != null &&
+    packages >= 1 &&
+    Number.isInteger(packages) &&
+    !!dest;
 
   const run = async () => {
     if (!valid) return;
@@ -244,10 +328,23 @@ function QuoteTester() {
 
   return (
     <Card testID="rate-tester">
-      <CardTitle title="Try the rate card" caption="Check what a booking would cost with the active charge heads." />
+      <CardTitle
+        title="Try the rate card"
+        caption="Check what a booking would cost with the active charge heads."
+      />
       <Grid basis={180}>
-        <NumberField testID="rate-tester-weight" label="Chargeable weight (kg)" value={weight} onChange={setWeight} />
-        <NumberField testID="rate-tester-packages" label="Packages" value={packages} onChange={(v) => setPackages(v == null ? undefined : Math.floor(v))} />
+        <NumberField
+          testID="rate-tester-weight"
+          label="Chargeable weight (kg)"
+          value={weight}
+          onChange={setWeight}
+        />
+        <NumberField
+          testID="rate-tester-packages"
+          label="Packages"
+          value={packages}
+          onChange={(v) => setPackages(v == null ? undefined : Math.floor(v))}
+        />
         <Combobox<string>
           testID="rate-tester-destination"
           label="Destination"
@@ -259,7 +356,14 @@ function QuoteTester() {
         />
       </Grid>
       <Row justify="flex-end" style={{ marginTop: 14 }}>
-        <Button testID="rate-tester-run" title="Get quote" icon={Calculator} loading={loading} disabled={!valid} onPress={run} />
+        <Button
+          testID="rate-tester-run"
+          title="Get quote"
+          icon={Calculator}
+          loading={loading}
+          disabled={!valid}
+          onPress={run}
+        />
       </Row>
       {error ? (
         <Text tone="danger" style={{ marginTop: 10 }}>
@@ -270,14 +374,28 @@ function QuoteTester() {
         <Col gap={10} style={{ marginTop: 14 }} testID="rate-tester-result">
           <Divider />
           {quote.lines.length === 0 ? (
-            <Text tone="muted">No active charge heads apply to this destination.</Text>
+            <Text tone="muted">
+              No active charge heads apply to this destination.
+            </Text>
           ) : (
             quote.lines.map((l, i) => (
-              <Row key={`${l.name}-${i}`} justify="space-between" gap={12} testID={`rate-tester-line-${i}`}>
+              <Row
+                key={`${l.name}-${i}`}
+                justify="space-between"
+                gap={12}
+                testID={`rate-tester-line-${i}`}
+              >
                 <Col gap={1} flex={1}>
                   <Text>{l.name}</Text>
-                  <Text variant="caption" tone="faint" style={{ fontFamily: t.fonts.mono }}>
-                    {l.basis === "flat" ? "flat" : `${formatNumber(l.qty)} × ₹${formatNumber(l.rate)}${BASIS_UNIT[l.basis]}`} · {APPLIES_TO_LABEL[l.appliesTo]}
+                  <Text
+                    variant="caption"
+                    tone="faint"
+                    style={{ fontFamily: t.fonts.mono }}
+                  >
+                    {l.basis === "flat"
+                      ? "flat"
+                      : `${formatNumber(l.qty)} × ₹${formatNumber(l.rate)}${BASIS_UNIT[l.basis]}`}{" "}
+                    · {APPLIES_TO_LABEL[l.appliesTo]}
                   </Text>
                 </Col>
                 <Money value={l.amount} />
@@ -313,11 +431,21 @@ export function RatesScreen() {
   const canEdit = useCan("masters.manage");
   const readOnly = useReadOnly();
   const editable = canEdit && !readOnly;
-  const list = useApiGet<ChargeHead[]>(["charge-heads"], "/charge-heads", { includeInactive: canEdit ? true : undefined });
-  const [dialog, setDialog] = useState<{ head: ChargeHead | null; group: AppliesTo } | null>(null);
+  const list = useApiGet<ChargeHead[]>(["charge-heads"], "/charge-heads", {
+    includeInactive: canEdit ? true : undefined,
+  });
+  const [dialog, setDialog] = useState<{
+    head: ChargeHead | null;
+    group: AppliesTo;
+  } | null>(null);
 
   const grouped = useMemo(() => {
-    const m: Record<AppliesTo, ChargeHead[]> = { freight: [], hamali: [], other: [], reimbursement: [] };
+    const m: Record<AppliesTo, ChargeHead[]> = {
+      freight: [],
+      hamali: [],
+      other: [],
+      reimbursement: [],
+    };
     (list.data || []).forEach((h) => m[h.appliesTo]?.push(h));
     return m;
   }, [list.data]);
@@ -334,7 +462,11 @@ export function RatesScreen() {
         </Col>
       ),
     },
-    { key: "basis", title: "Basis", render: (h) => <Text tone="muted">{BASIS_LABEL[h.basis]}</Text> },
+    {
+      key: "basis",
+      title: "Basis",
+      render: (h) => <Text tone="muted">{BASIS_LABEL[h.basis]}</Text>,
+    },
     {
       key: "rate",
       title: "Rate",
@@ -354,12 +486,22 @@ export function RatesScreen() {
       key: "min",
       title: "Minimum",
       align: "right",
-      render: (h) => (h.minAmount ? <Money value={h.minAmount} tone="muted" /> : <Text tone="faint">—</Text>),
+      render: (h) =>
+        h.minAmount ? (
+          <Money value={h.minAmount} tone="muted" />
+        ) : (
+          <Text tone="faint">—</Text>
+        ),
     },
     {
       key: "status",
       title: "Status",
-      render: (h) => <StatusPill status={h.isActive ? "active" : "inactive"} label={h.isActive ? "Active" : "Inactive"} />,
+      render: (h) => (
+        <StatusPill
+          status={h.isActive ? "active" : "inactive"}
+          label={h.isActive ? "Active" : "Inactive"}
+        />
+      ),
     },
   ];
   if (editable) {
@@ -369,13 +511,23 @@ export function RatesScreen() {
       align: "right",
       flex: 0.5,
       render: (h) => (
-        <IconButton testID={`rate-edit-${h.id}`} icon={Pencil} label={`Edit ${h.name}`} onPress={() => setDialog({ head: h, group: h.appliesTo })} />
+        <IconButton
+          testID={`rate-edit-${h.id}`}
+          icon={Pencil}
+          label={`Edit ${h.name}`}
+          onPress={() => setDialog({ head: h, group: h.appliesTo })}
+        />
       ),
     });
   }
 
   const addButton = editable ? (
-    <Button testID="rate-add" title="Add charge head" icon={Plus} onPress={() => setDialog({ head: null, group: "freight" })} />
+    <Button
+      testID="rate-add"
+      title="Add charge head"
+      icon={Plus}
+      onPress={() => setDialog({ head: null, group: "freight" })}
+    />
   ) : null;
 
   const total = list.data?.length ?? 0;
@@ -383,7 +535,11 @@ export function RatesScreen() {
   return (
     <Screen
       title="Rate card"
-      subtitle={canEdit ? "Charge heads used to price bookings." : "Charge heads used to price bookings (view only)."}
+      subtitle={
+        canEdit
+          ? "Charge heads used to price bookings."
+          : "Charge heads used to price bookings (view only)."
+      }
       back
       backTo="Settings"
       actions={addButton}
@@ -396,7 +552,10 @@ export function RatesScreen() {
         {list.isLoading ? (
           <LoadingBlock rows={4} />
         ) : list.error ? (
-          <ErrorState message={apiErrorMessage(list.error)} onRetry={() => list.refetch()} />
+          <ErrorState
+            message={apiErrorMessage(list.error)}
+            onRetry={() => list.refetch()}
+          />
         ) : total === 0 ? (
           <EmptyState
             icon={Receipt}

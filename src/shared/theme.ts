@@ -59,7 +59,11 @@ export function mix(hex: string, to: string, t: number): string {
   const a = p(hex);
   const b = p(to);
   return `#${a
-    .map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, "0"))
+    .map((v, i) =>
+      Math.round(v + (b[i] - v) * t)
+        .toString(16)
+        .padStart(2, "0"),
+    )
     .join("")}`;
 }
 
@@ -75,8 +79,13 @@ export function readableOn(hex: string): string {
   return lum > 0.45 ? "#14161A" : "#FFFFFF";
 }
 
-export function buildColors(mode: ThemeMode, accentHex?: string | null): Colors {
-  const accent = /^#[0-9a-f]{6}$/i.test(accentHex || "") ? (accentHex as string) : DEFAULT_ACCENT;
+export function buildColors(
+  mode: ThemeMode,
+  accentHex?: string | null,
+): Colors {
+  const accent = /^#[0-9a-f]{6}$/i.test(accentHex || "")
+    ? (accentHex as string)
+    : DEFAULT_ACCENT;
   if (mode === "dark") {
     const a = mix(accent, "#FFFFFF", 0.25); // lift the accent on dark
     return {
@@ -136,7 +145,16 @@ export function buildColors(mode: ThemeMode, accentHex?: string | null): Colors 
   };
 }
 
-export const space = { xxs: 2, xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
+export const space = {
+  xxs: 2,
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  xxl: 32,
+  xxxl: 48,
+} as const;
 
 export const radius = { sm: 6, md: 10, lg: 14, xl: 20, pill: 999 } as const;
 
@@ -149,8 +167,18 @@ export const fonts = {
 } as const;
 
 export const type = {
-  display: { fontSize: 32, lineHeight: 38, fontFamily: fonts.semibold, letterSpacing: -0.6 },
-  h1: { fontSize: 24, lineHeight: 30, fontFamily: fonts.semibold, letterSpacing: -0.3 },
+  display: {
+    fontSize: 32,
+    lineHeight: 38,
+    fontFamily: fonts.semibold,
+    letterSpacing: -0.6,
+  },
+  h1: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontFamily: fonts.semibold,
+    letterSpacing: -0.3,
+  },
   h2: { fontSize: 19, lineHeight: 26, fontFamily: fonts.semibold },
   h3: { fontSize: 16, lineHeight: 22, fontFamily: fonts.semibold },
   body: { fontSize: 15, lineHeight: 22, fontFamily: fonts.regular },
@@ -174,7 +202,10 @@ export type TypeVariant = keyof typeof type;
 export const breakpoints = { tablet: 768, desktop: 1100 } as const;
 
 /** Status → colour key. One vocabulary for every status pill in the app. */
-export const STATUS_TONE: Record<string, "success" | "warning" | "danger" | "info" | "neutral"> = {
+export const STATUS_TONE: Record<
+  string,
+  "success" | "warning" | "danger" | "info" | "neutral"
+> = {
   // delivery lifecycle
   received: "info",
   loaded: "info",

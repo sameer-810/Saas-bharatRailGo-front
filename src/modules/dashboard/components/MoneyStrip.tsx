@@ -16,7 +16,13 @@ export interface MoneyTileSpec {
   onPress?: () => void;
 }
 
-function MoneyTile({ spec, loading }: { spec: MoneyTileSpec; loading: boolean }) {
+function MoneyTile({
+  spec,
+  loading,
+}: {
+  spec: MoneyTileSpec;
+  loading: boolean;
+}) {
   const t = useTheme();
   const { isPhone } = useLayout();
   const rule = spec.tone === "warning" ? t.c.warning : t.c.accent;
@@ -28,14 +34,19 @@ function MoneyTile({ spec, loading }: { spec: MoneyTileSpec; loading: boolean })
           <Text variant="overline" tone="muted" numberOfLines={1}>
             {spec.label}
           </Text>
-          {spec.onPress ? <ChevronRight size={14} color={t.c.textFaint} /> : null}
+          {spec.onPress ? (
+            <ChevronRight size={14} color={t.c.textFaint} />
+          ) : null}
         </Row>
         {loading ? (
           <Skeleton height={26} width="70%" />
         ) : spec.amount !== undefined ? (
           <Money value={spec.amount} variant="h2" compact={isPhone} />
         ) : (
-          <Text variant="h2" style={{ fontFamily: t.fonts.mono, fontVariant: ["tabular-nums"] }}>
+          <Text
+            variant="h2"
+            style={{ fontFamily: t.fonts.mono, fontVariant: ["tabular-nums"] }}
+          >
             {spec.count ?? 0}
           </Text>
         )}
@@ -62,10 +73,13 @@ function MoneyTile({ spec, loading }: { spec: MoneyTileSpec; loading: boolean })
         testID={`money-${spec.key}`}
         accessibilityRole="button"
         onPress={spec.onPress}
-        style={({ hovered, pressed }: { hovered?: boolean; pressed: boolean }) => [
-          box,
-          (hovered || pressed) && { borderColor: t.c.borderStrong },
-        ]}
+        style={({
+          hovered,
+          pressed,
+        }: {
+          hovered?: boolean;
+          pressed: boolean;
+        }) => [box, (hovered || pressed) && { borderColor: t.c.borderStrong }]}
       >
         {content}
       </Pressable>
@@ -78,7 +92,13 @@ function MoneyTile({ spec, loading }: { spec: MoneyTileSpec; loading: boolean })
   );
 }
 
-export function MoneyStrip({ tiles, loading }: { tiles: MoneyTileSpec[]; loading: boolean }) {
+export function MoneyStrip({
+  tiles,
+  loading,
+}: {
+  tiles: MoneyTileSpec[];
+  loading: boolean;
+}) {
   return (
     <Row wrap gap={12} align="stretch" testID="money-strip">
       {tiles.map((s) => (

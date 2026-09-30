@@ -29,7 +29,13 @@ import { loadStationOptions } from "@shared/api/lookups";
 import { useReadOnly } from "@shared/lib/permissions";
 import { useAppNav, useParams } from "@navigation/useAppNav";
 import { FormError, type FormErrorState } from "../components/FormError";
-import { PAYMENT_MODES, PAYMENT_MODE_LABEL, type Party, type PartyInput, type PaymentMode } from "../types";
+import {
+  PAYMENT_MODES,
+  PAYMENT_MODE_LABEL,
+  type Party,
+  type PartyInput,
+  type PaymentMode,
+} from "../types";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Party name is required"),
@@ -43,11 +49,23 @@ const schema = z.object({
   city: z.string().trim(),
   state: z.string().trim(),
   defaultPaymentMode: z.enum(PAYMENT_MODES),
-  openingAmount: z.number({ invalid_type_error: "Enter a number" }).min(0).optional(),
+  openingAmount: z
+    .number({ invalid_type_error: "Enter a number" })
+    .min(0)
+    .optional(),
   openingSide: z.enum(["dr", "cr"]),
 });
 type Form = z.infer<typeof schema>;
-type TextKey = "name" | "gstin" | "pan" | "email" | "mobile" | "alternateMobile" | "address" | "city" | "state";
+type TextKey =
+  | "name"
+  | "gstin"
+  | "pan"
+  | "email"
+  | "mobile"
+  | "alternateMobile"
+  | "address"
+  | "city"
+  | "state";
 
 function fromParty(p?: Party): Form {
   const ob = p?.openingBalance ?? 0;
@@ -73,7 +91,14 @@ function Grid({ children }: { children: React.ReactNode }) {
   return (
     <Row gap={12} wrap align="flex-start">
       {React.Children.toArray(children).map((c, i) => (
-        <Col key={i} style={{ flexGrow: 1, flexBasis: isPhone ? "100%" : "46%", minWidth: 160 }}>
+        <Col
+          key={i}
+          style={{
+            flexGrow: 1,
+            flexBasis: isPhone ? "100%" : "46%",
+            minWidth: 160,
+          }}
+        >
           {c}
         </Col>
       ))}
@@ -90,14 +115,27 @@ export function PartyEditScreen() {
   const one = useApiGet<Party>(["parties", id], id ? `/parties/${id}` : null);
   if (one.error) {
     return (
-      <Screen title="Edit party" back backTo="Parties" testID="party-edit-screen">
-        <ErrorState message={apiErrorMessage(one.error)} onRetry={() => one.refetch()} />
+      <Screen
+        title="Edit party"
+        back
+        backTo="Parties"
+        testID="party-edit-screen"
+      >
+        <ErrorState
+          message={apiErrorMessage(one.error)}
+          onRetry={() => one.refetch()}
+        />
       </Screen>
     );
   }
   if (!one.data) {
     return (
-      <Screen title="Edit party" back backTo="Parties" testID="party-edit-screen">
+      <Screen
+        title="Edit party"
+        back
+        backTo="Parties"
+        testID="party-edit-screen"
+      >
         <LoadingBlock rows={8} />
       </Screen>
     );
@@ -105,7 +143,13 @@ export function PartyEditScreen() {
   return <PartyForm mode="edit" party={one.data} />;
 }
 
-function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) {
+function PartyForm({
+  mode,
+  party,
+}: {
+  mode: "create" | "edit";
+  party?: Party;
+}) {
   const nav = useAppNav();
   const readOnly = useReadOnly();
   const [saveError, setSaveError] = useState<FormErrorState | null>(null);
@@ -114,8 +158,14 @@ function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) 
     defaultValues: fromParty(party),
   });
   const inv = ["parties", "dashboard", "reports"];
-  const create = useApiMutation<Party, PartyInput>("post", "/parties", { invalidate: inv });
-  const update = useApiMutation<Party, PartyInput>("patch", party ? `/parties/${party.id}` : "/parties", { invalidate: inv });
+  const create = useApiMutation<Party, PartyInput>("post", "/parties", {
+    invalidate: inv,
+  });
+  const update = useApiMutation<Party, PartyInput>(
+    "patch",
+    party ? `/parties/${party.id}` : "/parties",
+    { invalidate: inv },
+  );
 
   const onSubmit = handleSubmit(async (v) => {
     setSaveError(null);
@@ -155,7 +205,11 @@ function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) 
     }
   });
 
-  const txt = (name: TextKey, label: string, props: Partial<React.ComponentProps<typeof TextField>> = {}) => (
+  const txt = (
+    name: TextKey,
+    label: string,
+    props: Partial<React.ComponentProps<typeof TextField>> = {},
+  ) => (
     <Controller
       control={control}
       name={name}
@@ -188,7 +242,15 @@ function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) 
             title="Read-only mode"
             message="Your subscription has expired, so parties cannot be saved."
             testID="party-form-readonly"
-            action={<Button title="Plan" size="sm" variant="secondary" testID="party-form-plan" onPress={() => nav.navigate("Plan")} />}
+            action={
+              <Button
+                title="Plan"
+                size="sm"
+                variant="secondary"
+                testID="party-form-plan"
+                onPress={() => nav.navigate("Plan")}
+              />
+            }
           />
         ) : null}
         <FormError error={saveError} testID="party-form-error" />
@@ -198,8 +260,16 @@ function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) 
           <Col gap={12}>
             {txt("name", "Name", { placeholder: "Business or person name" })}
             <Grid>
-              {txt("gstin", "GSTIN", { mono: true, autoCapitalize: "characters", maxLength: 15 })}
-              {txt("pan", "PAN", { mono: true, autoCapitalize: "characters", maxLength: 10 })}
+              {txt("gstin", "GSTIN", {
+                mono: true,
+                autoCapitalize: "characters",
+                maxLength: 15,
+              })}
+              {txt("pan", "PAN", {
+                mono: true,
+                autoCapitalize: "characters",
+                maxLength: 10,
+              })}
             </Grid>
           </Col>
         </Card>
@@ -208,10 +278,19 @@ function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) 
           <SectionHeader title="Contact" />
           <Col gap={12}>
             <Grid>
-              {txt("mobile", "Mobile", { keyboardType: "phone-pad", maxLength: 13 })}
-              {txt("alternateMobile", "Alternate mobile", { keyboardType: "phone-pad", maxLength: 13 })}
+              {txt("mobile", "Mobile", {
+                keyboardType: "phone-pad",
+                maxLength: 13,
+              })}
+              {txt("alternateMobile", "Alternate mobile", {
+                keyboardType: "phone-pad",
+                maxLength: 13,
+              })}
             </Grid>
-            {txt("email", "Email", { keyboardType: "email-address", autoCapitalize: "none" })}
+            {txt("email", "Email", {
+              keyboardType: "email-address",
+              autoCapitalize: "none",
+            })}
             {txt("address", "Address", { multiline: true })}
             <Grid>
               {txt("city", "City")}
@@ -248,7 +327,10 @@ function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) 
                     testID="party-defaultPaymentMode"
                     label="Default payment mode"
                     value={f.value}
-                    options={PAYMENT_MODES.map((m) => ({ value: m, label: PAYMENT_MODE_LABEL[m] }))}
+                    options={PAYMENT_MODES.map((m) => ({
+                      value: m,
+                      label: PAYMENT_MODE_LABEL[m],
+                    }))}
                     onChange={(m) => m && f.onChange(m)}
                   />
                 )}
@@ -298,7 +380,9 @@ function PartyForm({ mode, party }: { mode: "create" | "edit"; party?: Party }) 
             testID="party-cancel"
             title="Cancel"
             variant="secondary"
-            onPress={() => (nav.canGoBack() ? nav.goBack() : nav.navigate("Parties"))}
+            onPress={() =>
+              nav.canGoBack() ? nav.goBack() : nav.navigate("Parties")
+            }
           />
           <Button
             testID="party-save"

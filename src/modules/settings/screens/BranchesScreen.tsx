@@ -26,9 +26,19 @@ import {
 } from "@shared/ui";
 import { useApiMutation } from "@shared/api/query";
 import { apiErrorCode, apiErrorMessage } from "@shared/api/apiClient";
-import { loadStationOptions, useBranches, type Branch } from "@shared/api/lookups";
+import {
+  loadStationOptions,
+  useBranches,
+  type Branch,
+} from "@shared/api/lookups";
 import { useCan, useReadOnly } from "@shared/lib/permissions";
-import { PlanLimitBanner, ReadOnlyBanner, atLimit, usageText, useSubscription } from "../components/common";
+import {
+  PlanLimitBanner,
+  ReadOnlyBanner,
+  atLimit,
+  usageText,
+  useSubscription,
+} from "../components/common";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Branch name is required").max(80),
@@ -65,11 +75,17 @@ function BranchDialog({
       phone: branch?.phone || "",
     },
   });
-  const create = useApiMutation<Branch, Form>("post", "/branches", { invalidate: ["branches"] });
-  const update = useApiMutation<Branch, { id: string; body: Partial<Form> }>("patch", (v) => `/branches/${v.id}`, {
+  const create = useApiMutation<Branch, Form>("post", "/branches", {
     invalidate: ["branches"],
-    body: (v) => v.body,
   });
+  const update = useApiMutation<Branch, { id: string; body: Partial<Form> }>(
+    "patch",
+    (v) => `/branches/${v.id}`,
+    {
+      invalidate: ["branches"],
+      body: (v) => v.body,
+    },
+  );
 
   const close = () => {
     reset();
@@ -89,9 +105,13 @@ function BranchDialog({
         const patch: Partial<Form> = {};
         (Object.keys(body) as (keyof Form)[]).forEach((k) => {
           const next = v[k] ?? "";
-          if (next !== ((branch[k as keyof Branch] as string | undefined) ?? "")) patch[k] = next;
+          if (
+            next !== ((branch[k as keyof Branch] as string | undefined) ?? "")
+          )
+            patch[k] = next;
         });
-        if (Object.keys(patch).length) await update.mutateAsync({ id: branch.id, body: patch });
+        if (Object.keys(patch).length)
+          await update.mutateAsync({ id: branch.id, body: patch });
         toast.success("Branch updated");
       } else {
         await create.mutateAsync(body);
@@ -115,7 +135,12 @@ function BranchDialog({
       testID="branch-dialog"
       footer={
         <>
-          <Button testID="branch-cancel" title="Cancel" variant="secondary" onPress={close} />
+          <Button
+            testID="branch-cancel"
+            title="Cancel"
+            variant="secondary"
+            onPress={close}
+          />
           <Button
             testID="branch-save"
             title={isEdit ? "Save" : "Add branch"}
@@ -129,7 +154,14 @@ function BranchDialog({
         control={control}
         name="name"
         render={({ field: f, fieldState }) => (
-          <TextField testID="branch-name" label="Branch name" value={f.value} onChangeText={f.onChange} error={fieldState.error?.message} placeholder="e.g. Dadar counter" />
+          <TextField
+            testID="branch-name"
+            label="Branch name"
+            value={f.value}
+            onChangeText={f.onChange}
+            error={fieldState.error?.message}
+            placeholder="e.g. Dadar counter"
+          />
         )}
       />
       <Controller
@@ -169,14 +201,29 @@ function BranchDialog({
         control={control}
         name="address"
         render={({ field: f, fieldState }) => (
-          <TextField testID="branch-address" label="Address" value={f.value} onChangeText={f.onChange} multiline error={fieldState.error?.message} />
+          <TextField
+            testID="branch-address"
+            label="Address"
+            value={f.value}
+            onChangeText={f.onChange}
+            multiline
+            error={fieldState.error?.message}
+          />
         )}
       />
       <Controller
         control={control}
         name="phone"
         render={({ field: f, fieldState }) => (
-          <TextField testID="branch-phone" label="Phone" value={f.value} onChangeText={f.onChange} keyboardType="phone-pad" mono error={fieldState.error?.message} />
+          <TextField
+            testID="branch-phone"
+            label="Phone"
+            value={f.value}
+            onChangeText={f.onChange}
+            keyboardType="phone-pad"
+            mono
+            error={fieldState.error?.message}
+          />
         )}
       />
     </Dialog>
@@ -197,7 +244,10 @@ function BranchCard({
   const t = useTheme();
   return (
     <View style={{ flexGrow: 1, flexBasis: 300, minWidth: 260 }}>
-      <Card testID={`branch-card-${b.code}`} style={{ height: "100%", opacity: b.isActive ? 1 : 0.7 }}>
+      <Card
+        testID={`branch-card-${b.code}`}
+        style={{ height: "100%", opacity: b.isActive ? 1 : 0.7 }}
+      >
         <Row justify="space-between" align="flex-start" gap={8}>
           <Col gap={4} flex={1}>
             <Row gap={8} wrap>
@@ -205,7 +255,12 @@ function BranchCard({
               {b.isHeadOffice ? (
                 <View
                   testID={`branch-ho-${b.code}`}
-                  style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: t.radius.pill, backgroundColor: t.c.accentSoft }}
+                  style={{
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderRadius: t.radius.pill,
+                    backgroundColor: t.c.accentSoft,
+                  }}
                 >
                   <Text variant="caption" tone="accent" weight="semibold">
                     HO
@@ -217,12 +272,19 @@ function BranchCard({
               {b.code}
             </Text>
           </Col>
-          <StatusPill status={b.isActive ? "active" : "inactive"} label={b.isActive ? "Active" : "Inactive"} />
+          <StatusPill
+            status={b.isActive ? "active" : "inactive"}
+            label={b.isActive ? "Active" : "Inactive"}
+          />
         </Row>
         <Col gap={6} style={{ marginTop: 12 }}>
           <Row gap={6}>
             <MapPin size={14} color={t.c.textFaint} />
-            <Text variant="caption" tone="muted" style={{ fontFamily: b.stationCode ? t.fonts.mono : undefined }}>
+            <Text
+              variant="caption"
+              tone="muted"
+              style={{ fontFamily: b.stationCode ? t.fonts.mono : undefined }}
+            >
               {b.stationCode || "No station set"}
             </Text>
           </Row>
@@ -242,9 +304,18 @@ function BranchCard({
         </Col>
         {canEdit ? (
           <Row justify="flex-end" gap={0} style={{ marginTop: 8 }}>
-            <IconButton testID={`branch-edit-${b.code}`} icon={Pencil} label="Edit branch" onPress={onEdit} />
+            <IconButton
+              testID={`branch-edit-${b.code}`}
+              icon={Pencil}
+              label="Edit branch"
+              onPress={onEdit}
+            />
             {b.isHeadOffice ? (
-              <Text variant="caption" tone="faint" style={{ alignSelf: "center" }}>
+              <Text
+                variant="caption"
+                tone="faint"
+                style={{ alignSelf: "center" }}
+              >
                 Head office is always active
               </Text>
             ) : (
@@ -272,10 +343,14 @@ export function BranchesScreen() {
   const [dialog, setDialog] = useState<{ branch: Branch | null } | null>(null);
   const [limitHit, setLimitHit] = useState(false);
 
-  const toggle = useApiMutation<Branch, { id: string; isActive: boolean }>("patch", (v) => `/branches/${v.id}`, {
-    invalidate: ["branches"],
-    body: (v) => ({ isActive: v.isActive }),
-  });
+  const toggle = useApiMutation<Branch, { id: string; isActive: boolean }>(
+    "patch",
+    (v) => `/branches/${v.id}`,
+    {
+      invalidate: ["branches"],
+      body: (v) => ({ isActive: v.isActive }),
+    },
+  );
 
   const used = sub?.usage?.branches;
   const max = sub?.limits?.maxBranches ?? null;
@@ -285,7 +360,8 @@ export function BranchesScreen() {
     if (b.isActive) {
       const ok = await confirm({
         title: `Deactivate ${b.name}?`,
-        message: "It disappears from the branch switcher and new bookings. Existing records stay. Staff assigned only to it lose access.",
+        message:
+          "It disappears from the branch switcher and new bookings. Existing records stay. Staff assigned only to it lose access.",
         confirmLabel: "Deactivate",
         danger: true,
       });
@@ -293,7 +369,9 @@ export function BranchesScreen() {
     }
     try {
       await toggle.mutateAsync({ id: b.id, isActive: !b.isActive });
-      toast.success(b.isActive ? `${b.name} deactivated` : `${b.name} activated`);
+      toast.success(
+        b.isActive ? `${b.name} deactivated` : `${b.name} activated`,
+      );
     } catch (err) {
       if (apiErrorCode(err) === "PLAN_LIMIT_REACHED") setLimitHit(true);
       toast.error(apiErrorMessage(err));
@@ -317,7 +395,10 @@ export function BranchesScreen() {
   ) : null;
 
   const branches = [...(list.data || [])].sort(
-    (a, b) => Number(b.isHeadOffice) - Number(a.isHeadOffice) || Number(b.isActive) - Number(a.isActive) || a.name.localeCompare(b.name),
+    (a, b) =>
+      Number(b.isHeadOffice) - Number(a.isHeadOffice) ||
+      Number(b.isActive) - Number(a.isActive) ||
+      a.name.localeCompare(b.name),
   );
 
   return (
@@ -342,19 +423,37 @@ export function BranchesScreen() {
           <PlanLimitBanner
             what="branches"
             testID="branch-limit-banner"
-            message={full ? `You are using ${used} of ${max} branches on your plan. Upgrade to open another branch.` : undefined}
+            message={
+              full
+                ? `You are using ${used} of ${max} branches on your plan. Upgrade to open another branch.`
+                : undefined
+            }
           />
         ) : null}
         {list.isLoading ? (
           <LoadingBlock rows={3} />
         ) : list.error ? (
-          <ErrorState message={apiErrorMessage(list.error)} onRetry={() => list.refetch()} />
+          <ErrorState
+            message={apiErrorMessage(list.error)}
+            onRetry={() => list.refetch()}
+          />
         ) : !branches.length ? (
-          <EmptyState icon={Store} title="No branches yet" message="Your head office is created at signup. Add counters here." action={addButton} />
+          <EmptyState
+            icon={Store}
+            title="No branches yet"
+            message="Your head office is created at signup. Add counters here."
+            action={addButton}
+          />
         ) : (
           <Row wrap gap={12} align="stretch" testID="branch-list">
             {branches.map((b) => (
-              <BranchCard key={b.id} b={b} canEdit={editable} onEdit={() => setDialog({ branch: b })} onToggle={() => onToggle(b)} />
+              <BranchCard
+                key={b.id}
+                b={b}
+                canEdit={editable}
+                onEdit={() => setDialog({ branch: b })}
+                onToggle={() => onToggle(b)}
+              />
             ))}
           </Row>
         )}

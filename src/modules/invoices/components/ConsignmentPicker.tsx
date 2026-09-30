@@ -2,7 +2,15 @@
 import React from "react";
 import { Pressable, View } from "react-native";
 import { Check, PackageOpen } from "lucide-react-native";
-import { Col, EmptyState, ErrorState, LoadingBlock, Money, Row, Text } from "@shared/ui";
+import {
+  Col,
+  EmptyState,
+  ErrorState,
+  LoadingBlock,
+  Money,
+  Row,
+  Text,
+} from "@shared/ui";
 import { useTheme } from "@shared/useTheme";
 import { formatDate } from "@shared/lib/format";
 import { routeLabel, serviceOf } from "../lib";
@@ -48,7 +56,13 @@ export function ConsignmentPicker({
   testID?: string;
 }) {
   const t = useTheme();
-  if (error) return <ErrorState message="Could not load this party's bookings." onRetry={onRetry} />;
+  if (error)
+    return (
+      <ErrorState
+        message="Could not load this party's bookings."
+        onRetry={onRetry}
+      />
+    );
   if (loading) return <LoadingBlock rows={4} />;
   if (items.length === 0) {
     return (
@@ -70,17 +84,35 @@ export function ConsignmentPicker({
   };
 
   return (
-    <Col gap={0} testID={testID} style={{ borderWidth: 1, borderColor: t.c.border, borderRadius: t.radius.lg, overflow: "hidden" }}>
+    <Col
+      gap={0}
+      testID={testID}
+      style={{
+        borderWidth: 1,
+        borderColor: t.c.border,
+        borderRadius: t.radius.lg,
+        overflow: "hidden",
+      }}
+    >
       <Pressable
         testID={`${testID}-all`}
         accessibilityRole="checkbox"
         accessibilityState={{ checked: allOn }}
-        onPress={() => onChange(allOn ? new Set() : new Set(items.map((c) => c.id)))}
-        style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, backgroundColor: t.c.surfaceAlt }}
+        onPress={() =>
+          onChange(allOn ? new Set() : new Set(items.map((c) => c.id)))
+        }
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+          padding: 12,
+          backgroundColor: t.c.surfaceAlt,
+        }}
       >
         <Box on={allOn} />
         <Text variant="label" style={{ flex: 1 }}>
-          {allOn ? "Unselect all" : "Select all"} · {selected.size} of {items.length} selected
+          {allOn ? "Unselect all" : "Select all"} · {selected.size} of{" "}
+          {items.length} selected
         </Text>
       </Pressable>
       {items.map((c) => {
@@ -99,7 +131,11 @@ export function ConsignmentPicker({
               padding: 12,
               borderTopWidth: 1,
               borderTopColor: t.c.border,
-              backgroundColor: on ? t.c.accentSoft : hovered ? t.c.surfaceAlt : t.c.surface,
+              backgroundColor: on
+                ? t.c.accentSoft
+                : hovered
+                  ? t.c.surfaceAlt
+                  : t.c.surface,
             })}
           >
             <Box on={on} />
@@ -112,7 +148,9 @@ export function ConsignmentPicker({
               </Row>
               <Text variant="caption" tone="faint" numberOfLines={1}>
                 {[
-                  c.railwayReceiptNumber ? `RR ${c.railwayReceiptNumber}` : null,
+                  c.railwayReceiptNumber
+                    ? `RR ${c.railwayReceiptNumber}`
+                    : null,
                   c.packages ? `${c.packages} pkg` : null,
                   c.contents,
                 ]
@@ -123,8 +161,14 @@ export function ConsignmentPicker({
             <Col gap={0} align="flex-end">
               <Money value={c.totalAmount} variant="bodyStrong" />
               <Text variant="caption" tone="faint">
-                svc <Money value={serviceOf(c)} variant="caption" tone="faint" /> · reimb{" "}
-                <Money value={c.reimbursementAmount} variant="caption" tone="faint" />
+                svc{" "}
+                <Money value={serviceOf(c)} variant="caption" tone="faint" /> ·
+                reimb{" "}
+                <Money
+                  value={c.reimbursementAmount}
+                  variant="caption"
+                  tone="faint"
+                />
               </Text>
             </Col>
           </Pressable>

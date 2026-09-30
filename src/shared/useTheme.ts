@@ -1,7 +1,15 @@
 import { useMemo } from "react";
 import { useColorScheme, useWindowDimensions } from "react-native";
 import { useThemeStore } from "./store/useThemeStore";
-import { buildColors, breakpoints, fonts, radius, space, type, type Colors } from "./theme";
+import {
+  buildColors,
+  breakpoints,
+  fonts,
+  radius,
+  space,
+  type,
+  type Colors,
+} from "./theme";
 
 export interface Theme {
   c: Colors;
@@ -16,9 +24,17 @@ export interface Theme {
 export function useTheme(): Theme {
   const system = useColorScheme();
   const { preference, brandColor } = useThemeStore();
-  const isDark = preference === "dark" || (preference === "system" && system === "dark");
+  const isDark =
+    preference === "dark" || (preference === "system" && system === "dark");
   return useMemo(
-    () => ({ c: buildColors(isDark ? "dark" : "light", brandColor), space, radius, fonts, type, isDark }),
+    () => ({
+      c: buildColors(isDark ? "dark" : "light", brandColor),
+      space,
+      radius,
+      fonts,
+      type,
+      isDark,
+    }),
     [isDark, brandColor],
   );
 }

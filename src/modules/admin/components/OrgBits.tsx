@@ -12,11 +12,17 @@ export function limitLabel(v: number | null | undefined) {
 }
 
 /** Approval + org status pills side by side. */
-export function OrgPills({ org }: { org: Pick<AdminOrg, "approvalStatus" | "status"> }) {
+export function OrgPills({
+  org,
+}: {
+  org: Pick<AdminOrg, "approvalStatus" | "status">;
+}) {
   return (
     <Row gap={6} wrap>
       <StatusPill status={org.approvalStatus} />
-      {org.approvalStatus === "approved" ? <StatusPill status={org.status} /> : null}
+      {org.approvalStatus === "approved" ? (
+        <StatusPill status={org.status} />
+      ) : null}
     </Row>
   );
 }
@@ -32,14 +38,27 @@ export function SubscriptionCell({ sub }: { sub: SubscriptionState }) {
   }
   const days = sub.daysLeft;
   const daysText =
-    days == null ? "No end date" : days > 0 ? `${days} day${days === 1 ? "" : "s"} left` : `Ended ${-days}d ago`;
+    days == null
+      ? "No end date"
+      : days > 0
+        ? `${days} day${days === 1 ? "" : "s"} left`
+        : `Ended ${-days}d ago`;
   return (
     <Col gap={3}>
       <Row gap={6} wrap>
         <StatusPill status={sub.status} />
         {sub.state !== "ok" ? <StatusPill status={sub.state} /> : null}
       </Row>
-      <Text variant="caption" tone={sub.state === "expired" ? "danger" : sub.state === "grace" ? "warning" : "faint"}>
+      <Text
+        variant="caption"
+        tone={
+          sub.state === "expired"
+            ? "danger"
+            : sub.state === "grace"
+              ? "warning"
+              : "faint"
+        }
+      >
         {sub.planCode ? `${sub.planCode} · ` : ""}
         {daysText}
         {sub.endsAt ? ` · ${formatDate(sub.endsAt)}` : ""}
@@ -62,7 +81,14 @@ export function UsageMeter({
 }) {
   const t = useTheme();
   const ratio = limit == null ? 0 : limit === 0 ? 1 : Math.min(1, used / limit);
-  const color = limit == null ? t.c.textFaint : ratio >= 1 ? t.c.danger : ratio >= 0.8 ? t.c.warning : t.c.success;
+  const color =
+    limit == null
+      ? t.c.textFaint
+      : ratio >= 1
+        ? t.c.danger
+        : ratio >= 0.8
+          ? t.c.warning
+          : t.c.success;
   return (
     <Col gap={6} testID={testID} style={{ flexGrow: 1, flexBasis: 180 }}>
       <Row justify="space-between">
@@ -73,8 +99,21 @@ export function UsageMeter({
           {formatNumber(used)} / {limitLabel(limit)}
         </Text>
       </Row>
-      <View style={{ height: 6, borderRadius: 3, backgroundColor: t.c.surfaceAlt, overflow: "hidden" }}>
-        <View style={{ width: `${limit == null ? 0 : ratio * 100}%`, height: 6, backgroundColor: color }} />
+      <View
+        style={{
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: t.c.surfaceAlt,
+          overflow: "hidden",
+        }}
+      >
+        <View
+          style={{
+            width: `${limit == null ? 0 : ratio * 100}%`,
+            height: 6,
+            backgroundColor: color,
+          }}
+        />
       </View>
     </Col>
   );
@@ -90,7 +129,8 @@ export function metaSummary(meta: unknown): string {
       let s: string;
       if (v === null) s = "null";
       else if (Array.isArray(v)) s = `[${v.length}]`;
-      else if (typeof v === "object") s = `{${Object.keys(v as object).join(",")}}`;
+      else if (typeof v === "object")
+        s = `{${Object.keys(v as object).join(",")}}`;
       else s = String(v);
       if (s.length > 40) s = `${s.slice(0, 39)}…`;
       return `${k}=${s}`;

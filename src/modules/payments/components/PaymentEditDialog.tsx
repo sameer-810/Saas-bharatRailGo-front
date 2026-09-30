@@ -14,9 +14,20 @@ import {
 } from "@shared/ui";
 import { useApiMutation } from "@shared/api/query";
 import { apiErrorMessage } from "@shared/api/apiClient";
-import { PAYMENT_MODE_OPTIONS, type Payment, type PaymentInput, type PaymentMode } from "../types";
+import {
+  PAYMENT_MODE_OPTIONS,
+  type Payment,
+  type PaymentInput,
+  type PaymentMode,
+} from "../types";
 
-export const PAYMENT_INVALIDATE = ["payments", "consignments", "parties", "dashboard", "reports"];
+export const PAYMENT_INVALIDATE = [
+  "payments",
+  "consignments",
+  "parties",
+  "dashboard",
+  "reports",
+];
 
 export function PaymentEditDialog({
   payment,
@@ -44,9 +55,13 @@ export function PaymentEditDialog({
     setErr(null);
   }, [visible, payment]);
 
-  const update = useApiMutation<Payment, PaymentInput>("patch", `/payments/${payment.id}`, {
-    invalidate: PAYMENT_INVALIDATE,
-  });
+  const update = useApiMutation<Payment, PaymentInput>(
+    "patch",
+    `/payments/${payment.id}`,
+    {
+      invalidate: PAYMENT_INVALIDATE,
+    },
+  );
 
   const save = async () => {
     if (!amount || amount <= 0) return setErr("Enter an amount above zero.");
@@ -76,8 +91,18 @@ export function PaymentEditDialog({
       testID="payment-edit-dialog"
       footer={
         <>
-          <Button title="Cancel" variant="secondary" onPress={onClose} testID="payment-edit-cancel" />
-          <Button title="Save" onPress={save} loading={update.isPending} testID="payment-edit-save" />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onPress={onClose}
+            testID="payment-edit-cancel"
+          />
+          <Button
+            title="Save"
+            onPress={save}
+            loading={update.isPending}
+            testID="payment-edit-save"
+          />
         </>
       }
     >
@@ -91,13 +116,28 @@ export function PaymentEditDialog({
           {err}
         </Text>
       ) : null}
-      <NumberField label="Amount (₹)" value={amount} onChange={setAmount} testID="payment-edit-amount" />
-      <DateField label="Date" value={date} onChange={setDate} testID="payment-edit-date" />
+      <NumberField
+        label="Amount (₹)"
+        value={amount}
+        onChange={setAmount}
+        testID="payment-edit-amount"
+      />
+      <DateField
+        label="Date"
+        value={date}
+        onChange={setDate}
+        testID="payment-edit-date"
+      />
       <Col gap={6}>
         <Text variant="label" tone="muted">
           Mode
         </Text>
-        <SegmentedControl value={mode} options={PAYMENT_MODE_OPTIONS} onChange={setMode} testID="payment-edit-mode" />
+        <SegmentedControl
+          value={mode}
+          options={PAYMENT_MODE_OPTIONS}
+          onChange={setMode}
+          testID="payment-edit-mode"
+        />
       </Col>
       {mode !== "cash" ? (
         <TextField
@@ -109,7 +149,13 @@ export function PaymentEditDialog({
           testID="payment-edit-reference"
         />
       ) : null}
-      <TextField label="Notes" value={notes} onChangeText={setNotes} multiline testID="payment-edit-notes" />
+      <TextField
+        label="Notes"
+        value={notes}
+        onChangeText={setNotes}
+        multiline
+        testID="payment-edit-notes"
+      />
     </Dialog>
   );
 }

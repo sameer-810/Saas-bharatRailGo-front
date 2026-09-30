@@ -17,7 +17,16 @@ import { useTheme } from "../useTheme";
 import { STATUS_TONE, type TypeVariant } from "../theme";
 import { formatMoney } from "../lib/format";
 
-type Tone = "default" | "muted" | "faint" | "accent" | "success" | "warning" | "danger" | "info" | "inverse";
+type Tone =
+  | "default"
+  | "muted"
+  | "faint"
+  | "accent"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "inverse";
 
 export interface TextProps extends RNTextProps {
   variant?: TypeVariant;
@@ -26,7 +35,14 @@ export interface TextProps extends RNTextProps {
   weight?: "regular" | "medium" | "semibold";
 }
 
-export function Text({ variant = "body", tone = "default", align, weight, style, ...rest }: TextProps) {
+export function Text({
+  variant = "body",
+  tone = "default",
+  align,
+  weight,
+  style,
+  ...rest
+}: TextProps) {
   const t = useTheme();
   const color = {
     default: t.c.text,
@@ -43,7 +59,13 @@ export function Text({ variant = "body", tone = "default", align, weight, style,
   return (
     <RNText
       {...rest}
-      style={[t.type[variant] as TextStyle, { color }, align && { textAlign: align }, w, style]}
+      style={[
+        t.type[variant] as TextStyle,
+        { color },
+        align && { textAlign: align },
+        w,
+        style,
+      ]}
     />
   );
 }
@@ -57,12 +79,28 @@ interface StackProps extends ViewProps {
   padding?: number;
 }
 
-export function Row({ gap = 8, align = "center", justify, wrap, flex, padding, style, ...rest }: StackProps) {
+export function Row({
+  gap = 8,
+  align = "center",
+  justify,
+  wrap,
+  flex,
+  padding,
+  style,
+  ...rest
+}: StackProps) {
   return (
     <View
       {...rest}
       style={[
-        { flexDirection: "row", gap, alignItems: align, justifyContent: justify, flex, padding },
+        {
+          flexDirection: "row",
+          gap,
+          alignItems: align,
+          justifyContent: justify,
+          flex,
+          padding,
+        },
         wrap && { flexWrap: "wrap" },
         style,
       ]}
@@ -70,8 +108,24 @@ export function Row({ gap = 8, align = "center", justify, wrap, flex, padding, s
   );
 }
 
-export function Col({ gap = 8, align, justify, flex, padding, style, ...rest }: StackProps) {
-  return <View {...rest} style={[{ gap, alignItems: align, justifyContent: justify, flex, padding }, style]} />;
+export function Col({
+  gap = 8,
+  align,
+  justify,
+  flex,
+  padding,
+  style,
+  ...rest
+}: StackProps) {
+  return (
+    <View
+      {...rest}
+      style={[
+        { gap, alignItems: align, justifyContent: justify, flex, padding },
+        style,
+      ]}
+    />
+  );
 }
 
 export interface CardProps extends ViewProps {
@@ -80,9 +134,21 @@ export interface CardProps extends ViewProps {
   tone?: "default" | "accent" | "sunken";
 }
 
-export function Card({ padding = 16, onPress, tone = "default", style, children, ...rest }: CardProps) {
+export function Card({
+  padding = 16,
+  onPress,
+  tone = "default",
+  style,
+  children,
+  ...rest
+}: CardProps) {
   const t = useTheme();
-  const bg = tone === "accent" ? t.c.accentSoft : tone === "sunken" ? t.c.surfaceAlt : t.c.surface;
+  const bg =
+    tone === "accent"
+      ? t.c.accentSoft
+      : tone === "sunken"
+        ? t.c.surfaceAlt
+        : t.c.surface;
   const base: StyleProp<ViewStyle> = [
     {
       backgroundColor: bg,
@@ -98,7 +164,13 @@ export function Card({ padding = 16, onPress, tone = "default", style, children,
       <Pressable
         accessibilityRole="button"
         onPress={onPress}
-        style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+        style={({
+          pressed,
+          hovered,
+        }: {
+          pressed: boolean;
+          hovered?: boolean;
+        }) => [
           base,
           (hovered || pressed) && { borderColor: t.c.borderStrong },
           pressed && { opacity: 0.9 },
@@ -116,12 +188,20 @@ export function Card({ padding = 16, onPress, tone = "default", style, children,
   );
 }
 
-export function Divider({ vertical, style }: { vertical?: boolean; style?: StyleProp<ViewStyle> }) {
+export function Divider({
+  vertical,
+  style,
+}: {
+  vertical?: boolean;
+  style?: StyleProp<ViewStyle>;
+}) {
   const t = useTheme();
   return (
     <View
       style={[
-        vertical ? { width: 1, alignSelf: "stretch" } : { height: 1, alignSelf: "stretch" },
+        vertical
+          ? { width: 1, alignSelf: "stretch" }
+          : { height: 1, alignSelf: "stretch" },
         { backgroundColor: t.c.border },
         style,
       ]}
@@ -173,7 +253,13 @@ const TONE_KEYS = {
 } as const;
 
 /** Status pill — one colour vocabulary for every status in the app (theme.STATUS_TONE). */
-export function StatusPill({ status, label }: { status: string; label?: string }) {
+export function StatusPill({
+  status,
+  label,
+}: {
+  status: string;
+  label?: string;
+}) {
   const t = useTheme();
   const tone = STATUS_TONE[status] ?? "neutral";
   const [fg, bg] = TONE_KEYS[tone];
@@ -190,7 +276,14 @@ export function StatusPill({ status, label }: { status: string; label?: string }
         backgroundColor: t.c[bg],
       }}
     >
-      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: t.c[fg] }} />
+      <View
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: t.c[fg],
+        }}
+      />
       <Text variant="label" style={{ color: t.c[fg] }}>
         {label ?? humanize(status)}
       </Text>
@@ -223,7 +316,10 @@ export function Money({
     <Text
       variant={variant}
       tone={tone}
-      style={[{ fontFamily: t.fonts.mono, fontVariant: ["tabular-nums"] }, style]}
+      style={[
+        { fontFamily: t.fonts.mono, fontVariant: ["tabular-nums"] },
+        style,
+      ]}
     >
       {formatMoney(value, { compact })}
     </Text>
@@ -231,7 +327,13 @@ export function Money({
 }
 
 /** Small count / label badge. */
-export function Badge({ children, tone = "accent" }: { children: React.ReactNode; tone?: "accent" | "danger" }) {
+export function Badge({
+  children,
+  tone = "accent",
+}: {
+  children: React.ReactNode;
+  tone?: "accent" | "danger";
+}) {
   const t = useTheme();
   return (
     <View
@@ -245,7 +347,10 @@ export function Badge({ children, tone = "accent" }: { children: React.ReactNode
         backgroundColor: tone === "danger" ? t.c.danger : t.c.accent,
       }}
     >
-      <Text variant="caption" style={{ color: tone === "danger" ? "#fff" : t.c.accentText }}>
+      <Text
+        variant="caption"
+        style={{ color: tone === "danger" ? "#fff" : t.c.accentText }}
+      >
         {children}
       </Text>
     </View>

@@ -55,12 +55,19 @@ export function QuickEntryBar({
   const partyQ = useDebounced(parsed.partyQuery || "", 250);
   const stationQ = useDebounced(parsed.destinationStation || "", 250);
 
-  const [party, setParty] = useState<{ q: string; match: Option<string> | null; loading: boolean }>({
+  const [party, setParty] = useState<{
+    q: string;
+    match: Option<string> | null;
+    loading: boolean;
+  }>({
     q: "",
     match: null,
     loading: false,
   });
-  const [station, setStation] = useState<{ q: string; name: string | null }>({ q: "", name: null });
+  const [station, setStation] = useState<{ q: string; name: string | null }>({
+    q: "",
+    name: null,
+  });
   const partyCache = useRef(new Map<string, Option<string> | null>());
 
   useEffect(() => {
@@ -70,7 +77,11 @@ export function QuickEntryBar({
     }
     const key = partyQ.toLowerCase();
     if (partyCache.current.has(key)) {
-      setParty({ q: partyQ, match: partyCache.current.get(key) ?? null, loading: false });
+      setParty({
+        q: partyQ,
+        match: partyCache.current.get(key) ?? null,
+        loading: false,
+      });
       return;
     }
     let alive = true;
@@ -80,7 +91,9 @@ export function QuickEntryBar({
         partyCache.current.set(key, m);
         if (alive) setParty({ q: partyQ, match: m, loading: false });
       })
-      .catch(() => alive && setParty({ q: partyQ, match: null, loading: false }));
+      .catch(
+        () => alive && setParty({ q: partyQ, match: null, loading: false }),
+      );
     return () => {
       alive = false;
     };
@@ -94,8 +107,14 @@ export function QuickEntryBar({
     let alive = true;
     loadStationOptions(stationQ)
       .then((opts) => {
-        const hit = opts.find((o) => o.value.toUpperCase() === stationQ.toUpperCase());
-        if (alive) setStation({ q: stationQ, name: hit ? hit.label.replace(/^[^—]*—\s*/, "") : null });
+        const hit = opts.find(
+          (o) => o.value.toUpperCase() === stationQ.toUpperCase(),
+        );
+        if (alive)
+          setStation({
+            q: stationQ,
+            name: hit ? hit.label.replace(/^[^—]*—\s*/, "") : null,
+          });
       })
       .catch(() => alive && setStation({ q: stationQ, name: null }));
     return () => {
@@ -138,7 +157,10 @@ export function QuickEntryBar({
     }
   };
 
-  const valueFor = (kind: QuickTokenKind, raw: string): { value: string; faded?: boolean; warn?: boolean } => {
+  const valueFor = (
+    kind: QuickTokenKind,
+    raw: string,
+  ): { value: string; faded?: boolean; warn?: boolean } => {
     switch (kind) {
       case "destination":
         return {
@@ -151,13 +173,21 @@ export function QuickEntryBar({
       case "weight":
         return { value: `${parsed.chargeableWeight} kg` };
       case "paymentMode":
-        return { value: parsed.paymentMode ? PAYMENT_MODE_LABEL[parsed.paymentMode] : raw };
+        return {
+          value: parsed.paymentMode
+            ? PAYMENT_MODE_LABEL[parsed.paymentMode]
+            : raw,
+        };
       case "amount":
         return { value: formatMoney(parsed.amount) };
       case "party": {
-        const settled = party.q.toLowerCase() === (parsed.partyQuery || "").toLowerCase() && !party.loading;
+        const settled =
+          party.q.toLowerCase() === (parsed.partyQuery || "").toLowerCase() &&
+          !party.loading;
         if (!settled) return { value: `${raw}…` };
-        return party.match ? { value: party.match.label } : { value: `${raw} (no match)`, warn: true };
+        return party.match
+          ? { value: party.match.label }
+          : { value: `${raw} (no match)`, warn: true };
       }
       default:
         return { value: raw, faded: true };
@@ -173,12 +203,21 @@ export function QuickEntryBar({
             Quick entry
           </Text>
           {!isPhone ? (
-            <Text variant="caption" tone="faint" style={{ flex: 1 }} numberOfLines={1}>
+            <Text
+              variant="caption"
+              tone="faint"
+              style={{ flex: 1 }}
+              numberOfLines={1}
+            >
               Type one line, press Enter — e.g. DLI 3pkg 60kg Sharma topay 1550
             </Text>
           ) : null}
         </Row>
-        <Row gap={8} align="flex-start" style={{ flexDirection: isPhone ? "column" : "row" }}>
+        <Row
+          gap={8}
+          align="flex-start"
+          style={{ flexDirection: isPhone ? "column" : "row" }}
+        >
           <View style={{ flex: isPhone ? undefined : 1, alignSelf: "stretch" }}>
             <TextField
               testID={`${testID}-input`}
@@ -222,26 +261,42 @@ export function QuickEntryBar({
                     borderRadius: t.radius.pill,
                     borderWidth: 1,
                     borderStyle: v.faded ? "dashed" : "solid",
-                    borderColor: v.warn ? t.c.warning : v.faded ? t.c.border : t.c.accent,
-                    backgroundColor: v.faded ? "transparent" : v.warn ? t.c.warningSoft : t.c.accentSoft,
+                    borderColor: v.warn
+                      ? t.c.warning
+                      : v.faded
+                        ? t.c.border
+                        : t.c.accent,
+                    backgroundColor: v.faded
+                      ? "transparent"
+                      : v.warn
+                        ? t.c.warningSoft
+                        : t.c.accentSoft,
                     opacity: v.faded ? 0.6 : 1,
                   }}
                 >
-                  <Text variant="overline" tone={v.faded ? "faint" : v.warn ? "warning" : "accent"}>
+                  <Text
+                    variant="overline"
+                    tone={v.faded ? "faint" : v.warn ? "warning" : "accent"}
+                  >
                     {KIND_LABEL[tok.kind]}
                   </Text>
                   <Text
                     variant="label"
                     tone={v.faded ? "faint" : "default"}
                     style={
-                      tok.kind === "destination" || tok.kind === "amount" || tok.kind === "weight" || tok.kind === "packages"
+                      tok.kind === "destination" ||
+                      tok.kind === "amount" ||
+                      tok.kind === "weight" ||
+                      tok.kind === "packages"
                         ? { fontFamily: t.fonts.mono }
                         : undefined
                     }
                   >
                     {v.value}
                   </Text>
-                  {loading ? <ActivityIndicator size="small" color={t.c.accent} /> : null}
+                  {loading ? (
+                    <ActivityIndicator size="small" color={t.c.accent} />
+                  ) : null}
                 </View>
               );
             })}

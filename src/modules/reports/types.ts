@@ -69,12 +69,18 @@ export function presetRange(p: RangePreset, now = new Date()): DateRange {
     const offset = (now.getDay() + 6) % 7;
     return { startDate: isoDay(addDays(now, -offset)), endDate: today };
   }
-  if (p === "month") return { startDate: isoDay(startOfMonth(now)), endDate: today };
+  if (p === "month")
+    return { startDate: isoDay(startOfMonth(now)), endDate: today };
   const firstThis = startOfMonth(now);
   const lastPrev = addDays(firstThis, -1);
-  return { startDate: isoDay(startOfMonth(lastPrev)), endDate: isoDay(lastPrev) };
+  return {
+    startDate: isoDay(startOfMonth(lastPrev)),
+    endDate: isoDay(lastPrev),
+  };
 }
 
 export function sum<T>(rows: T[] | undefined, pick: (r: T) => number): number {
-  return Math.round((rows || []).reduce((s, r) => s + (pick(r) || 0), 0) * 100) / 100;
+  return (
+    Math.round((rows || []).reduce((s, r) => s + (pick(r) || 0), 0) * 100) / 100
+  );
 }

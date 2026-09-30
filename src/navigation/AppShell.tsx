@@ -49,7 +49,10 @@ const ROUTE_TO_SECTION: Record<string, string> = {
 };
 
 function navigate(route: string) {
-  if (navigationRef.isReady()) (navigationRef as unknown as { navigate: (r: string) => void }).navigate(route);
+  if (navigationRef.isReady())
+    (navigationRef as unknown as { navigate: (r: string) => void }).navigate(
+      route,
+    );
 }
 
 function useSessionSync() {
@@ -58,7 +61,12 @@ function useSessionSync() {
   const setMe = useAuthStore((s) => s.setMe);
   const setBrandColor = useThemeStore((s) => s.setBrandColor);
   useEffect(() => {
-    if (me.data) setMe({ user: me.data, organization: me.data.organization, subscription: me.data.subscription });
+    if (me.data)
+      setMe({
+        user: me.data,
+        organization: me.data.organization,
+        subscription: me.data.subscription,
+      });
   }, [me.data, setMe]);
   useEffect(() => {
     if (profile.data?.brandColor) setBrandColor(profile.data.brandColor);
@@ -73,8 +81,14 @@ function BranchSwitcher({ compact }: { compact?: boolean }) {
   const qc = useQueryClient();
   if (!branches || branches.length < 2) return null;
   const options = [
-    ...(role !== "staff" || branches.length > 1 ? [{ value: "all", label: "All branches" }] : []),
-    ...branches.map((b) => ({ value: b.id, label: `${b.name}${b.isHeadOffice ? " (HO)" : ""}`, hint: b.code })),
+    ...(role !== "staff" || branches.length > 1
+      ? [{ value: "all", label: "All branches" }]
+      : []),
+    ...branches.map((b) => ({
+      value: b.id,
+      label: `${b.name}${b.isHeadOffice ? " (HO)" : ""}`,
+      hint: b.code,
+    })),
   ];
   return (
     <View style={{ minWidth: compact ? 150 : 210 }}>
@@ -159,12 +173,25 @@ function UserMenu() {
           {user?.role}
         </Text>
       </Col>
-      <IconButton icon={LogOut} label="Log out" testID="logout" onPress={() => logout()} />
+      <IconButton
+        icon={LogOut}
+        label="Log out"
+        testID="logout"
+        onPress={() => logout()}
+      />
     </Row>
   );
 }
 
-function Sidebar({ current, logo, name }: { current: string; logo?: string | null; name?: string }) {
+function Sidebar({
+  current,
+  logo,
+  name,
+}: {
+  current: string;
+  logo?: string | null;
+  name?: string;
+}) {
   const t = useTheme();
   const role = useAuthStore((s) => s.user?.role);
   const active = ROUTE_TO_SECTION[current] || current;
@@ -172,13 +199,32 @@ function Sidebar({ current, logo, name }: { current: string; logo?: string | nul
   return (
     <View
       testID="sidebar"
-      style={{ width: 248, backgroundColor: t.c.surface, borderRightWidth: 1, borderRightColor: t.c.border, paddingVertical: 16 }}
+      style={{
+        width: 248,
+        backgroundColor: t.c.surface,
+        borderRightWidth: 1,
+        borderRightColor: t.c.border,
+        paddingVertical: 16,
+      }}
     >
       <Row gap={10} style={{ paddingHorizontal: 18, marginBottom: 20 }}>
         {logo ? (
-          <Image source={{ uri: logo }} style={{ width: 34, height: 34, borderRadius: 8 }} resizeMode="contain" />
+          <Image
+            source={{ uri: logo }}
+            style={{ width: 34, height: 34, borderRadius: 8 }}
+            resizeMode="contain"
+          />
         ) : (
-          <View style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: t.c.accent, alignItems: "center", justifyContent: "center" }}>
+          <View
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              backgroundColor: t.c.accent,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Text variant="h3" style={{ color: t.c.accentText }}>
               {(name || "S").charAt(0).toUpperCase()}
             </Text>
@@ -189,11 +235,17 @@ function Sidebar({ current, logo, name }: { current: string; logo?: string | nul
         </Text>
       </Row>
       {groups.map((g) => {
-        const items = NAV_ITEMS.filter((n) => n.group === g && (!n.perm || can(role, n.perm)));
+        const items = NAV_ITEMS.filter(
+          (n) => n.group === g && (!n.perm || can(role, n.perm)),
+        );
         if (!items.length) return null;
         return (
           <View key={g} style={{ marginBottom: 14 }}>
-            <Text variant="overline" tone="faint" style={{ paddingHorizontal: 18, marginBottom: 4 }}>
+            <Text
+              variant="overline"
+              tone="faint"
+              style={{ paddingHorizontal: 18, marginBottom: 4 }}
+            >
               {g}
             </Text>
             {items.map((n) => {
@@ -213,7 +265,11 @@ function Sidebar({ current, logo, name }: { current: string; logo?: string | nul
                     paddingHorizontal: 10,
                     height: 40,
                     borderRadius: t.radius.md,
-                    backgroundColor: on ? t.c.accentSoft : hovered ? t.c.surfaceAlt : "transparent",
+                    backgroundColor: on
+                      ? t.c.accentSoft
+                      : hovered
+                        ? t.c.surfaceAlt
+                        : "transparent",
                   })}
                 >
                   <Icon size={18} color={on ? t.c.accent : t.c.textMuted} />
@@ -233,12 +289,19 @@ function Sidebar({ current, logo, name }: { current: string; logo?: string | nul
 function PhoneTabBar({ current }: { current: string }) {
   const t = useTheme();
   const active = ROUTE_TO_SECTION[current] || current;
-  const tabs = TAB_ROUTES.map((r) => NAV_ITEMS.find((n) => n.route === r)!).filter(Boolean);
+  const tabs = TAB_ROUTES.map((r) =>
+    NAV_ITEMS.find((n) => n.route === r)!,
+  ).filter(Boolean);
   return (
     <Row
       testID="tabbar"
       gap={0}
-      style={{ backgroundColor: t.c.surface, borderTopWidth: 1, borderTopColor: t.c.border, paddingBottom: Platform.OS === "ios" ? 18 : 4 }}
+      style={{
+        backgroundColor: t.c.surface,
+        borderTopWidth: 1,
+        borderTopColor: t.c.border,
+        paddingBottom: Platform.OS === "ios" ? 18 : 4,
+      }}
     >
       {[...tabs, { route: "More", label: "More", icon: Menu }].map((n) => {
         const on = n.route === active;
@@ -248,10 +311,20 @@ function PhoneTabBar({ current }: { current: string }) {
             key={n.route}
             testID={`tab-${n.route}`}
             onPress={() => navigate(n.route)}
-            style={{ flex: 1, alignItems: "center", paddingTop: 8, paddingBottom: 4, gap: 2 }}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              paddingTop: 8,
+              paddingBottom: 4,
+              gap: 2,
+            }}
           >
             <Icon size={20} color={on ? t.c.accent : t.c.textFaint} />
-            <Text variant="caption" tone={on ? "accent" : "faint"} numberOfLines={1}>
+            <Text
+              variant="caption"
+              tone={on ? "accent" : "faint"}
+              numberOfLines={1}
+            >
               {n.label.split(" ")[0]}
             </Text>
           </Pressable>
@@ -261,7 +334,13 @@ function PhoneTabBar({ current }: { current: string }) {
   );
 }
 
-export function AppShell({ current, children }: { current: string; children: React.ReactNode }) {
+export function AppShell({
+  current,
+  children,
+}: {
+  current: string;
+  children: React.ReactNode;
+}) {
   const t = useTheme();
   const { isPhone } = useLayout();
   const profile = useSessionSync();
@@ -290,7 +369,11 @@ export function AppShell({ current, children }: { current: string; children: Rea
           <Text tone="faint" style={{ flex: 1 }}>
             Search or jump to…
           </Text>
-          <Text variant="caption" tone="faint" style={{ fontFamily: t.fonts.mono }}>
+          <Text
+            variant="caption"
+            tone="faint"
+            style={{ fontFamily: t.fonts.mono }}
+          >
             Ctrl K
           </Text>
         </>
@@ -300,13 +383,25 @@ export function AppShell({ current, children }: { current: string; children: Rea
 
   return (
     <View style={{ flex: 1, flexDirection: "row", backgroundColor: t.c.bg }}>
-      {!isPhone ? <Sidebar current={current} logo={profile?.logoDataUrl} name={profile?.businessName} /> : null}
+      {!isPhone ? (
+        <Sidebar
+          current={current}
+          logo={profile?.logoDataUrl}
+          name={profile?.businessName}
+        />
+      ) : null}
       <View style={{ flex: 1 }}>
         <Row
           testID="topbar"
           justify="space-between"
           gap={12}
-          style={{ height: 60, paddingHorizontal: isPhone ? 12 : 20, backgroundColor: t.c.surface, borderBottomWidth: 1, borderBottomColor: t.c.border }}
+          style={{
+            height: 60,
+            paddingHorizontal: isPhone ? 12 : 20,
+            backgroundColor: t.c.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: t.c.border,
+          }}
         >
           <Row gap={10} style={{ flexShrink: 1 }}>
             {isPhone ? (
@@ -322,7 +417,13 @@ export function AppShell({ current, children }: { current: string; children: Rea
             {isPhone ? searchButton : <UserMenu />}
           </Row>
         </Row>
-        <View style={{ paddingHorizontal: isPhone ? 12 : 20, paddingTop: 10, gap: 8 }}>
+        <View
+          style={{
+            paddingHorizontal: isPhone ? 12 : 20,
+            paddingTop: 10,
+            gap: 8,
+          }}
+        >
           <SubscriptionBanner />
         </View>
         <View style={{ flex: 1 }}>{children}</View>

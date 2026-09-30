@@ -5,7 +5,19 @@
 import React, { useState } from "react";
 import { Download, FileCheck2, Trash2 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { Banner, Button, Card, Col, LoadingBlock, Row, Screen, Text, TextField, confirm, toast } from "@shared/ui";
+import {
+  Banner,
+  Button,
+  Card,
+  Col,
+  LoadingBlock,
+  Row,
+  Screen,
+  Text,
+  TextField,
+  confirm,
+  toast,
+} from "@shared/ui";
 import { useTheme } from "@shared/useTheme";
 import { useApiGet } from "@shared/api/query";
 import { apiClient, apiErrorMessage } from "@shared/api/apiClient";
@@ -14,7 +26,12 @@ import { formatDate, formatDateTime } from "@shared/lib/format";
 
 interface AccountPrivacy {
   consent: { termsVersion: string; acceptedAt: string } | null;
-  deletion: { requestedAt: string | null; purgeAllowedFrom: string | null; graceDays: number; reason: string | null };
+  deletion: {
+    requestedAt: string | null;
+    purgeAllowedFrom: string | null;
+    graceDays: number;
+    reason: string | null;
+  };
 }
 
 function Section({
@@ -44,7 +61,10 @@ function Section({
 
 export function PrivacyScreen() {
   const qc = useQueryClient();
-  const status = useApiGet<AccountPrivacy>(["privacy", "account"], "/privacy/account");
+  const status = useApiGet<AccountPrivacy>(
+    ["privacy", "account"],
+    "/privacy/account",
+  );
   const [downloading, setDownloading] = useState(false);
   const [password, setPassword] = useState("");
   const [reason, setReason] = useState("");
@@ -55,7 +75,10 @@ export function PrivacyScreen() {
   const onDownload = async () => {
     setDownloading(true);
     try {
-      await downloadFile("/privacy/account/export", `bharatrailgo-data-${new Date().toISOString().slice(0, 10)}.zip`);
+      await downloadFile(
+        "/privacy/account/export",
+        `bharatrailgo-data-${new Date().toISOString().slice(0, 10)}.zip`,
+      );
       toast.success("Your data is downloading");
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -76,7 +99,10 @@ export function PrivacyScreen() {
     if (!ok) return;
     setBusy(true);
     try {
-      const res = await apiClient.post("/privacy/account/deletion", { password, reason: reason.trim() || undefined });
+      const res = await apiClient.post("/privacy/account/deletion", {
+        password,
+        reason: reason.trim() || undefined,
+      });
       toast.success(res.data.message || "Deletion requested");
       setPassword("");
       setReason("");
@@ -137,10 +163,15 @@ export function PrivacyScreen() {
             />
           ) : null}
 
-          <Section icon={Download} title="Download all your data" testID="privacy-export-card">
+          <Section
+            icon={Download}
+            title="Download all your data"
+            testID="privacy-export-card"
+          >
             <Text variant="caption" tone="muted">
-              A zip with a spreadsheet you can open (parties, bookings, bilti, GST bills, payments, branches) and the
-              complete data files. Passwords are never included.
+              A zip with a spreadsheet you can open (parties, bookings, bilti,
+              GST bills, payments, branches) and the complete data files.
+              Passwords are never included.
             </Text>
             <Row>
               <Button
@@ -153,10 +184,15 @@ export function PrivacyScreen() {
             </Row>
           </Section>
 
-          <Section icon={FileCheck2} title="Terms & privacy consent" testID="privacy-consent-card">
+          <Section
+            icon={FileCheck2}
+            title="Terms & privacy consent"
+            testID="privacy-consent-card"
+          >
             {status.data.consent ? (
               <Text variant="caption" tone="muted" testID="privacy-consent">
-                You accepted the Terms and Privacy Policy (version {status.data.consent.termsVersion}) on{" "}
+                You accepted the Terms and Privacy Policy (version{" "}
+                {status.data.consent.termsVersion}) on{" "}
                 {formatDateTime(status.data.consent.acceptedAt)}.
               </Text>
             ) : (
@@ -165,16 +201,22 @@ export function PrivacyScreen() {
               </Text>
             )}
             <Text variant="caption" tone="muted">
-              Your customers&apos; data: you decide what is kept. Open a party to download or erase that customer&apos;s
-              data when they ask.
+              Your customers&apos; data: you decide what is kept. Open a party
+              to download or erase that customer&apos;s data when they ask.
             </Text>
           </Section>
 
           {!d?.requestedAt ? (
-            <Section icon={Trash2} title="Delete your account" testID="privacy-deletion-card">
+            <Section
+              icon={Trash2}
+              title="Delete your account"
+              testID="privacy-deletion-card"
+            >
               <Text variant="caption" tone="muted">
-                After you ask, you have {d?.graceDays ?? 30} days to change your mind. Then all of your agency&apos;s
-                data is permanently deleted. Our GST invoices for your subscription are kept, as the law requires.
+                After you ask, you have {d?.graceDays ?? 30} days to change your
+                mind. Then all of your agency&apos;s data is permanently
+                deleted. Our GST invoices for your subscription are kept, as the
+                law requires.
               </Text>
               <TextField
                 testID="privacy-deletion-reason"

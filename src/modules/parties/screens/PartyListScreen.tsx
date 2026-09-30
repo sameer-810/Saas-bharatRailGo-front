@@ -27,7 +27,11 @@ export function PartyListScreen() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const q = useDebounced(search);
-  const list = useApiList<Party>("parties", "/parties", { page, limit: 20, search: q });
+  const list = useApiList<Party>("parties", "/parties", {
+    page,
+    limit: 20,
+    search: q,
+  });
 
   const columns: Column<Party>[] = [
     {
@@ -40,7 +44,11 @@ export function PartyListScreen() {
             {p.name}
           </Text>
           {p.gstin ? (
-            <Text variant="caption" tone="faint" style={{ fontFamily: t.fonts.mono }}>
+            <Text
+              variant="caption"
+              tone="faint"
+              style={{ fontFamily: t.fonts.mono }}
+            >
               {p.gstin}
             </Text>
           ) : null}
@@ -51,21 +59,34 @@ export function PartyListScreen() {
       key: "mobile",
       title: "Mobile",
       flex: 1.2,
-      render: (p) => <Text style={{ fontFamily: t.fonts.mono }}>{p.mobile || "—"}</Text>,
+      render: (p) => (
+        <Text style={{ fontFamily: t.fonts.mono }}>{p.mobile || "—"}</Text>
+      ),
     },
-    { key: "city", title: "City", flex: 1, render: (p) => <Text tone="muted">{p.city || "—"}</Text> },
+    {
+      key: "city",
+      title: "City",
+      flex: 1,
+      render: (p) => <Text tone="muted">{p.city || "—"}</Text>,
+    },
     {
       key: "station",
       title: "Station",
       flex: 0.8,
-      render: (p) => <Text style={{ fontFamily: t.fonts.mono }}>{p.defaultStation || "—"}</Text>,
+      render: (p) => (
+        <Text style={{ fontFamily: t.fonts.mono }}>
+          {p.defaultStation || "—"}
+        </Text>
+      ),
     },
     {
       key: "mode",
       title: "Payment mode",
       flex: 1.2,
       hideOnPhone: true,
-      render: (p) => <Text tone="muted">{paymentModeLabel(p.defaultPaymentMode)}</Text>,
+      render: (p) => (
+        <Text tone="muted">{paymentModeLabel(p.defaultPaymentMode)}</Text>
+      ),
     },
     {
       key: "opening",
@@ -73,7 +94,12 @@ export function PartyListScreen() {
       flex: 1,
       align: "right",
       hideOnPhone: true,
-      render: (p) => <Money value={p.openingBalance} tone={p.openingBalance ? "default" : "faint"} />,
+      render: (p) => (
+        <Money
+          value={p.openingBalance}
+          tone={p.openingBalance ? "default" : "faint"}
+        />
+      ),
     },
   ];
 
@@ -85,12 +111,23 @@ export function PartyListScreen() {
       refreshing={list.isRefetching}
       onRefresh={() => list.refetch()}
       actions={
-        <Button testID="party-new" title="New party" icon={Plus} disabled={readOnly} onPress={() => nav.navigate("PartyNew")} />
+        <Button
+          testID="party-new"
+          title="New party"
+          icon={Plus}
+          disabled={readOnly}
+          onPress={() => nav.navigate("PartyNew")}
+        />
       }
     >
       <Col gap={12} style={{ marginBottom: 16 }}>
         {readOnly ? (
-          <Banner tone="warning" title="Read-only mode" message="Your subscription has expired. Renew to add parties." testID="party-readonly" />
+          <Banner
+            tone="warning"
+            title="Read-only mode"
+            message="Your subscription has expired. Renew to add parties."
+            testID="party-readonly"
+          />
         ) : null}
         <SearchInput
           testID="party-search"

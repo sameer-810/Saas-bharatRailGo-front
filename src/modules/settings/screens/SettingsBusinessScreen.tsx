@@ -28,7 +28,12 @@ import { useApiMutation } from "@shared/api/query";
 import { apiErrorMessage } from "@shared/api/apiClient";
 import { useBusinessProfile, type BusinessProfile } from "@shared/api/lookups";
 import { useCan, useReadOnly } from "@shared/lib/permissions";
-import { CardTitle, Grid, ReadOnlyBanner, StringListEditor } from "../components/common";
+import {
+  CardTitle,
+  Grid,
+  ReadOnlyBanner,
+  StringListEditor,
+} from "../components/common";
 
 const optText = z.string().trim().optional();
 const optNum = z.number().min(0).optional();
@@ -40,7 +45,10 @@ const schema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/, "Enter a valid 15-character GSTIN"),
+    .regex(
+      /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/,
+      "Enter a valid 15-character GSTIN",
+    ),
   pan: z
     .string()
     .trim()
@@ -65,7 +73,11 @@ const schema = z.object({
   defaultSgstRate: z.number().min(0).max(100, "0–100").optional(),
   billNumberPrefix: optText,
   useFinancialYearPrefix: z.boolean(),
-  nextBillNumber: z.number().int("Whole number").min(1, "At least 1").optional(),
+  nextBillNumber: z
+    .number()
+    .int("Whole number")
+    .min(1, "At least 1")
+    .optional(),
   nextPodNumber: z.number().int("Whole number").min(1, "At least 1").optional(),
   podNumberPrefix: z.string().trim().max(10, "Up to 10 characters").optional(),
   paymentReceivers: z.array(z.string()).max(30, "Up to 30 names"),
@@ -102,7 +114,11 @@ function toForm(p: BusinessProfile): Form {
 const COUNTERS: Key[] = ["nextBillNumber", "nextPodNumber"];
 
 /** Only the fields that differ from the loaded profile; empty numbers are not sent. */
-function diff(initial: Form, next: Form, includeCounters: boolean): Partial<Form> {
+function diff(
+  initial: Form,
+  next: Form,
+  includeCounters: boolean,
+): Partial<Form> {
   const out: Record<string, unknown> = {};
   (Object.keys(next) as Key[]).forEach((k) => {
     if (!includeCounters && COUNTERS.includes(k)) return;
@@ -120,9 +136,15 @@ function fyLabel(d = new Date()) {
   return `${String(y).slice(-2)}-${String(y + 1).slice(-2)}`;
 }
 
-export function sampleBillNumber(prefix: string | undefined, useFy: boolean, next: number | undefined) {
+export function sampleBillNumber(
+  prefix: string | undefined,
+  useFy: boolean,
+  next: number | undefined,
+) {
   const n = next ?? 1;
-  return useFy ? `${prefix || ""}${fyLabel()}/${String(n).padStart(3, "0")}` : `${prefix || ""}${n}`;
+  return useFy
+    ? `${prefix || ""}${fyLabel()}/${String(n).padStart(3, "0")}`
+    : `${prefix || ""}${n}`;
 }
 
 export function SettingsBusinessScreen() {
@@ -132,7 +154,11 @@ export function SettingsBusinessScreen() {
   return (
     <Screen
       title="Business profile"
-      subtitle={canEdit ? "Printed on every bilti, invoice and report." : "Only the owner can change these details."}
+      subtitle={
+        canEdit
+          ? "Printed on every bilti, invoice and report."
+          : "Only the owner can change these details."
+      }
       back
       backTo="Settings"
       refreshing={profile.isRefetching}
@@ -142,7 +168,10 @@ export function SettingsBusinessScreen() {
       {profile.isLoading ? (
         <LoadingBlock rows={8} />
       ) : profile.error || !profile.data ? (
-        <ErrorState message={apiErrorMessage(profile.error, "Could not load the profile")} onRetry={() => profile.refetch()} />
+        <ErrorState
+          message={apiErrorMessage(profile.error, "Could not load the profile")}
+          onRetry={() => profile.refetch()}
+        />
       ) : canEdit ? (
         <BusinessForm profile={profile.data} />
       ) : (
@@ -155,10 +184,18 @@ export function SettingsBusinessScreen() {
 function BusinessReadOnly({ p }: { p: BusinessProfile }) {
   const t = useTheme();
   const mono = (v?: string | number | null) =>
-    v == null || v === "" ? <Text>—</Text> : <Text style={{ fontFamily: t.fonts.mono }}>{String(v)}</Text>;
+    v == null || v === "" ? (
+      <Text>—</Text>
+    ) : (
+      <Text style={{ fontFamily: t.fonts.mono }}>{String(v)}</Text>
+    );
   return (
     <Col gap={14} testID="business-readonly">
-      <Banner tone="info" title="View only" message="Ask the owner to change the business profile." />
+      <Banner
+        tone="info"
+        title="View only"
+        message="Ask the owner to change the business profile."
+      />
       <Card>
         <CardTitle title="Agency" />
         <KeyValue
@@ -171,7 +208,10 @@ function BusinessReadOnly({ p }: { p: BusinessProfile }) {
             ["Jurisdiction", p.jurisdiction || "—"],
             ["Office address", p.officeAddress || "—"],
             ["Godown address", p.godownAddress || "—"],
-            ["Liability limit", p.liabilityLimit != null ? `₹${p.liabilityLimit}` : "—"],
+            [
+              "Liability limit",
+              p.liabilityLimit != null ? `₹${p.liabilityLimit}` : "—",
+            ],
           ]}
         />
       </Card>
@@ -179,11 +219,32 @@ function BusinessReadOnly({ p }: { p: BusinessProfile }) {
         <CardTitle title="Tax & numbering" />
         <KeyValue
           items={[
-            ["Default CGST", p.defaultCgstRate != null ? `${p.defaultCgstRate}%` : "—"],
-            ["Default SGST", p.defaultSgstRate != null ? `${p.defaultSgstRate}%` : "—"],
-            ["Next bill no.", mono(sampleBillNumber(p.billNumberPrefix, !!p.useFinancialYearPrefix, p.nextBillNumber))],
-            ["Next bilti no.", mono(`${p.podNumberPrefix || ""}${p.nextPodNumber ?? ""}`)],
-            ["Payment receivers", (p.paymentReceivers || []).join(", ") || "Free text"],
+            [
+              "Default CGST",
+              p.defaultCgstRate != null ? `${p.defaultCgstRate}%` : "—",
+            ],
+            [
+              "Default SGST",
+              p.defaultSgstRate != null ? `${p.defaultSgstRate}%` : "—",
+            ],
+            [
+              "Next bill no.",
+              mono(
+                sampleBillNumber(
+                  p.billNumberPrefix,
+                  !!p.useFinancialYearPrefix,
+                  p.nextBillNumber,
+                ),
+              ),
+            ],
+            [
+              "Next bilti no.",
+              mono(`${p.podNumberPrefix || ""}${p.nextPodNumber ?? ""}`),
+            ],
+            [
+              "Payment receivers",
+              (p.paymentReceivers || []).join(", ") || "Free text",
+            ],
           ]}
         />
       </Card>
@@ -196,7 +257,9 @@ function TF({
   name,
   label,
   ...props
-}: { control: Control<Form>; name: Key; label: string } & Partial<React.ComponentProps<typeof TextField>>) {
+}: { control: Control<Form>; name: Key; label: string } & Partial<
+  React.ComponentProps<typeof TextField>
+>) {
   return (
     <Controller
       control={control}
@@ -258,9 +321,13 @@ function BusinessForm({ profile }: { profile: BusinessProfile }) {
     reset(initial);
   }, [initial, reset]);
 
-  const save = useApiMutation<BusinessProfile, Partial<Form>>("patch", "/business-profile", {
-    invalidate: ["business-profile"],
-  });
+  const save = useApiMutation<BusinessProfile, Partial<Form>>(
+    "patch",
+    "/business-profile",
+    {
+      invalidate: ["business-profile"],
+    },
+  );
 
   const values = useWatch({ control }) as Form;
   const pending = diff(initial, values, advanced);
@@ -314,14 +381,46 @@ function BusinessForm({ profile }: { profile: BusinessProfile }) {
       <ReadOnlyBanner />
 
       <Card>
-        <CardTitle title="Agency" caption="Shown in the bilti and invoice header." />
+        <CardTitle
+          title="Agency"
+          caption="Shown in the bilti and invoice header."
+        />
         <Grid>
           <TF control={control} name="businessName" label="Business name *" />
-          <TF control={control} name="tagline" label="Tagline" placeholder="e.g. Railway parcel booking agent" />
-          <TF control={control} name="gstin" label="GSTIN *" autoCapitalize="characters" mono maxLength={15} />
-          <TF control={control} name="pan" label="PAN" autoCapitalize="characters" mono maxLength={10} />
-          <TF control={control} name="jurisdiction" label="Jurisdiction" placeholder="Subject to Mumbai jurisdiction" />
-          <NF control={control} name="liabilityLimit" label="Liability limit (₹)" hint="Printed in the bilti terms" />
+          <TF
+            control={control}
+            name="tagline"
+            label="Tagline"
+            placeholder="e.g. Railway parcel booking agent"
+          />
+          <TF
+            control={control}
+            name="gstin"
+            label="GSTIN *"
+            autoCapitalize="characters"
+            mono
+            maxLength={15}
+          />
+          <TF
+            control={control}
+            name="pan"
+            label="PAN"
+            autoCapitalize="characters"
+            mono
+            maxLength={10}
+          />
+          <TF
+            control={control}
+            name="jurisdiction"
+            label="Jurisdiction"
+            placeholder="Subject to Mumbai jurisdiction"
+          />
+          <NF
+            control={control}
+            name="liabilityLimit"
+            label="Liability limit (₹)"
+            hint="Printed in the bilti terms"
+          />
         </Grid>
         <Col gap={14} style={{ marginTop: 14 }}>
           <Controller
@@ -338,7 +437,11 @@ function BusinessForm({ profile }: { profile: BusinessProfile }) {
                   mono
                   keyboardType="phone-pad"
                   placeholder="10-digit mobile"
-                  validate={(s) => (/^[+\d][\d\s-]{6,14}$/.test(s) ? null : "Enter a valid phone number")}
+                  validate={(s) =>
+                    /^[+\d][\d\s-]{6,14}$/.test(s)
+                      ? null
+                      : "Enter a valid phone number"
+                  }
                 />
                 {fieldState.error ? (
                   <Text variant="caption" tone="danger">
@@ -349,18 +452,44 @@ function BusinessForm({ profile }: { profile: BusinessProfile }) {
             )}
           />
           <Grid basis={320}>
-            <TF control={control} name="officeAddress" label="Office address *" multiline />
-            <TF control={control} name="godownAddress" label="Godown address" multiline />
+            <TF
+              control={control}
+              name="officeAddress"
+              label="Office address *"
+              multiline
+            />
+            <TF
+              control={control}
+              name="godownAddress"
+              label="Godown address"
+              multiline
+            />
           </Grid>
         </Col>
       </Card>
 
       <Card>
-        <CardTitle title="Bank details" caption="Printed on invoices for payment." />
+        <CardTitle
+          title="Bank details"
+          caption="Printed on invoices for payment."
+        />
         <Grid>
           <TF control={control} name="bankName" label="Bank name" />
-          <TF control={control} name="bankAccountNumber" label="Account number" mono keyboardType="number-pad" />
-          <TF control={control} name="bankIFSC" label="IFSC" mono autoCapitalize="characters" maxLength={11} />
+          <TF
+            control={control}
+            name="bankAccountNumber"
+            label="Account number"
+            mono
+            keyboardType="number-pad"
+          />
+          <TF
+            control={control}
+            name="bankIFSC"
+            label="IFSC"
+            mono
+            autoCapitalize="characters"
+            maxLength={11}
+          />
           <TF control={control} name="bankBranch" label="Branch" />
         </Grid>
       </Card>
@@ -368,12 +497,25 @@ function BusinessForm({ profile }: { profile: BusinessProfile }) {
       <Card>
         <CardTitle title="Tax" caption="Default GST rates for new invoices." />
         <Grid>
-          <NF control={control} name="defaultCgstRate" label="Default CGST (%)" />
-          <NF control={control} name="defaultSgstRate" label="Default SGST (%)" />
+          <NF
+            control={control}
+            name="defaultCgstRate"
+            label="Default CGST (%)"
+          />
+          <NF
+            control={control}
+            name="defaultSgstRate"
+            label="Default SGST (%)"
+          />
         </Grid>
       </Card>
 
-      <NumberingCard control={control} values={values} advanced={advanced} setAdvanced={setAdvanced} />
+      <NumberingCard
+        control={control}
+        values={values}
+        advanced={advanced}
+        setAdvanced={setAdvanced}
+      />
 
       <Card>
         <CardTitle
@@ -421,10 +563,28 @@ function NumberingCard({
   const t = useTheme();
   return (
     <Card testID="business-numbering">
-      <CardTitle title="Numbering" caption="How bill (invoice) and bilti numbers are generated." />
+      <CardTitle
+        title="Numbering"
+        caption="How bill (invoice) and bilti numbers are generated."
+      />
       <Grid>
-        <TF control={control} name="billNumberPrefix" label="Bill number prefix" mono autoCapitalize="characters" placeholder="e.g. SG/" />
-        <TF control={control} name="podNumberPrefix" label="Bilti number prefix" mono autoCapitalize="characters" maxLength={10} placeholder="e.g. B-" />
+        <TF
+          control={control}
+          name="billNumberPrefix"
+          label="Bill number prefix"
+          mono
+          autoCapitalize="characters"
+          placeholder="e.g. SG/"
+        />
+        <TF
+          control={control}
+          name="podNumberPrefix"
+          label="Bilti number prefix"
+          mono
+          autoCapitalize="characters"
+          maxLength={10}
+          placeholder="e.g. B-"
+        />
       </Grid>
       <Col gap={14} style={{ marginTop: 14 }}>
         <Controller
@@ -445,15 +605,25 @@ function NumberingCard({
             <Text variant="caption" tone="faint">
               Next bill number
             </Text>
-            <Text testID="business-bill-sample" style={{ fontFamily: t.fonts.mono }}>
-              {sampleBillNumber(values.billNumberPrefix, values.useFinancialYearPrefix, values.nextBillNumber)}
+            <Text
+              testID="business-bill-sample"
+              style={{ fontFamily: t.fonts.mono }}
+            >
+              {sampleBillNumber(
+                values.billNumberPrefix,
+                values.useFinancialYearPrefix,
+                values.nextBillNumber,
+              )}
             </Text>
           </Col>
           <Col gap={2}>
             <Text variant="caption" tone="faint">
               Next bilti number
             </Text>
-            <Text testID="business-bilti-sample" style={{ fontFamily: t.fonts.mono }}>
+            <Text
+              testID="business-bilti-sample"
+              style={{ fontFamily: t.fonts.mono }}
+            >
               {`${values.podNumberPrefix || ""}${values.nextPodNumber ?? ""}`}
             </Text>
           </Col>
@@ -474,8 +644,16 @@ function NumberingCard({
               message="If you set a number that was already used, two bills or biltis will share it. Only move counters forward past the last number you issued."
             />
             <Grid>
-              <NF control={control} name="nextBillNumber" label="Next bill number" />
-              <NF control={control} name="nextPodNumber" label="Next bilti number" />
+              <NF
+                control={control}
+                name="nextBillNumber"
+                label="Next bill number"
+              />
+              <NF
+                control={control}
+                name="nextPodNumber"
+                label="Next bilti number"
+              />
             </Grid>
           </Col>
         ) : null}

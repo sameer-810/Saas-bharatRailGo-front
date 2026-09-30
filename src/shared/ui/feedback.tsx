@@ -37,10 +37,17 @@ const useFeedback = create<{
 let nextId = 1;
 function push(kind: ToastKind, message: string) {
   const id = nextId++;
-  useFeedback.setState((s) => ({ toasts: [...s.toasts, { id, kind, message }].slice(-3) }));
-  setTimeout(() => {
-    useFeedback.setState((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
-  }, kind === "error" ? 6000 : 3200);
+  useFeedback.setState((s) => ({
+    toasts: [...s.toasts, { id, kind, message }].slice(-3),
+  }));
+  setTimeout(
+    () => {
+      useFeedback.setState((s) => ({
+        toasts: s.toasts.filter((t) => t.id !== id),
+      }));
+    },
+    kind === "error" ? 6000 : 3200,
+  );
 }
 
 export const toast = {
@@ -50,7 +57,9 @@ export const toast = {
 };
 
 export function confirm(opts: Omit<ConfirmReq, "resolve">): Promise<boolean> {
-  return new Promise((resolve) => useFeedback.setState({ confirmReq: { ...opts, resolve } }));
+  return new Promise((resolve) =>
+    useFeedback.setState({ confirmReq: { ...opts, resolve } }),
+  );
 }
 
 function ToastView({ item }: { item: ToastItem }) {
@@ -59,14 +68,31 @@ function ToastView({ item }: { item: ToastItem }) {
   useEffect(() => {
     Animated.spring(anim, { toValue: 1, useNativeDriver: true }).start();
   }, [anim]);
-  const Icon = item.kind === "success" ? CheckCircle2 : item.kind === "error" ? AlertTriangle : Info;
-  const color = item.kind === "success" ? t.c.success : item.kind === "error" ? t.c.danger : t.c.info;
+  const Icon =
+    item.kind === "success"
+      ? CheckCircle2
+      : item.kind === "error"
+        ? AlertTriangle
+        : Info;
+  const color =
+    item.kind === "success"
+      ? t.c.success
+      : item.kind === "error"
+        ? t.c.danger
+        : t.c.info;
   return (
     <Animated.View
       testID={`toast-${item.kind}`}
       style={{
         opacity: anim,
-        transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
+        transform: [
+          {
+            translateY: anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [12, 0],
+            }),
+          },
+        ],
         backgroundColor: t.c.surface,
         borderRadius: t.radius.md,
         borderWidth: 1,
@@ -100,7 +126,14 @@ export function FeedbackHost() {
     <>
       <View
         pointerEvents="box-none"
-        style={{ position: "absolute", bottom: 24, left: 16, right: 16, alignItems: "center", gap: 8 }}
+        style={{
+          position: "absolute",
+          bottom: 24,
+          left: 16,
+          right: 16,
+          alignItems: "center",
+          gap: 8,
+        }}
       >
         {toasts.map((t) => (
           <ToastView key={t.id} item={t} />
@@ -114,7 +147,12 @@ export function FeedbackHost() {
         testID="confirm-dialog"
         footer={
           <>
-            <Button title="Cancel" variant="secondary" onPress={() => close(false)} testID="confirm-cancel" />
+            <Button
+              title="Cancel"
+              variant="secondary"
+              onPress={() => close(false)}
+              testID="confirm-cancel"
+            />
             <Button
               title={confirmReq?.confirmLabel || "Confirm"}
               variant={confirmReq?.danger ? "danger" : "primary"}
@@ -124,7 +162,9 @@ export function FeedbackHost() {
           </>
         }
       >
-        {confirmReq?.message ? <Text tone="muted">{confirmReq.message}</Text> : null}
+        {confirmReq?.message ? (
+          <Text tone="muted">{confirmReq.message}</Text>
+        ) : null}
       </Dialog>
     </>
   );

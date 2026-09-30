@@ -29,32 +29,132 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { route: "Home", label: "Departure board", icon: LayoutDashboard, group: "Operations", keywords: "home dashboard today" },
-  { route: "Bookings", label: "Bookings", icon: Package, group: "Operations", keywords: "consignments parcels" },
-  { route: "Bilti", label: "Bilti / POD", icon: ReceiptText, group: "Operations", keywords: "pod receipt delivery" },
-  { route: "Parties", label: "Parties", icon: Users, group: "Operations", keywords: "customers clients ledger" },
-  { route: "Payments", label: "Payments", icon: IndianRupee, group: "Money", keywords: "collection receipt cash upi" },
-  { route: "Invoices", label: "GST invoices", icon: FileText, group: "Money", keywords: "bill gst tax" },
-  { route: "Reports", label: "Reports", icon: BarChart3, group: "Insights", keywords: "daily outstanding station gst excel" },
-  { route: "Activity", label: "Activity log", icon: History, group: "Insights", perm: "audit.view", keywords: "audit who changed deleted history log sign in" },
-  { route: "Branches", label: "Branches", icon: Building2, group: "Setup", perm: "branches.manage" },
-  { route: "Settings", label: "Settings", icon: Settings, group: "Setup", keywords: "profile logo team stations rates plan" },
+  {
+    route: "Home",
+    label: "Departure board",
+    icon: LayoutDashboard,
+    group: "Operations",
+    keywords: "home dashboard today",
+  },
+  {
+    route: "Bookings",
+    label: "Bookings",
+    icon: Package,
+    group: "Operations",
+    keywords: "consignments parcels",
+  },
+  {
+    route: "Bilti",
+    label: "Bilti / POD",
+    icon: ReceiptText,
+    group: "Operations",
+    keywords: "pod receipt delivery",
+  },
+  {
+    route: "Parties",
+    label: "Parties",
+    icon: Users,
+    group: "Operations",
+    keywords: "customers clients ledger",
+  },
+  {
+    route: "Payments",
+    label: "Payments",
+    icon: IndianRupee,
+    group: "Money",
+    keywords: "collection receipt cash upi",
+  },
+  {
+    route: "Invoices",
+    label: "GST invoices",
+    icon: FileText,
+    group: "Money",
+    keywords: "bill gst tax",
+  },
+  {
+    route: "Reports",
+    label: "Reports",
+    icon: BarChart3,
+    group: "Insights",
+    keywords: "daily outstanding station gst excel",
+  },
+  {
+    route: "Activity",
+    label: "Activity log",
+    icon: History,
+    group: "Insights",
+    perm: "audit.view",
+    keywords: "audit who changed deleted history log sign in",
+  },
+  {
+    route: "Branches",
+    label: "Branches",
+    icon: Building2,
+    group: "Setup",
+    perm: "branches.manage",
+  },
+  {
+    route: "Settings",
+    label: "Settings",
+    icon: Settings,
+    group: "Setup",
+    keywords: "profile logo team stations rates plan",
+  },
 ];
 
 /** Phone bottom tabs (the rest lives under "More"). */
 export const TAB_ROUTES: AppRoute[] = ["Home", "Bookings", "Bilti", "Payments"];
 
 /** Quick actions offered by the command palette. */
-export const QUICK_ACTIONS: { label: string; route: AppRoute; keywords: string; perm?: Permission }[] = [
-  { label: "New booking", route: "BookingNew", keywords: "add consignment parcel create" },
+export const QUICK_ACTIONS: {
+  label: string;
+  route: AppRoute;
+  keywords: string;
+  perm?: Permission;
+}[] = [
+  {
+    label: "New booking",
+    route: "BookingNew",
+    keywords: "add consignment parcel create",
+  },
   { label: "New bilti", route: "BiltiNew", keywords: "add pod receipt create" },
-  { label: "Record payment", route: "PaymentNew", keywords: "receive money collect cash upi" },
+  {
+    label: "Record payment",
+    route: "PaymentNew",
+    keywords: "receive money collect cash upi",
+  },
   { label: "New GST invoice", route: "InvoiceNew", keywords: "bill create" },
   { label: "New party", route: "PartyNew", keywords: "customer add" },
-  { label: "Today's loading list", route: "LoadingList", keywords: "train bogie load" },
-  { label: "Outstanding report", route: "ReportOutstanding", keywords: "due pending money" },
-  { label: "Team & users", route: "Team", keywords: "staff manager invite", perm: "users.manage" },
-  { label: "Rate card", route: "Rates", keywords: "charge heads freight hamali price" },
-  { label: "Plan & usage", route: "Plan", keywords: "subscription upgrade trial" },
-  { label: "Privacy & data", route: "Privacy", keywords: "download export delete account dpdp gdpr", perm: "account.manage" },
+  {
+    label: "Today's loading list",
+    route: "LoadingList",
+    keywords: "train bogie load",
+  },
+  {
+    label: "Outstanding report",
+    route: "ReportOutstanding",
+    keywords: "due pending money",
+  },
+  {
+    label: "Team & users",
+    route: "Team",
+    keywords: "staff manager invite",
+    perm: "users.manage",
+  },
+  {
+    label: "Rate card",
+    route: "Rates",
+    keywords: "charge heads freight hamali price",
+  },
+  {
+    label: "Plan & usage",
+    route: "Plan",
+    keywords: "subscription upgrade trial",
+  },
+  {
+    label: "Privacy & data",
+    route: "Privacy",
+    keywords: "download export delete account dpdp gdpr",
+    perm: "account.manage",
+  },
 ];

@@ -31,7 +31,12 @@ export function fifoPreview(amount: number, open: ConsignmentLite[]) {
     if (due <= 0) continue;
     const applied = remaining > 0 ? round2(Math.min(remaining, due)) : 0;
     remaining = round2(remaining - applied);
-    lines.push({ consignment: c, due, applied, remainingDue: round2(due - applied) });
+    lines.push({
+      consignment: c,
+      due,
+      applied,
+      remainingDue: round2(due - applied),
+    });
   }
   return { lines, advance: Math.max(0, remaining) };
 }
@@ -65,12 +70,17 @@ export function useOpenConsignments(partyId: string | undefined) {
   );
   const items = useMemo(() => {
     if (!enabled) return [];
-    const all = [...(pending.data?.items || []), ...(partial.data?.items || [])];
+    const all = [
+      ...(pending.data?.items || []),
+      ...(partial.data?.items || []),
+    ];
     return all
       .filter((c) => c.paymentMode === "to_pay" || c.paymentMode === "on_bill")
       .sort(byAge);
   }, [enabled, pending.data, partial.data]);
-  const totalDue = round2(items.reduce((s, c) => s + round2(c.totalAmount - c.amountPaid), 0));
+  const totalDue = round2(
+    items.reduce((s, c) => s + round2(c.totalAmount - c.amountPaid), 0),
+  );
   return {
     items,
     totalDue,
@@ -84,7 +94,11 @@ export function useOpenConsignments(partyId: string | undefined) {
 }
 
 /** Short human label for a consignment row. */
-export function consignmentLabel(c: Pick<ConsignmentLite, "date" | "originStation" | "destinationStation">) {
-  const route = [c.originStation, c.destinationStation].filter(Boolean).join(" → ");
+export function consignmentLabel(
+  c: Pick<ConsignmentLite, "date" | "originStation" | "destinationStation">,
+) {
+  const route = [c.originStation, c.destinationStation]
+    .filter(Boolean)
+    .join(" → ");
   return `${formatDate(c.date)}${route ? ` · ${route}` : ""}`;
 }

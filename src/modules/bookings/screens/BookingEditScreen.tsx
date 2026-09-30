@@ -9,17 +9,32 @@ import type { Consignment } from "../lib/types";
 
 export function BookingEditScreen() {
   const { id } = useParams<{ id: string }>();
-  const one = useApiGet<Consignment>(["consignments", id], id ? `/consignments/${id}` : null);
+  const one = useApiGet<Consignment>(
+    ["consignments", id],
+    id ? `/consignments/${id}` : null,
+  );
   const c = one.data;
   const invoiceLocked =
-    c?.invoice && typeof c.invoice === "object" && c.invoice.status && c.invoice.status !== "draft";
+    c?.invoice &&
+    typeof c.invoice === "object" &&
+    c.invoice.status &&
+    c.invoice.status !== "draft";
 
   return (
-    <Screen title="Edit booking" back backTo="Bookings" maxWidth={960} testID="booking-edit-screen">
+    <Screen
+      title="Edit booking"
+      back
+      backTo="Bookings"
+      maxWidth={960}
+      testID="booking-edit-screen"
+    >
       {one.isLoading ? (
         <LoadingBlock rows={8} />
       ) : one.error || !c ? (
-        <ErrorState message={apiErrorMessage(one.error, "Booking not found")} onRetry={one.refetch} />
+        <ErrorState
+          message={apiErrorMessage(one.error, "Booking not found")}
+          onRetry={one.refetch}
+        />
       ) : (
         <Col gap={16}>
           {invoiceLocked ? (

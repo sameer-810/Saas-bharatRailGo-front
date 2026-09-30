@@ -1,6 +1,11 @@
 /** Party types — mirror of bharatrailgo-back/src/modules/party/party.{dto,service}.js */
 
-export const PAYMENT_MODES = ["paid_source", "to_pay", "on_bill", "slip"] as const;
+export const PAYMENT_MODES = [
+  "paid_source",
+  "to_pay",
+  "on_bill",
+  "slip",
+] as const;
 export type PaymentMode = (typeof PAYMENT_MODES)[number];
 
 export const PAYMENT_MODE_LABEL: Record<PaymentMode, string> = {
@@ -63,7 +68,13 @@ export interface LedgerRow {
 }
 
 export interface PartyLedger {
-  party: { id: string; name: string; mobile?: string; gstin?: string; openingBalance: number };
+  party: {
+    id: string;
+    name: string;
+    mobile?: string;
+    gstin?: string;
+    openingBalance: number;
+  };
   ledger: LedgerRow[];
   totalOutstanding: number;
 }

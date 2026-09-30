@@ -75,28 +75,36 @@ export function describeAction(action: string): string {
   }
   const noun = NOUN[resource] || resource.replace(/_/g, " ");
   const v = VERB[verb];
-  if (v) return `${v} ${verb === "pdf" ? `${noun} PDF` : `a ${noun}`}`.replace(/ a (?=[aeiou])/i, " an ");
+  if (v)
+    return `${v} ${verb === "pdf" ? `${noun} PDF` : `a ${noun}`}`.replace(
+      / a (?=[aeiou])/i,
+      " an ",
+    );
   return `${noun}: ${verb.replace(/_/g, " ")}`;
 }
 
 /** Filter chips → backend `action` prefix. */
-export const ACTIVITY_GROUPS: { key: string; label: string; prefix: string }[] = [
-  { key: "all", label: "All", prefix: "" },
-  { key: "auth", label: "Sign-ins", prefix: "auth." },
-  { key: "consignment", label: "Bookings", prefix: "consignment." },
-  { key: "pod", label: "Bilti", prefix: "pod." },
-  { key: "invoice", label: "GST bills", prefix: "invoice." },
-  { key: "payment", label: "Payments", prefix: "payment." },
-  { key: "party", label: "Parties", prefix: "party." },
-  { key: "report", label: "Exports", prefix: "report." },
-  { key: "user", label: "Team", prefix: "user." },
-  { key: "settings", label: "Settings", prefix: "settings." },
-  { key: "privacy", label: "Privacy", prefix: "privacy." },
-];
+export const ACTIVITY_GROUPS: { key: string; label: string; prefix: string }[] =
+  [
+    { key: "all", label: "All", prefix: "" },
+    { key: "auth", label: "Sign-ins", prefix: "auth." },
+    { key: "consignment", label: "Bookings", prefix: "consignment." },
+    { key: "pod", label: "Bilti", prefix: "pod." },
+    { key: "invoice", label: "GST bills", prefix: "invoice." },
+    { key: "payment", label: "Payments", prefix: "payment." },
+    { key: "party", label: "Parties", prefix: "party." },
+    { key: "report", label: "Exports", prefix: "report." },
+    { key: "user", label: "Team", prefix: "user." },
+    { key: "settings", label: "Settings", prefix: "settings." },
+    { key: "privacy", label: "Privacy", prefix: "privacy." },
+  ];
 
 /** Where a row's record opens (not for deletes — the record is gone). */
-export function targetRoute(e: ActivityEntry): { route: AppRoute; id: string } | null {
-  if (!e.targetId || e.action.endsWith(".delete") || e.outcome === "denied") return null;
+export function targetRoute(
+  e: ActivityEntry,
+): { route: AppRoute; id: string } | null {
+  if (!e.targetId || e.action.endsWith(".delete") || e.outcome === "denied")
+    return null;
   const route: Partial<Record<string, AppRoute>> = {
     consignment: "BookingDetail",
     pod: "BiltiDetail",

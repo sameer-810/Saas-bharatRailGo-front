@@ -45,7 +45,7 @@ function StationDialog({
   const [stateName, setStateName] = useState("");
   const [touched, setTouched] = useState(false);
   const [openedFor, setOpenedFor] = useState<string | null>(null);
-  const key = visible ? station?.id ?? "new" : null;
+  const key = visible ? (station?.id ?? "new") : null;
   if (key !== openedFor) {
     setOpenedFor(key);
     setCode(station?.code || "");
@@ -54,26 +54,44 @@ function StationDialog({
     setTouched(false);
   }
 
-  const create = useApiMutation<Station, { code: string; name: string; state?: string }>("post", "/stations", {
+  const create = useApiMutation<
+    Station,
+    { code: string; name: string; state?: string }
+  >("post", "/stations", {
     invalidate: ["stations"],
   });
-  const update = useApiMutation<Station, { id: string; name: string; state?: string }>("patch", (v) => `/stations/${v.id}`, {
+  const update = useApiMutation<
+    Station,
+    { id: string; name: string; state?: string }
+  >("patch", (v) => `/stations/${v.id}`, {
     invalidate: ["stations"],
     body: ({ name: n, state }) => ({ name: n, state }),
   });
 
-  const codeErr = !isEdit && touched && !CODE_RX.test(code) ? "1–6 letters or digits, e.g. NDLS" : undefined;
-  const nameErr = touched && name.trim().length < 2 ? "Enter the station name" : undefined;
+  const codeErr =
+    !isEdit && touched && !CODE_RX.test(code)
+      ? "1–6 letters or digits, e.g. NDLS"
+      : undefined;
+  const nameErr =
+    touched && name.trim().length < 2 ? "Enter the station name" : undefined;
 
   const save = async () => {
     setTouched(true);
     if ((!isEdit && !CODE_RX.test(code)) || name.trim().length < 2) return;
     try {
       if (station) {
-        await update.mutateAsync({ id: station.id, name: name.trim(), state: stateName.trim() || undefined });
+        await update.mutateAsync({
+          id: station.id,
+          name: name.trim(),
+          state: stateName.trim() || undefined,
+        });
         toast.success("Station updated");
       } else {
-        await create.mutateAsync({ code, name: name.trim(), state: stateName.trim() || undefined });
+        await create.mutateAsync({
+          code,
+          name: name.trim(),
+          state: stateName.trim() || undefined,
+        });
         toast.success(`Station ${code} added`);
       }
       onClose();
@@ -91,8 +109,18 @@ function StationDialog({
       testID="station-dialog"
       footer={
         <>
-          <Button testID="station-cancel" title="Cancel" variant="secondary" onPress={onClose} />
-          <Button testID="station-save" title={isEdit ? "Save" : "Add station"} loading={create.isPending || update.isPending} onPress={save} />
+          <Button
+            testID="station-cancel"
+            title="Cancel"
+            variant="secondary"
+            onPress={onClose}
+          />
+          <Button
+            testID="station-save"
+            title={isEdit ? "Save" : "Add station"}
+            loading={create.isPending || update.isPending}
+            onPress={save}
+          />
         </>
       }
     >
@@ -105,11 +133,28 @@ function StationDialog({
         mono
         maxLength={6}
         editable={!isEdit}
-        hint={isEdit ? "The code cannot be changed." : "Indian Railways code, e.g. BCT, NDLS"}
+        hint={
+          isEdit
+            ? "The code cannot be changed."
+            : "Indian Railways code, e.g. BCT, NDLS"
+        }
         error={codeErr}
       />
-      <TextField testID="station-name" label="Name" value={name} onChangeText={setName} error={nameErr} placeholder="e.g. Mumbai Central" />
-      <TextField testID="station-state" label="State" value={stateName} onChangeText={setStateName} placeholder="e.g. Maharashtra" />
+      <TextField
+        testID="station-name"
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        error={nameErr}
+        placeholder="e.g. Mumbai Central"
+      />
+      <TextField
+        testID="station-state"
+        label="State"
+        value={stateName}
+        onChangeText={setStateName}
+        placeholder="e.g. Maharashtra"
+      />
     </Dialog>
   );
 }
@@ -125,18 +170,25 @@ export function StationsScreen() {
     search: q || undefined,
     includeInactive: canEdit && showInactive ? true : undefined,
   });
-  const [dialog, setDialog] = useState<{ station: Station | null } | null>(null);
+  const [dialog, setDialog] = useState<{ station: Station | null } | null>(
+    null,
+  );
 
-  const toggle = useApiMutation<Station, { id: string; isActive: boolean }>("patch", (v) => `/stations/${v.id}`, {
-    invalidate: ["stations"],
-    body: (v) => ({ isActive: v.isActive }),
-  });
+  const toggle = useApiMutation<Station, { id: string; isActive: boolean }>(
+    "patch",
+    (v) => `/stations/${v.id}`,
+    {
+      invalidate: ["stations"],
+      body: (v) => ({ isActive: v.isActive }),
+    },
+  );
 
   const onToggle = async (s: Station) => {
     if (s.isActive) {
       const ok = await confirm({
         title: `Deactivate ${s.code}?`,
-        message: "It will no longer be offered on new bookings. Old bookings keep it.",
+        message:
+          "It will no longer be offered on new bookings. Old bookings keep it.",
         confirmLabel: "Deactivate",
         danger: true,
       });
@@ -144,7 +196,9 @@ export function StationsScreen() {
     }
     try {
       await toggle.mutateAsync({ id: s.id, isActive: !s.isActive });
-      toast.success(s.isActive ? `${s.code} deactivated` : `${s.code} activated`);
+      toast.success(
+        s.isActive ? `${s.code} deactivated` : `${s.code} activated`,
+      );
     } catch (err) {
       toast.error(apiErrorMessage(err));
     }
@@ -157,17 +211,36 @@ export function StationsScreen() {
       title: "Code",
       flex: 0.8,
       render: (s) => (
-        <Text variant="mono" weight="semibold" style={{ fontFamily: t.fonts.monoBold }}>
+        <Text
+          variant="mono"
+          weight="semibold"
+          style={{ fontFamily: t.fonts.monoBold }}
+        >
           {s.code}
         </Text>
       ),
     },
-    { key: "name", title: "Name", flex: 2, render: (s) => <Text>{s.name}</Text> },
-    { key: "state", title: "State", flex: 1.4, render: (s) => <Text tone="muted">{s.state || "—"}</Text> },
+    {
+      key: "name",
+      title: "Name",
+      flex: 2,
+      render: (s) => <Text>{s.name}</Text>,
+    },
+    {
+      key: "state",
+      title: "State",
+      flex: 1.4,
+      render: (s) => <Text tone="muted">{s.state || "—"}</Text>,
+    },
     {
       key: "status",
       title: "Status",
-      render: (s) => <StatusPill status={s.isActive ? "active" : "inactive"} label={s.isActive ? "Active" : "Inactive"} />,
+      render: (s) => (
+        <StatusPill
+          status={s.isActive ? "active" : "inactive"}
+          label={s.isActive ? "Active" : "Inactive"}
+        />
+      ),
     },
   ];
   if (editable) {
@@ -177,7 +250,12 @@ export function StationsScreen() {
       align: "right",
       render: (s) => (
         <Row gap={0}>
-          <IconButton testID={`station-edit-${s.code}`} icon={Pencil} label="Edit station" onPress={() => setDialog({ station: s })} />
+          <IconButton
+            testID={`station-edit-${s.code}`}
+            icon={Pencil}
+            label="Edit station"
+            onPress={() => setDialog({ station: s })}
+          />
           <IconButton
             testID={`station-toggle-${s.code}`}
             icon={Power}
@@ -191,13 +269,22 @@ export function StationsScreen() {
   }
 
   const addButton = editable ? (
-    <Button testID="station-add" title="Add station" icon={Plus} onPress={() => setDialog({ station: null })} />
+    <Button
+      testID="station-add"
+      title="Add station"
+      icon={Plus}
+      onPress={() => setDialog({ station: null })}
+    />
   ) : null;
 
   return (
     <Screen
       title="Stations"
-      subtitle={canEdit ? "Station codes offered on bookings, branches and rates." : "Station codes (view only)."}
+      subtitle={
+        canEdit
+          ? "Station codes offered on bookings, branches and rates."
+          : "Station codes (view only)."
+      }
       back
       backTo="Settings"
       actions={addButton}
@@ -209,11 +296,21 @@ export function StationsScreen() {
         <ReadOnlyBanner />
         <Row wrap gap={12} align="center">
           <View style={{ flexGrow: 1, flexBasis: 260 }}>
-            <SearchInput testID="station-search" value={search} onChangeText={setSearch} placeholder="Search code or name" />
+            <SearchInput
+              testID="station-search"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search code or name"
+            />
           </View>
           {canEdit ? (
             <View style={{ minWidth: 200 }}>
-              <Toggle testID="station-show-inactive" label="Show inactive" value={showInactive} onChange={setShowInactive} />
+              <Toggle
+                testID="station-show-inactive"
+                label="Show inactive"
+                value={showInactive}
+                onChange={setShowInactive}
+              />
             </View>
           ) : null}
         </Row>
@@ -234,13 +331,21 @@ export function StationsScreen() {
             <EmptyState
               icon={MapPin}
               title={q ? `No station matches “${q}”` : "No stations yet"}
-              message={editable ? "Add the stations you book parcels to." : undefined}
+              message={
+                editable ? "Add the stations you book parcels to." : undefined
+              }
               action={addButton}
             />
           }
         />
       </Col>
-      {editable ? <StationDialog visible={!!dialog} station={dialog?.station ?? null} onClose={() => setDialog(null)} /> : null}
+      {editable ? (
+        <StationDialog
+          visible={!!dialog}
+          station={dialog?.station ?? null}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
     </Screen>
   );
 }

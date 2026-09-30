@@ -5,7 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { LogIn } from "lucide-react-native";
 import { Banner, Button, Col, Row, Text, TextField } from "@shared/ui";
-import { apiClient, apiErrorCode, apiErrorMessage } from "@shared/api/apiClient";
+import {
+  apiClient,
+  apiErrorCode,
+  apiErrorMessage,
+} from "@shared/api/apiClient";
 import { useAuthStore } from "@shared/store/useAuthStore";
 import { useBranchStore } from "@shared/store/useBranchStore";
 import { AuthLayout } from "./AuthLayout";
@@ -16,7 +20,11 @@ const schema = z.object({
 });
 type Form = z.infer<typeof schema>;
 
-export function LoginScreen({ navigation }: { navigation: { navigate: (r: string, p?: object) => void } }) {
+export function LoginScreen({
+  navigation,
+}: {
+  navigation: { navigate: (r: string, p?: object) => void };
+}) {
   const setSession = useAuthStore((s) => s.setSession);
   const [error, setError] = useState<string | null>(null);
   const { control, handleSubmit, formState } = useForm<Form>({
@@ -32,7 +40,8 @@ export function LoginScreen({ navigation }: { navigation: { navigate: (r: string
       setSession(res.data.data);
     } catch (err) {
       const code = apiErrorCode(err);
-      if (code === "ORG_PENDING_APPROVAL") return navigation.navigate("Pending", {});
+      if (code === "ORG_PENDING_APPROVAL")
+        return navigation.navigate("Pending", {});
       setError(apiErrorMessage(err, "Could not sign in"));
     }
   });
@@ -44,7 +53,9 @@ export function LoginScreen({ navigation }: { navigation: { navigate: (r: string
           <Text variant="display">Sign in</Text>
           <Text tone="muted">Welcome back to your parcel office.</Text>
         </Col>
-        {error ? <Banner tone="danger" title={error} testID="login-error" /> : null}
+        {error ? (
+          <Banner tone="danger" title={error} testID="login-error" />
+        ) : null}
         <Controller
           control={control}
           name="email"
@@ -87,12 +98,18 @@ export function LoginScreen({ navigation }: { navigation: { navigate: (r: string
           fullWidth
         />
         <Row justify="space-between" wrap>
-          <Pressable onPress={() => navigation.navigate("Signup")} testID="go-signup">
+          <Pressable
+            onPress={() => navigation.navigate("Signup")}
+            testID="go-signup"
+          >
             <Text variant="label" tone="accent">
               New agency? Start a free trial
             </Text>
           </Pressable>
-          <Pressable onPress={() => navigation.navigate("Admin")} testID="go-admin">
+          <Pressable
+            onPress={() => navigation.navigate("Admin")}
+            testID="go-admin"
+          >
             <Text variant="caption" tone="faint">
               Platform admin
             </Text>

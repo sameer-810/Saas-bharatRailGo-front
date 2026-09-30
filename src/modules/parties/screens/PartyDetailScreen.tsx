@@ -36,7 +36,12 @@ import { formatDate, formatMoney } from "@shared/lib/format";
 import { useAppNav, useParams } from "@navigation/useAppNav";
 import { Balance, LedgerTable } from "../components/LedgerTable";
 import { PartyPrivacyCard } from "../components/PartyPrivacyCard";
-import { paymentModeLabel, waNumber, type Party, type PartyLedger } from "../types";
+import {
+  paymentModeLabel,
+  waNumber,
+  type Party,
+  type PartyLedger,
+} from "../types";
 
 export function PartyDetailScreen() {
   const t = useTheme();
@@ -49,18 +54,26 @@ export function PartyDetailScreen() {
   const profile = useBusinessProfile();
 
   const one = useApiGet<Party>(["parties", id], id ? `/parties/${id}` : null);
-  const ledger = useApiGet<PartyLedger>(["parties", id, "ledger"], id ? `/parties/${id}/ledger` : null);
-  const remove = useApiMutation<{ consignmentsRetained?: number }, { id: string }>(
-    "delete",
-    (v) => `/parties/${v.id}`,
-    { invalidate: ["parties", "dashboard", "reports"] },
+  const ledger = useApiGet<PartyLedger>(
+    ["parties", id, "ledger"],
+    id ? `/parties/${id}/ledger` : null,
   );
+  const remove = useApiMutation<
+    { consignmentsRetained?: number },
+    { id: string }
+  >("delete", (v) => `/parties/${v.id}`, {
+    invalidate: ["parties", "dashboard", "reports"],
+  });
 
   const party = one.data;
   const outstanding = ledger.data?.totalOutstanding ?? 0;
   const rows = ledger.data?.ledger;
-  const billed = (rows || []).filter((r) => r.type === "consignment").reduce((a, r) => a + r.debit, 0);
-  const received = (rows || []).filter((r) => r.type === "payment").reduce((a, r) => a + r.credit, 0);
+  const billed = (rows || [])
+    .filter((r) => r.type === "consignment")
+    .reduce((a, r) => a + r.debit, 0);
+  const received = (rows || [])
+    .filter((r) => r.type === "payment")
+    .reduce((a, r) => a + r.credit, 0);
 
   const open = async (url: string, fail: string) => {
     try {
@@ -83,14 +96,18 @@ export function PartyDetailScreen() {
       outstanding > 0
         ? `Dear ${party.name}, your outstanding balance${biz ? ` with ${biz}` : ""} is ${formatMoney(outstanding)} as of ${formatDate(new Date())}. Kindly arrange payment. Thank you.`
         : `Dear ${party.name},${biz ? ` greetings from ${biz}.` : ""}`;
-    open(`https://wa.me/${phone || ""}?text=${encodeURIComponent(msg)}`, "Could not open WhatsApp");
+    open(
+      `https://wa.me/${phone || ""}?text=${encodeURIComponent(msg)}`,
+      "Could not open WhatsApp",
+    );
   };
 
   const onDelete = async () => {
     if (!party) return;
     const ok = await confirm({
       title: `Delete ${party.name}?`,
-      message: "The party is deactivated and hidden from lists. Their past bookings and payments are kept.",
+      message:
+        "The party is deactivated and hidden from lists. Their past bookings and payments are kept.",
       confirmLabel: "Delete",
       danger: true,
     });
@@ -98,7 +115,11 @@ export function PartyDetailScreen() {
     try {
       const res = await remove.mutateAsync({ id: party.id });
       const kept = res?.consignmentsRetained;
-      toast.success(kept ? `Party deactivated · ${kept} bookings kept` : "Party deactivated");
+      toast.success(
+        kept
+          ? `Party deactivated · ${kept} bookings kept`
+          : "Party deactivated",
+      );
       nav.navigate("Parties");
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -108,7 +129,10 @@ export function PartyDetailScreen() {
   if (one.error) {
     return (
       <Screen title="Party" back backTo="Parties" testID="party-detail-screen">
-        <ErrorState message={apiErrorMessage(one.error)} onRetry={() => one.refetch()} />
+        <ErrorState
+          message={apiErrorMessage(one.error)}
+          onRetry={() => one.refetch()}
+        />
       </Screen>
     );
   }
@@ -121,10 +145,30 @@ export function PartyDetailScreen() {
   }
 
   const quick = [
-    { key: "booking", title: "New booking", icon: Package, route: "BookingNew" as const },
-    { key: "bilti", title: "New bilti", icon: FileText, route: "BiltiNew" as const },
-    { key: "payment", title: "Record payment", icon: IndianRupee, route: "PaymentNew" as const },
-    { key: "invoice", title: "New invoice", icon: FilePlus2, route: "InvoiceNew" as const },
+    {
+      key: "booking",
+      title: "New booking",
+      icon: Package,
+      route: "BookingNew" as const,
+    },
+    {
+      key: "bilti",
+      title: "New bilti",
+      icon: FileText,
+      route: "BiltiNew" as const,
+    },
+    {
+      key: "payment",
+      title: "Record payment",
+      icon: IndianRupee,
+      route: "PaymentNew" as const,
+    },
+    {
+      key: "invoice",
+      title: "New invoice",
+      icon: FilePlus2,
+      route: "InvoiceNew" as const,
+    },
   ];
 
   const mono = (v?: string) =>
@@ -137,7 +181,9 @@ export function PartyDetailScreen() {
   return (
     <Screen
       title={party.name}
-      subtitle={[party.city, party.state].filter(Boolean).join(", ") || undefined}
+      subtitle={
+        [party.city, party.state].filter(Boolean).join(", ") || undefined
+      }
       back
       backTo="Parties"
       testID="party-detail-screen"
@@ -149,9 +195,21 @@ export function PartyDetailScreen() {
       actions={
         <>
           {party.mobile ? (
-            <Button testID="party-call" title={isPhone ? "Call" : party.mobile} icon={Phone} variant="secondary" onPress={() => onCall(party.mobile)} />
+            <Button
+              testID="party-call"
+              title={isPhone ? "Call" : party.mobile}
+              icon={Phone}
+              variant="secondary"
+              onPress={() => onCall(party.mobile)}
+            />
           ) : null}
-          <Button testID="party-whatsapp" title="WhatsApp" icon={MessageCircle} variant="secondary" onPress={onWhatsApp} />
+          <Button
+            testID="party-whatsapp"
+            title="WhatsApp"
+            icon={MessageCircle}
+            variant="secondary"
+            onPress={onWhatsApp}
+          />
           <Button
             testID="party-edit"
             title="Edit"
@@ -161,7 +219,13 @@ export function PartyDetailScreen() {
             onPress={() => nav.navigate("PartyEdit", { id: party.id })}
           />
           {canDelete ? (
-            <IconButton testID="party-delete" icon={Trash2} label="Delete party" tone="danger" onPress={onDelete} />
+            <IconButton
+              testID="party-delete"
+              icon={Trash2}
+              label="Delete party"
+              tone="danger"
+              onPress={onDelete}
+            />
           ) : null}
         </>
       }
@@ -171,11 +235,31 @@ export function PartyDetailScreen() {
           <StatTile
             testID="party-outstanding"
             label="Outstanding"
-            value={ledger.data ? <Balance value={outstanding} variant="h2" /> : <Text tone="faint">…</Text>}
-            hint={outstanding > 0 ? "Party owes you" : outstanding < 0 ? "Advance with you" : "All settled"}
+            value={
+              ledger.data ? (
+                <Balance value={outstanding} variant="h2" />
+              ) : (
+                <Text tone="faint">…</Text>
+              )
+            }
+            hint={
+              outstanding > 0
+                ? "Party owes you"
+                : outstanding < 0
+                  ? "Advance with you"
+                  : "All settled"
+            }
           />
-          <StatTile testID="party-billed" label="Booked on account" value={formatMoney(billed, { compact: true })} />
-          <StatTile testID="party-received" label="Received" value={formatMoney(received, { compact: true })} />
+          <StatTile
+            testID="party-billed"
+            label="Booked on account"
+            value={formatMoney(billed, { compact: true })}
+          />
+          <StatTile
+            testID="party-received"
+            label="Received"
+            value={formatMoney(received, { compact: true })}
+          />
         </Row>
 
         <Row gap={8} wrap testID="party-quick-actions">
@@ -197,14 +281,47 @@ export function PartyDetailScreen() {
           <SectionHeader title="Details" />
           <KeyValue
             items={[
-              ["Mobile", party.mobile ? <Text key="m" style={{ fontFamily: t.fonts.mono }} onPress={() => onCall(party.mobile)} tone="accent" testID="party-mobile-link">{party.mobile}</Text> : "—"],
-              ["Alternate mobile", party.alternateMobile ? <Text key="am" style={{ fontFamily: t.fonts.mono }} onPress={() => onCall(party.alternateMobile)} tone="accent" testID="party-altmobile-link">{party.alternateMobile}</Text> : "—"],
+              [
+                "Mobile",
+                party.mobile ? (
+                  <Text
+                    key="m"
+                    style={{ fontFamily: t.fonts.mono }}
+                    onPress={() => onCall(party.mobile)}
+                    tone="accent"
+                    testID="party-mobile-link"
+                  >
+                    {party.mobile}
+                  </Text>
+                ) : (
+                  "—"
+                ),
+              ],
+              [
+                "Alternate mobile",
+                party.alternateMobile ? (
+                  <Text
+                    key="am"
+                    style={{ fontFamily: t.fonts.mono }}
+                    onPress={() => onCall(party.alternateMobile)}
+                    tone="accent"
+                    testID="party-altmobile-link"
+                  >
+                    {party.alternateMobile}
+                  </Text>
+                ) : (
+                  "—"
+                ),
+              ],
               ["Email", party.email || "—"],
               ["GSTIN", mono(party.gstin)],
               ["PAN", mono(party.pan)],
               ["Default station", mono(party.defaultStation)],
               ["Payment mode", paymentModeLabel(party.defaultPaymentMode)],
-              ["Opening balance", <Balance key="ob" value={party.openingBalance || 0} />],
+              [
+                "Opening balance",
+                <Balance key="ob" value={party.openingBalance || 0} />,
+              ],
               ["Address", party.address || "—"],
             ]}
           />
@@ -223,13 +340,17 @@ export function PartyDetailScreen() {
                 title="New booking"
                 icon={Package}
                 disabled={readOnly}
-                onPress={() => nav.navigate("BookingNew", { partyId: party.id })}
+                onPress={() =>
+                  nav.navigate("BookingNew", { partyId: party.id })
+                }
               />
             }
           />
         </Col>
 
-        {canPrivacy ? <PartyPrivacyCard party={party} readOnly={readOnly} /> : null}
+        {canPrivacy ? (
+          <PartyPrivacyCard party={party} readOnly={readOnly} />
+        ) : null}
       </Col>
     </Screen>
   );

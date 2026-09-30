@@ -8,9 +8,7 @@
     "scheme": "bharatrailgo",
     "android": {
       "package": "com.bharatrailgo.app",
-      "permissions": [
-        "android.permission.INTERNET"
-      ],
+      "permissions": ["android.permission.INTERNET"],
       "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {
@@ -20,9 +18,6 @@
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": [
-      "expo-secure-store",
-      "expo-font"
-    ]
+    "plugins": ["expo-secure-store", "expo-font"]
   }
 }

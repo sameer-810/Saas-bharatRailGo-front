@@ -1,7 +1,13 @@
 /** API shapes for the payments module (mirror of bharatrailgo-back payment.dto.js). */
 import type { Option } from "@shared/ui";
 
-export const PAYMENT_MODES = ["cash", "upi", "bank_transfer", "cheque", "other"] as const;
+export const PAYMENT_MODES = [
+  "cash",
+  "upi",
+  "bank_transfer",
+  "cheque",
+  "other",
+] as const;
 export type PaymentMode = (typeof PAYMENT_MODES)[number];
 
 export const PAYMENT_MODE_LABEL: Record<PaymentMode, string> = {
@@ -12,10 +18,12 @@ export const PAYMENT_MODE_LABEL: Record<PaymentMode, string> = {
   other: "Other",
 };
 
-export const PAYMENT_MODE_OPTIONS: Option<PaymentMode>[] = PAYMENT_MODES.map((m) => ({
-  value: m,
-  label: PAYMENT_MODE_LABEL[m],
-}));
+export const PAYMENT_MODE_OPTIONS: Option<PaymentMode>[] = PAYMENT_MODES.map(
+  (m) => ({
+    value: m,
+    label: PAYMENT_MODE_LABEL[m],
+  }),
+);
 
 export interface PartyRef {
   id: string;

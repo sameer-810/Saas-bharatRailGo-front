@@ -18,6 +18,9 @@ export const useBranchStore = create<BranchState>()(
       branchId: "all",
       setBranchId: (branchId) => set({ branchId }),
     }),
-    { name: "bharatrailgo-branch", storage: createJSONStorage(() => secureStorage) },
+    {
+      name: "bharatrailgo-branch",
+      storage: createJSONStorage(() => secureStorage),
+    },
   ),
 );

@@ -1,7 +1,12 @@
 /** Secondary dashboard cards: recent bookings, top stations, pending by train, payment-mode mix. */
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
-import { ChevronDown, ChevronRight, Plus, TrainFront } from "lucide-react-native";
+import {
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  TrainFront,
+} from "lucide-react-native";
 import {
   Button,
   Card,
@@ -17,7 +22,12 @@ import {
 } from "@shared/ui";
 import { useTheme } from "@shared/useTheme";
 import { formatDate } from "@shared/lib/format";
-import { PAYMENT_MODE_LABEL, type DashboardMetrics, type PendingTrain, type RecentConsignment } from "../types";
+import {
+  PAYMENT_MODE_LABEL,
+  type DashboardMetrics,
+  type PendingTrain,
+  type RecentConsignment,
+} from "../types";
 
 function Code({ children }: { children: string }) {
   const t = useTheme();
@@ -32,7 +42,10 @@ function Code({ children }: { children: string }) {
         alignItems: "center",
       }}
     >
-      <Text variant="mono" style={{ fontFamily: t.fonts.monoBold, fontSize: 13 }}>
+      <Text
+        variant="mono"
+        style={{ fontFamily: t.fonts.monoBold, fontSize: 13 }}
+      >
         {children}
       </Text>
     </View>
@@ -71,7 +84,15 @@ export function RecentBookings({
     <Card testID="recent-bookings">
       <SectionHeader
         title="Recent bookings"
-        action={<Button title="View all" variant="ghost" size="sm" onPress={onAll} testID="recent-view-all" />}
+        action={
+          <Button
+            title="View all"
+            variant="ghost"
+            size="sm"
+            onPress={onAll}
+            testID="recent-view-all"
+          />
+        }
       />
       {loading && !rows ? (
         <ListSkeleton />
@@ -79,7 +100,16 @@ export function RecentBookings({
         <EmptyState
           title="No bookings yet"
           message="Your latest bookings will show up here."
-          action={canCreate ? <Button title="New booking" icon={Plus} onPress={onNew} testID="recent-new-booking" /> : undefined}
+          action={
+            canCreate ? (
+              <Button
+                title="New booking"
+                icon={Plus}
+                onPress={onNew}
+                testID="recent-new-booking"
+              />
+            ) : undefined
+          }
         />
       ) : (
         <Col gap={0}>
@@ -108,7 +138,8 @@ export function RecentBookings({
                   {c.party?.name ?? "—"}
                 </Text>
                 <Text variant="caption" tone="faint" numberOfLines={1}>
-                  {formatDate(c.date)} · {c.packages} pkg · {PAYMENT_MODE_LABEL[c.paymentMode] ?? c.paymentMode}
+                  {formatDate(c.date)} · {c.packages} pkg ·{" "}
+                  {PAYMENT_MODE_LABEL[c.paymentMode] ?? c.paymentMode}
                 </Text>
               </Col>
               <Col gap={4} align="flex-end">
@@ -161,8 +192,21 @@ export function TopStations({
                     </Text>
                     <Money value={r.revenue} variant="label" />
                   </Row>
-                  <View style={{ height: 6, borderRadius: 3, backgroundColor: t.c.surfaceAlt, overflow: "hidden" }}>
-                    <View style={{ width: `${(r.revenue / max) * 100}%`, height: "100%", backgroundColor: t.c.accent }} />
+                  <View
+                    style={{
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: t.c.surfaceAlt,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: `${(r.revenue / max) * 100}%`,
+                        height: "100%",
+                        backgroundColor: t.c.accent,
+                      }}
+                    />
                   </View>
                 </Col>
               </Row>
@@ -176,7 +220,13 @@ export function TopStations({
 
 /* ───────────── Payment-mode mix (this month) ───────────── */
 
-export function ModeMix({ rows, loading }: { rows: DashboardMetrics["paymentModeMix"] | undefined; loading: boolean }) {
+export function ModeMix({
+  rows,
+  loading,
+}: {
+  rows: DashboardMetrics["paymentModeMix"] | undefined;
+  loading: boolean;
+}) {
   const t = useTheme();
   const total = (rows || []).reduce((s, r) => s + r.amount, 0);
   const sorted = [...(rows || [])].sort((a, b) => b.amount - a.amount);
@@ -190,17 +240,37 @@ export function ModeMix({ rows, loading }: { rows: DashboardMetrics["paymentMode
         <Text tone="faint">Nothing booked this month yet.</Text>
       ) : (
         <Col gap={12}>
-          <Row gap={2} align="stretch" style={{ height: 12, borderRadius: 6, overflow: "hidden" }}>
+          <Row
+            gap={2}
+            align="stretch"
+            style={{ height: 12, borderRadius: 6, overflow: "hidden" }}
+          >
             {sorted.map((r, i) => (
-              <View key={r.mode} style={{ flex: r.amount || 0.0001, backgroundColor: t.c.accent, opacity: shade(i) }} />
+              <View
+                key={r.mode}
+                style={{
+                  flex: r.amount || 0.0001,
+                  backgroundColor: t.c.accent,
+                  opacity: shade(i),
+                }}
+              />
             ))}
           </Row>
           <Row wrap gap={14}>
             {sorted.map((r, i) => (
               <Row key={r.mode} gap={6}>
-                <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: t.c.accent, opacity: shade(i) }} />
+                <View
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 2,
+                    backgroundColor: t.c.accent,
+                    opacity: shade(i),
+                  }}
+                />
                 <Text variant="caption" tone="muted">
-                  {PAYMENT_MODE_LABEL[r.mode] ?? r.mode} · {Math.round((r.amount / total) * 100)}% ({r.count})
+                  {PAYMENT_MODE_LABEL[r.mode] ?? r.mode} ·{" "}
+                  {Math.round((r.amount / total) * 100)}% ({r.count})
                 </Text>
               </Row>
             ))}
@@ -213,7 +283,13 @@ export function ModeMix({ rows, loading }: { rows: DashboardMetrics["paymentMode
 
 /* ───────────── Pending by train ───────────── */
 
-function TrainRow({ train, onParty }: { train: PendingTrain; onParty: (id: string) => void }) {
+function TrainRow({
+  train,
+  onParty,
+}: {
+  train: PendingTrain;
+  onParty: (id: string) => void;
+}) {
   const t = useTheme();
   const [open, setOpen] = useState(false);
   const due = train.parties.reduce((s, p) => s + p.amount, 0);
@@ -224,17 +300,35 @@ function TrainRow({ train, onParty }: { train: PendingTrain; onParty: (id: strin
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen((v) => !v)}
-        style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10 }}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+          paddingVertical: 10,
+        }}
       >
         <TrainFront size={16} color={t.c.textMuted} />
-        <Text variant="mono" style={{ fontFamily: t.fonts.monoBold, minWidth: 60 }}>
+        <Text
+          variant="mono"
+          style={{ fontFamily: t.fonts.monoBold, minWidth: 60 }}
+        >
           {train.trainNumber}
         </Text>
-        <Text variant="caption" tone="muted" style={{ flex: 1 }} numberOfLines={1}>
-          {train.partyCount} {train.partyCount === 1 ? "party" : "parties"} · {train.consignmentCount} bkg
+        <Text
+          variant="caption"
+          tone="muted"
+          style={{ flex: 1 }}
+          numberOfLines={1}
+        >
+          {train.partyCount} {train.partyCount === 1 ? "party" : "parties"} ·{" "}
+          {train.consignmentCount} bkg
         </Text>
         <Money value={due} variant="label" />
-        {open ? <ChevronDown size={16} color={t.c.textFaint} /> : <ChevronRight size={16} color={t.c.textFaint} />}
+        {open ? (
+          <ChevronDown size={16} color={t.c.textFaint} />
+        ) : (
+          <ChevronRight size={16} color={t.c.textFaint} />
+        )}
       </Pressable>
       {open ? (
         <Col gap={6} style={{ paddingLeft: 26, paddingBottom: 10 }}>
@@ -247,11 +341,16 @@ function TrainRow({ train, onParty }: { train: PendingTrain; onParty: (id: strin
               style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
             >
               <Col gap={0} flex={1}>
-                <Text variant="label" tone={p.id ? "accent" : "default"} numberOfLines={1}>
+                <Text
+                  variant="label"
+                  tone={p.id ? "accent" : "default"}
+                  numberOfLines={1}
+                >
                   {p.name}
                 </Text>
                 <Text variant="caption" tone="faint" numberOfLines={1}>
-                  {p.consignments} bkg · {p.packages} pkg{p.stations.length ? ` · ${p.stations.join(", ")}` : ""}
+                  {p.consignments} bkg · {p.packages} pkg
+                  {p.stations.length ? ` · ${p.stations.join(", ")}` : ""}
                 </Text>
               </Col>
               <Money value={p.amount} variant="caption" />
@@ -290,7 +389,9 @@ export function PendingByTrain({
           ))}
           {(rows || []).length > 5 ? (
             <Button
-              title={all ? "Show fewer" : `Show all ${(rows || []).length} trains`}
+              title={
+                all ? "Show fewer" : `Show all ${(rows || []).length} trains`
+              }
               variant="ghost"
               size="sm"
               onPress={() => setAll((v) => !v)}

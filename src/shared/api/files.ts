@@ -20,8 +20,14 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 async function fetchBytes(url: string, params?: Record<string, unknown>) {
-  const res = await apiClient.get<ArrayBuffer>(url, { params, responseType: "arraybuffer" });
-  return { data: res.data, type: String(res.headers["content-type"] || "application/octet-stream") };
+  const res = await apiClient.get<ArrayBuffer>(url, {
+    params,
+    responseType: "arraybuffer",
+  });
+  return {
+    data: res.data,
+    type: String(res.headers["content-type"] || "application/octet-stream"),
+  };
 }
 
 /** Open a PDF (bilti / invoice). */
@@ -38,7 +44,11 @@ export async function openPdf(url: string, filename: string) {
 }
 
 /** Download an export (Excel). */
-export async function downloadFile(url: string, filename: string, params?: Record<string, unknown>) {
+export async function downloadFile(
+  url: string,
+  filename: string,
+  params?: Record<string, unknown>,
+) {
   const { data, type } = await fetchBytes(url, params);
   if (Platform.OS === "web") {
     const blobUrl = URL.createObjectURL(new Blob([data], { type }));
@@ -58,10 +68,15 @@ function triggerDownload(href: string, filename: string) {
   a.remove();
 }
 
-async function shareNative(data: ArrayBuffer, filename: string, mimeType: string) {
+async function shareNative(
+  data: ArrayBuffer,
+  filename: string,
+  mimeType: string,
+) {
   const path = `${FileSystem.cacheDirectory}${filename}`;
   await FileSystem.writeAsStringAsync(path, arrayBufferToBase64(data), {
     encoding: FileSystem.EncodingType.Base64,
   });
-  if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(path, { mimeType });
+  if (await Sharing.isAvailableAsync())
+    await Sharing.shareAsync(path, { mimeType });
 }

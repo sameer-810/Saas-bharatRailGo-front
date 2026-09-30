@@ -84,15 +84,25 @@ export interface InvoiceUpdateInput {
   notes?: string;
 }
 
-export const INVOICE_INVALIDATE = ["invoices", "consignments", "parties", "dashboard", "reports"];
+export const INVOICE_INVALIDATE = [
+  "invoices",
+  "consignments",
+  "parties",
+  "dashboard",
+  "reports",
+];
 
-export function invoicePartyName(inv: Pick<Invoice, "party" | "partySnapshot">): string {
+export function invoicePartyName(
+  inv: Pick<Invoice, "party" | "partySnapshot">,
+): string {
   if (inv.partySnapshot?.name) return inv.partySnapshot.name;
   if (!inv.party) return "—";
   return typeof inv.party === "string" ? inv.party : inv.party.name;
 }
 
-export function invoicePartyId(inv: Pick<Invoice, "party">): string | undefined {
+export function invoicePartyId(
+  inv: Pick<Invoice, "party">,
+): string | undefined {
   if (!inv.party) return undefined;
   return typeof inv.party === "string" ? inv.party : inv.party.id;
 }

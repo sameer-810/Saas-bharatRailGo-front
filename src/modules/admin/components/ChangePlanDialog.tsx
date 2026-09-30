@@ -1,6 +1,18 @@
 /** Assign plan / status / billing cycle / paid period to an organization. */
 import React, { useEffect, useMemo, useState } from "react";
-import { Banner, Button, Chip, Col, Dialog, NumberField, Row, SegmentedControl, Select, Text, toast } from "@shared/ui";
+import {
+  Banner,
+  Button,
+  Chip,
+  Col,
+  Dialog,
+  NumberField,
+  Row,
+  SegmentedControl,
+  Select,
+  Text,
+  toast,
+} from "@shared/ui";
 import { apiErrorMessage } from "@shared/api/apiClient";
 import { formatDate, formatMoney, addDays } from "@shared/lib/format";
 import {
@@ -36,7 +48,9 @@ export function ChangePlanDialog({
   const [status, setStatus] = useState<EditableStatus | null>(null);
   const [cycle, setCycle] = useState<"monthly" | "yearly" | "none">("monthly");
   const [periodDays, setPeriodDays] = useState<number | undefined>(30);
-  const save = useAdminMutation((body: SubscriptionPatch) => adminActions.updateSubscription(org.id, body));
+  const save = useAdminMutation((body: SubscriptionPatch) =>
+    adminActions.updateSubscription(org.id, body),
+  );
 
   useEffect(() => {
     if (!visible) return;
@@ -52,7 +66,9 @@ export function ChangePlanDialog({
       (plans.data ?? []).map((p) => ({
         value: p.code,
         label: `${p.name} (${p.code})${p.isActive ? "" : " · inactive"}`,
-        hint: p.isTrial ? "Trial plan" : `${formatMoney(p.priceMonthly)}/mo · ${formatMoney(p.priceYearly)}/yr`,
+        hint: p.isTrial
+          ? "Trial plan"
+          : `${formatMoney(p.priceMonthly)}/mo · ${formatMoney(p.priceYearly)}/yr`,
       })),
     [plans.data],
   );
@@ -61,11 +77,16 @@ export function ChangePlanDialog({
 
   const submit = async () => {
     const body: SubscriptionPatch = {};
-    if (planCode && planCode !== org.subscription.planCode) body.planCode = planCode;
+    if (planCode && planCode !== org.subscription.planCode)
+      body.planCode = planCode;
     if (status) body.status = status;
     body.billingCycle = cycle === "none" ? null : (cycle as BillingCycle);
     if (isPaid && periodDays) {
-      if (!Number.isInteger(periodDays) || periodDays < 1 || periodDays > 3660) {
+      if (
+        !Number.isInteger(periodDays) ||
+        periodDays < 1 ||
+        periodDays > 3660
+      ) {
         toast.error("Period must be 1 to 3660 days");
         return;
       }
@@ -88,13 +109,27 @@ export function ChangePlanDialog({
       testID="admin-change-plan-dialog"
       footer={
         <>
-          <Button title="Cancel" variant="secondary" onPress={onClose} testID="admin-change-plan-cancel" />
-          <Button title="Save subscription" loading={save.isPending} onPress={submit} testID="admin-change-plan-submit" />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onPress={onClose}
+            testID="admin-change-plan-cancel"
+          />
+          <Button
+            title="Save subscription"
+            loading={save.isPending}
+            onPress={submit}
+            testID="admin-change-plan-submit"
+          />
         </>
       }
     >
       {org.approvalStatus !== "approved" ? (
-        <Banner tone="warning" title="Approve the agency first" message="Subscriptions can only be changed once approved." />
+        <Banner
+          tone="warning"
+          title="Approve the agency first"
+          message="Subscriptions can only be changed once approved."
+        />
       ) : null}
       <Select
         testID="admin-change-plan-plan"
@@ -150,8 +185,14 @@ export function ChangePlanDialog({
             testID="admin-change-plan-period-days"
             label="Days"
             value={periodDays}
-            onChange={(v) => setPeriodDays(v == null ? undefined : Math.floor(v))}
-            hint={periodDays ? `Period ends ${formatDate(addDays(new Date(), periodDays))}` : "Leave empty to keep the current end date"}
+            onChange={(v) =>
+              setPeriodDays(v == null ? undefined : Math.floor(v))
+            }
+            hint={
+              periodDays
+                ? `Period ends ${formatDate(addDays(new Date(), periodDays))}`
+                : "Leave empty to keep the current end date"
+            }
           />
         </Col>
       ) : status === "trial" ? (

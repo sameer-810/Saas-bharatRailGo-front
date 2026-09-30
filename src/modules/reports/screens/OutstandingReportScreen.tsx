@@ -36,17 +36,49 @@ const BUCKETS: { key: BucketKey; label: string; short: string }[] = [
 
 /** Older money is more urgent, so the colour escalates with age. */
 function bucketColor(t: Theme, k: BucketKey) {
-  return { aged0to30: t.c.info, aged31to60: t.c.accent, aged61to90: t.c.warning, aged90Plus: t.c.danger }[k];
+  return {
+    aged0to30: t.c.info,
+    aged31to60: t.c.accent,
+    aged61to90: t.c.warning,
+    aged90Plus: t.c.danger,
+  }[k];
 }
 
-function AgingBar({ row, height = 8 }: { row: Pick<OutstandingRow, BucketKey>; height?: number }) {
+function AgingBar({
+  row,
+  height = 8,
+}: {
+  row: Pick<OutstandingRow, BucketKey>;
+  height?: number;
+}) {
   const t = useTheme();
   const total = BUCKETS.reduce((s, b) => s + Math.max(0, row[b.key]), 0);
-  if (total <= 0) return <View style={{ height, borderRadius: height / 2, backgroundColor: t.c.surfaceAlt }} />;
+  if (total <= 0)
+    return (
+      <View
+        style={{
+          height,
+          borderRadius: height / 2,
+          backgroundColor: t.c.surfaceAlt,
+        }}
+      />
+    );
   return (
-    <Row gap={2} align="stretch" style={{ height, borderRadius: height / 2, overflow: "hidden", alignSelf: "stretch" }}>
+    <Row
+      gap={2}
+      align="stretch"
+      style={{
+        height,
+        borderRadius: height / 2,
+        overflow: "hidden",
+        alignSelf: "stretch",
+      }}
+    >
       {BUCKETS.filter((b) => row[b.key] > 0).map((b) => (
-        <View key={b.key} style={{ flex: row[b.key], backgroundColor: bucketColor(t, b.key) }} />
+        <View
+          key={b.key}
+          style={{ flex: row[b.key], backgroundColor: bucketColor(t, b.key) }}
+        />
       ))}
     </Row>
   );
@@ -58,7 +90,10 @@ export function OutstandingReportScreen() {
   const t = useTheme();
   const nav = useAppNav();
   const { isPhone } = useLayout();
-  const q = useApiGet<OutstandingRow[]>(["reports", "outstanding"], "/reports/outstanding");
+  const q = useApiGet<OutstandingRow[]>(
+    ["reports", "outstanding"],
+    "/reports/outstanding",
+  );
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<Sort>("amount");
   const [bucket, setBucket] = useState<BucketKey | null>(null);
@@ -88,7 +123,11 @@ export function OutstandingReportScreen() {
     if (bucket) list = list.filter((r) => r[bucket] > 0);
     if (sort === "oldest") {
       list = [...list].sort(
-        (a, b) => b.aged90Plus - a.aged90Plus || b.aged61to90 - a.aged61to90 || b.aged31to60 - a.aged31to60 || b.totalAmount - a.totalAmount,
+        (a, b) =>
+          b.aged90Plus - a.aged90Plus ||
+          b.aged61to90 - a.aged61to90 ||
+          b.aged31to60 - a.aged31to60 ||
+          b.totalAmount - a.totalAmount,
       );
     }
     return list;
@@ -97,7 +136,16 @@ export function OutstandingReportScreen() {
   const agedCell = (k: BucketKey) =>
     function AgedCell(r: OutstandingRow) {
       return r[k] > 0 ? (
-        <Money value={r[k]} tone={k === "aged90Plus" ? "danger" : k === "aged61to90" ? "warning" : "default"} />
+        <Money
+          value={r[k]}
+          tone={
+            k === "aged90Plus"
+              ? "danger"
+              : k === "aged61to90"
+                ? "warning"
+                : "default"
+          }
+        />
       ) : (
         <Text tone="faint">—</Text>
       );
@@ -110,7 +158,11 @@ export function OutstandingReportScreen() {
       flex: 2,
       render: (r) => (
         <Col gap={1}>
-          <Text variant="bodyStrong" tone={r.partyId ? "accent" : "default"} numberOfLines={1}>
+          <Text
+            variant="bodyStrong"
+            tone={r.partyId ? "accent" : "default"}
+            numberOfLines={1}
+          >
             {r.partyName || "Unknown party"}
           </Text>
           <Text variant="caption" tone="faint" numberOfLines={1}>
@@ -119,7 +171,13 @@ export function OutstandingReportScreen() {
         </Col>
       ),
     },
-    { key: "cnt", title: "Bilties", align: "right", flex: 0.7, render: (r) => <MonoNum value={r.consignmentCount} /> },
+    {
+      key: "cnt",
+      title: "Bilties",
+      align: "right",
+      flex: 0.7,
+      render: (r) => <MonoNum value={r.consignmentCount} />,
+    },
     ...BUCKETS.map<Column<OutstandingRow>>((b) => ({
       key: b.key,
       title: b.short,
@@ -133,9 +191,17 @@ export function OutstandingReportScreen() {
       title: "Total due",
       align: "right",
       flex: 1.2,
-      render: (r) => <Money value={r.totalAmount} style={{ fontFamily: t.fonts.monoBold }} />,
+      render: (r) => (
+        <Money value={r.totalAmount} style={{ fontFamily: t.fonts.monoBold }} />
+      ),
     },
-    { key: "mix", title: "Aging", flex: 1.2, hideOnPhone: true, render: (r) => <AgingBar row={r} height={6} /> },
+    {
+      key: "mix",
+      title: "Aging",
+      flex: 1.2,
+      hideOnPhone: true,
+      render: (r) => <AgingBar row={r} height={6} />,
+    },
   ];
 
   const loading = q.isLoading;
@@ -147,10 +213,18 @@ export function OutstandingReportScreen() {
       back
       backTo="Reports"
       testID="report-outstanding"
-      actions={<ExportButton url="/reports/outstanding/export" filename="outstanding-report.xlsx" />}
+      actions={
+        <ExportButton
+          url="/reports/outstanding/export"
+          filename="outstanding-report.xlsx"
+        />
+      }
     >
       {q.error ? (
-        <ErrorState message={apiErrorMessage(q.error)} onRetry={() => q.refetch()} />
+        <ErrorState
+          message={apiErrorMessage(q.error)}
+          onRetry={() => q.refetch()}
+        />
       ) : (
         <Col gap={16}>
           <Card testID="aging-summary">
@@ -162,20 +236,32 @@ export function OutstandingReportScreen() {
                 {loading ? (
                   <Skeleton height={34} width={200} />
                 ) : (
-                  <Money value={totals.grandTotal} variant={isPhone ? "h1" : "display"} />
+                  <Money
+                    value={totals.grandTotal}
+                    variant={isPhone ? "h1" : "display"}
+                  />
                 )}
                 <Text variant="caption" tone="faint">
-                  {loading ? " " : `${all?.length ?? 0} parties · ${totals.bilties} bilties`}
+                  {loading
+                    ? " "
+                    : `${all?.length ?? 0} parties · ${totals.bilties} bilties`}
                 </Text>
               </Col>
             </Row>
             <View style={{ marginTop: 16 }}>
-              {loading ? <Skeleton height={14} /> : <AgingBar row={totals} height={14} />}
+              {loading ? (
+                <Skeleton height={14} />
+              ) : (
+                <AgingBar row={totals} height={14} />
+              )}
             </View>
             <Row wrap gap={10} style={{ marginTop: 14 }}>
               {BUCKETS.map((b) => {
                 const value = totals[b.key];
-                const pct = totals.grandTotal > 0 ? Math.round((value / totals.grandTotal) * 100) : 0;
+                const pct =
+                  totals.grandTotal > 0
+                    ? Math.round((value / totals.grandTotal) * 100)
+                    : 0;
                 const active = bucket === b.key;
                 return (
                   <Pressable
@@ -192,17 +278,32 @@ export function OutstandingReportScreen() {
                       gap: 4,
                       borderRadius: t.radius.md,
                       borderWidth: 1,
-                      borderColor: active ? bucketColor(t, b.key) : hovered ? t.c.borderStrong : t.c.border,
+                      borderColor: active
+                        ? bucketColor(t, b.key)
+                        : hovered
+                          ? t.c.borderStrong
+                          : t.c.border,
                       backgroundColor: active ? t.c.surfaceAlt : t.c.surface,
                     })}
                   >
                     <Row gap={6}>
-                      <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: bucketColor(t, b.key) }} />
+                      <View
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 2,
+                          backgroundColor: bucketColor(t, b.key),
+                        }}
+                      />
                       <Text variant="label" tone="muted">
                         {b.label}
                       </Text>
                     </Row>
-                    {loading ? <Skeleton height={20} width="60%" /> : <Money value={value} variant="h3" />}
+                    {loading ? (
+                      <Skeleton height={20} width="60%" />
+                    ) : (
+                      <Money value={value} variant="h3" />
+                    )}
                     <Text variant="caption" tone="faint">
                       {loading ? " " : `${pct}% of total`}
                     </Text>
@@ -212,10 +313,21 @@ export function OutstandingReportScreen() {
             </Row>
           </Card>
 
-          <SectionHeader title={bucket ? `Parties with money due ${BUCKETS.find((b) => b.key === bucket)?.label}` : "By party"} />
+          <SectionHeader
+            title={
+              bucket
+                ? `Parties with money due ${BUCKETS.find((b) => b.key === bucket)?.label}`
+                : "By party"
+            }
+          />
           <Row gap={12} wrap align="center">
             <View style={{ flex: 1, minWidth: 220 }}>
-              <SearchInput value={search} onChangeText={setSearch} placeholder="Search party, city or mobile" testID="outstanding-search" />
+              <SearchInput
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search party, city or mobile"
+                testID="outstanding-search"
+              />
             </View>
             <SegmentedControl<Sort>
               testID="outstanding-sort"
@@ -234,7 +346,10 @@ export function OutstandingReportScreen() {
             loading={loading}
             columns={columns}
             keyOf={(r) => r.partyId || `${r.partyName}-${r.mobile}`}
-            onRowPress={(r) => r.partyId && nav.navigate("PartyDetail", { id: String(r.partyId) })}
+            onRowPress={(r) =>
+              r.partyId &&
+              nav.navigate("PartyDetail", { id: String(r.partyId) })
+            }
             phoneTitle={(r) => (
               <Col gap={6}>
                 <Text variant="bodyStrong" numberOfLines={1}>
@@ -243,11 +358,20 @@ export function OutstandingReportScreen() {
                 <AgingBar row={r} height={6} />
               </Col>
             )}
-            phoneRight={(r) => <Money value={r.totalAmount} style={{ fontFamily: t.fonts.monoBold }} />}
+            phoneRight={(r) => (
+              <Money
+                value={r.totalAmount}
+                style={{ fontFamily: t.fonts.monoBold }}
+              />
+            )}
             empty={
               <EmptyState
                 icon={Hourglass}
-                title={all && all.length > 0 ? "No party matches" : "Nothing outstanding"}
+                title={
+                  all && all.length > 0
+                    ? "No party matches"
+                    : "Nothing outstanding"
+                }
                 message={
                   all && all.length > 0
                     ? "Clear the search or the age filter to see every party."

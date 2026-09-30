@@ -4,9 +4,25 @@
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Building2, ClipboardList, DatabaseBackup, LayoutDashboard, LogOut, Tags } from "lucide-react-native";
+import {
+  Building2,
+  ClipboardList,
+  DatabaseBackup,
+  LayoutDashboard,
+  LogOut,
+  Tags,
+} from "lucide-react-native";
 import { useLayout, useTheme } from "@shared/useTheme";
-import { Banner, Button, Card, Col, IconButton, Row, Text, TextField } from "@shared/ui";
+import {
+  Banner,
+  Button,
+  Card,
+  Col,
+  IconButton,
+  Row,
+  Text,
+  TextField,
+} from "@shared/ui";
 import { adminApiClient } from "@shared/api/adminApiClient";
 import { apiErrorMessage } from "@shared/api/apiClient";
 import { useAdminStore } from "@shared/store/useAdminStore";
@@ -43,15 +59,33 @@ function AdminLoginScreen() {
     }
   };
   return (
-    <View style={{ flex: 1, backgroundColor: t.c.board, justifyContent: "center", padding: 20 }}>
-      <Card style={{ width: "100%", maxWidth: 400, alignSelf: "center" }} padding={28}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: t.c.board,
+        justifyContent: "center",
+        padding: 20,
+      }}
+    >
+      <Card
+        style={{ width: "100%", maxWidth: 400, alignSelf: "center" }}
+        padding={28}
+      >
         <Col gap={16}>
           <Text variant="overline" tone="accent">
             Platform console
           </Text>
           <Text variant="h1">Admin sign in</Text>
-          {error ? <Banner tone="danger" title={error} testID="admin-login-error" /> : null}
-          <TextField testID="admin-email" label="Email" value={email} onChangeText={setEmail} autoCapitalize="none" />
+          {error ? (
+            <Banner tone="danger" title={error} testID="admin-login-error" />
+          ) : null}
+          <TextField
+            testID="admin-email"
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+          />
           <TextField
             testID="admin-password"
             label="Password"
@@ -60,14 +94,28 @@ function AdminLoginScreen() {
             secureTextEntry
             onSubmitEditing={submit}
           />
-          <Button testID="admin-login-submit" title="Sign in" loading={busy} onPress={submit} fullWidth />
+          <Button
+            testID="admin-login-submit"
+            title="Sign in"
+            loading={busy}
+            onPress={submit}
+            fullWidth
+          />
         </Col>
       </Card>
     </View>
   );
 }
 
-function AdminShell({ current, children, navigate }: { current: string; children: React.ReactNode; navigate: (r: string) => void }) {
+function AdminShell({
+  current,
+  children,
+  navigate,
+}: {
+  current: string;
+  children: React.ReactNode;
+  navigate: (r: string) => void;
+}) {
   const t = useTheme();
   const { isPhone } = useLayout();
   const { admin, logout } = useAdminStore();
@@ -92,7 +140,10 @@ function AdminShell({ current, children, navigate }: { current: string; children
       >
         <Icon size={17} color={on ? t.c.boardText : "#9AA3AF"} />
         {!isPhone ? (
-          <Text variant="label" style={{ color: on ? t.c.boardText : "#D1D5DB" }}>
+          <Text
+            variant="label"
+            style={{ color: on ? t.c.boardText : "#D1D5DB" }}
+          >
             {n.label}
           </Text>
         ) : null}
@@ -100,7 +151,13 @@ function AdminShell({ current, children, navigate }: { current: string; children
     );
   });
   return (
-    <View style={{ flex: 1, flexDirection: isPhone ? "column" : "row", backgroundColor: t.c.bg }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: isPhone ? "column" : "row",
+        backgroundColor: t.c.bg,
+      }}
+    >
       <View
         style={{
           backgroundColor: t.c.board,
@@ -112,7 +169,15 @@ function AdminShell({ current, children, navigate }: { current: string; children
         }}
       >
         {!isPhone ? (
-          <Text style={{ fontFamily: t.fonts.monoBold, color: t.c.boardText, letterSpacing: 2, marginBottom: 16, fontSize: 13 }}>
+          <Text
+            style={{
+              fontFamily: t.fonts.monoBold,
+              color: t.c.boardText,
+              letterSpacing: 2,
+              marginBottom: 16,
+              fontSize: 13,
+            }}
+          >
             BHARATRAILGO · ADMIN
           </Text>
         ) : null}
@@ -120,11 +185,20 @@ function AdminShell({ current, children, navigate }: { current: string; children
         <View style={{ flex: 1 }} />
         <Row gap={6}>
           {!isPhone ? (
-            <Text variant="caption" style={{ color: "#9AA3AF", flex: 1 }} numberOfLines={1}>
+            <Text
+              variant="caption"
+              style={{ color: "#9AA3AF", flex: 1 }}
+              numberOfLines={1}
+            >
               {admin?.email}
             </Text>
           ) : null}
-          <IconButton icon={LogOut} label="Log out" testID="admin-logout" onPress={logout} />
+          <IconButton
+            icon={LogOut}
+            label="Log out"
+            testID="admin-logout"
+            onPress={logout}
+          />
         </Row>
       </View>
       <View style={{ flex: 1 }}>{children}</View>
@@ -137,7 +211,11 @@ export function AdminNavigator() {
   if (!token) {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="AdminLogin" component={AdminLoginScreen} options={{ title: "Admin · BharatRailGo" }} />
+        <Stack.Screen
+          name="AdminLogin"
+          component={AdminLoginScreen}
+          options={{ title: "Admin · BharatRailGo" }}
+        />
       </Stack.Navigator>
     );
   }
@@ -147,14 +225,23 @@ export function AdminNavigator() {
       layout={({ children, state, navigation }) => (
         <AdminShell
           current={state.routes[state.index]?.name ?? "AdminDashboard"}
-          navigate={(r) => (navigation as unknown as { navigate: (r: string) => void }).navigate(r)}
+          navigate={(r) =>
+            (
+              navigation as unknown as { navigate: (r: string) => void }
+            ).navigate(r)
+          }
         >
           {children}
         </AdminShell>
       )}
     >
       {Object.entries(adminAppScreens).map(([name, component]) => (
-        <Stack.Screen key={name} name={name} component={component as React.ComponentType} options={{ title: `${name} · Admin` }} />
+        <Stack.Screen
+          key={name}
+          name={name}
+          component={component as React.ComponentType}
+          options={{ title: `${name} · Admin` }}
+        />
       ))}
     </Stack.Navigator>
   );

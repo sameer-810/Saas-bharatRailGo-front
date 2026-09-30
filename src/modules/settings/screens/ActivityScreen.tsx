@@ -28,7 +28,13 @@ import { formatDateTime } from "@shared/lib/format";
 import { humanize } from "@shared/ui";
 import { useAppNav } from "@navigation/useAppNav";
 import type { TeamUser } from "../types";
-import { ACTIVITY_GROUPS, describeAction, deviceOf, targetRoute, type ActivityEntry } from "../lib/activity";
+import {
+  ACTIVITY_GROUPS,
+  describeAction,
+  deviceOf,
+  targetRoute,
+  type ActivityEntry,
+} from "../lib/activity";
 
 export function ActivityScreen() {
   const t = useTheme();
@@ -67,10 +73,16 @@ export function ActivityScreen() {
             <Text variant="bodyStrong" numberOfLines={1}>
               {describeAction(r.action)}
             </Text>
-            {r.outcome === "denied" ? <StatusPill status="denied" label="Refused" /> : null}
+            {r.outcome === "denied" ? (
+              <StatusPill status="denied" label="Refused" />
+            ) : null}
           </Row>
           {r.label ? (
-            <Text variant="caption" tone={targetRoute(r) ? "accent" : "muted"} numberOfLines={1}>
+            <Text
+              variant="caption"
+              tone={targetRoute(r) ? "accent" : "muted"}
+              numberOfLines={1}
+            >
               {r.label}
             </Text>
           ) : null}
@@ -118,7 +130,12 @@ export function ActivityScreen() {
             {deviceOf(r.userAgent) || "—"}
           </Text>
           {r.ip ? (
-            <Text variant="caption" tone="faint" style={{ fontFamily: t.fonts.mono }} numberOfLines={1}>
+            <Text
+              variant="caption"
+              tone="faint"
+              style={{ fontFamily: t.fonts.mono }}
+              numberOfLines={1}
+            >
               {r.ip.replace(/^::ffff:/, "")}
             </Text>
           ) : null}
@@ -127,12 +144,20 @@ export function ActivityScreen() {
     },
   ];
 
-  const userOptions = (users.data || []).map((u) => ({ value: u.id, label: u.name, hint: humanize(u.role) }));
+  const userOptions = (users.data || []).map((u) => ({
+    value: u.id,
+    label: u.name,
+    hint: humanize(u.role),
+  }));
 
   return (
     <Screen
       title="Activity log"
-      subtitle={log.data ? `${log.data.meta.total} entries · kept for 1 year` : "Who did what, and when"}
+      subtitle={
+        log.data
+          ? `${log.data.meta.total} entries · kept for 1 year`
+          : "Who did what, and when"
+      }
       back
       backTo="Settings"
       testID="activity-screen"
@@ -149,7 +174,14 @@ export function ActivityScreen() {
               placeholder="Search bill no., party, person…"
             />
           </View>
-          <View style={{ flexGrow: 1, flexBasis: 200, minWidth: 180, maxWidth: isPhone ? undefined : 260 }}>
+          <View
+            style={{
+              flexGrow: 1,
+              flexBasis: 200,
+              minWidth: 180,
+              maxWidth: isPhone ? undefined : 260,
+            }}
+          >
             <Select
               testID="activity-person"
               placeholder="Everyone"
@@ -160,10 +192,22 @@ export function ActivityScreen() {
             />
           </View>
           <View style={{ minWidth: 160 }}>
-            <DateField testID="activity-from" label="From" value={from} onChange={setFrom} quick={false} />
+            <DateField
+              testID="activity-from"
+              label="From"
+              value={from}
+              onChange={setFrom}
+              quick={false}
+            />
           </View>
           <View style={{ minWidth: 160 }}>
-            <DateField testID="activity-to" label="To" value={to} onChange={setTo} quick={false} />
+            <DateField
+              testID="activity-to"
+              label="To"
+              value={to}
+              onChange={setTo}
+              quick={false}
+            />
           </View>
         </Row>
         <Row gap={6} wrap testID="activity-groups">

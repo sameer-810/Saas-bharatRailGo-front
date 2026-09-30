@@ -49,7 +49,12 @@ export interface AdminOrg {
   subscriptionState: SubscriptionState;
   limitsOverride: Limits;
   /** Owner asked to close the account (DPDP); purge allowed from purgeAllowedFrom. */
-  deletion: { requestedAt: string | null; purgeAllowedFrom: string | null; graceDays: number; reason: string | null };
+  deletion: {
+    requestedAt: string | null;
+    purgeAllowedFrom: string | null;
+    graceDays: number;
+    reason: string | null;
+  };
   consent: { termsVersion: string; acceptedAt: string } | null;
   createdAt: string;
 }
@@ -66,7 +71,12 @@ export interface AdminOrgUser {
 export interface SubscriptionSummary extends SubscriptionState {
   planName: string | null;
   limits: Limits;
-  usage: { users: number; branches: number; bookingsThisMonth: number; periodStart: string };
+  usage: {
+    users: number;
+    branches: number;
+    bookingsThisMonth: number;
+    periodStart: string;
+  };
 }
 
 export interface AdminOrgDetail extends AdminOrg {
@@ -137,22 +147,40 @@ export interface SubscriptionPatch {
 
 /* ─────────────────────────── Helpers ─────────────────────────── */
 
-async function getData<T>(url: string, params?: Record<string, unknown>): Promise<T> {
-  const res = await adminApiClient.get<Envelope<T>>(url, { params: cleanParams(params) });
+async function getData<T>(
+  url: string,
+  params?: Record<string, unknown>,
+): Promise<T> {
+  const res = await adminApiClient.get<Envelope<T>>(url, {
+    params: cleanParams(params),
+  });
   return res.data.data;
 }
 
-async function getPaged<T>(url: string, params?: Record<string, unknown>): Promise<Paged<T>> {
-  const res = await adminApiClient.get<Envelope<T[]>>(url, { params: cleanParams(params) });
+async function getPaged<T>(
+  url: string,
+  params?: Record<string, unknown>,
+): Promise<Paged<T>> {
+  const res = await adminApiClient.get<Envelope<T[]>>(url, {
+    params: cleanParams(params),
+  });
   const items = res.data.data ?? [];
-  const meta = (res.data.meta as Paging) ?? { total: items.length, page: 1, limit: items.length, totalPages: 1 };
+  const meta = (res.data.meta as Paging) ?? {
+    total: items.length,
+    page: 1,
+    limit: items.length,
+    totalPages: 1,
+  };
   return { items, meta };
 }
 
 /* ─────────────────────────── Queries ─────────────────────────── */
 
 export function useAdminDashboard() {
-  return useQuery({ queryKey: ["admin", "dashboard"], queryFn: () => getData<AdminDashboard>("/dashboard") });
+  return useQuery({
+    queryKey: ["admin", "dashboard"],
+    queryFn: () => getData<AdminDashboard>("/dashboard"),
+  });
 }
 
 export interface OrgListParams {
@@ -182,10 +210,18 @@ export function useAdminOrg(id: string | undefined) {
 }
 
 export function useAdminPlans() {
-  return useQuery({ queryKey: ["admin", "plans"], queryFn: () => getData<Plan[]>("/plans") });
+  return useQuery({
+    queryKey: ["admin", "plans"],
+    queryFn: () => getData<Plan[]>("/plans"),
+  });
 }
 
-export function useAdminAudit(params: { organization?: string; action?: string; page?: number; limit?: number }) {
+export function useAdminAudit(params: {
+  organization?: string;
+  action?: string;
+  page?: number;
+  limit?: number;
+}) {
   return useQuery({
     queryKey: ["admin", "audit", cleanParams({ ...params })],
     queryFn: () => getPaged<AuditEntry>("/audit", { ...params }),
@@ -206,26 +242,36 @@ export function useAdminMutation<V, R = unknown>(fn: (vars: V) => Promise<R>) {
 
 type Msg<T> = { data: T; message?: string };
 
-async function send<T>(method: "post" | "patch", url: string, body?: unknown): Promise<Msg<T>> {
+async function send<T>(
+  method: "post" | "patch",
+  url: string,
+  body?: unknown,
+): Promise<Msg<T>> {
   const res = await adminApiClient[method]<Envelope<T>>(url, body ?? {});
   return { data: res.data.data, message: res.data.message };
 }
 
 export const adminActions = {
-  approve: (id: string) => send<AdminOrg>("post", `/organizations/${id}/approve`),
-  reject: (id: string, reason: string) => send<AdminOrg>("post", `/organizations/${id}/reject`, { reason }),
-  suspend: (id: string, reason: string) => send<AdminOrg>("post", `/organizations/${id}/suspend`, { reason }),
-  reactivate: (id: string) => send<AdminOrg>("post", `/organizations/${id}/reactivate`),
-  revokeSessions: (id: string) => send<{ revoked: number }>("post", `/organizations/${id}/revoke-sessions`),
+  approve: (id: string) =>
+    send<AdminOrg>("post", `/organizations/${id}/approve`),
+  reject: (id: string, reason: string) =>
+    send<AdminOrg>("post", `/organizations/${id}/reject`, { reason }),
+  suspend: (id: string, reason: string) =>
+    send<AdminOrg>("post", `/organizations/${id}/suspend`, { reason }),
+  reactivate: (id: string) =>
+    send<AdminOrg>("post", `/organizations/${id}/reactivate`),
+  revokeSessions: (id: string) =>
+    send<{ revoked: number }>("post", `/organizations/${id}/revoke-sessions`),
   updateSubscription: (id: string, body: SubscriptionPatch) =>
     send<AdminOrg>("patch", `/organizations/${id}/subscription`, body),
-  updateLimits: (id: string, body: Limits) => send<AdminOrg>("patch", `/organizations/${id}/limits`, body),
+  updateLimits: (id: string, body: Limits) =>
+    send<AdminOrg>("patch", `/organizations/${id}/limits`, body),
   createPlan: (body: PlanInput) => send<Plan>("post", "/plans", body),
-  updatePlan: (id: string, body: PlanInput) => send<Plan>("patch", `/plans/${id}`, body),
+  updatePlan: (id: string, body: PlanInput) =>
+    send<Plan>("patch", `/plans/${id}`, body),
   purge: (id: string, confirmSlug: string) =>
-    send<{ organization: { id: string; name: string; slug: string }; deleted: Record<string, number> }>(
-      "post",
-      `/organizations/${id}/purge`,
-      { confirmSlug },
-    ),
+    send<{
+      organization: { id: string; name: string; slug: string };
+      deleted: Record<string, number>;
+    }>("post", `/organizations/${id}/purge`, { confirmSlug }),
 };

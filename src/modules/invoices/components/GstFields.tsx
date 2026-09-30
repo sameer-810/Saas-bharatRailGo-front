@@ -60,7 +60,8 @@ export function GstFields({
         />
       )}
       <Text variant="caption" tone="faint">
-        Tax applies to service charges only. Railway freight reimbursement is not taxed (Pure Agent).
+        Tax applies to service charges only. Railway freight reimbursement is
+        not taxed (Pure Agent).
       </Text>
     </Col>
   );

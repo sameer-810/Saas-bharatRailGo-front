@@ -9,12 +9,17 @@ import { useApiList } from "@shared/api/query";
 import { formatDate } from "@shared/lib/format";
 import type { InvoiceConsignment } from "./types";
 
-type Chargeable = Pick<InvoiceConsignment, "freightAmount" | "hamaliCharges" | "otherCharges" | "reimbursementAmount">;
+type Chargeable = Pick<
+  InvoiceConsignment,
+  "freightAmount" | "hamaliCharges" | "otherCharges" | "reimbursementAmount"
+>;
 
 const fix2 = (n: number) => parseFloat(n.toFixed(2));
 
 export function serviceOf(c: Chargeable) {
-  return (c.freightAmount || 0) + (c.hamaliCharges || 0) + (c.otherCharges || 0);
+  return (
+    (c.freightAmount || 0) + (c.hamaliCharges || 0) + (c.otherCharges || 0)
+  );
 }
 
 export function computeSubtotals(consignments: Chargeable[]) {
@@ -24,7 +29,10 @@ export function computeSubtotals(consignments: Chargeable[]) {
     serviceSubtotal += serviceOf(c);
     reimbursementSubtotal += c.reimbursementAmount || 0;
   }
-  return { serviceSubtotal: fix2(serviceSubtotal), reimbursementSubtotal: fix2(reimbursementSubtotal) };
+  return {
+    serviceSubtotal: fix2(serviceSubtotal),
+    reimbursementSubtotal: fix2(reimbursementSubtotal),
+  };
 }
 
 export interface Rates {
@@ -51,14 +59,19 @@ export function computeTotals(
   const cgstAmount = fix2((service * (rates.cgstRate || 0)) / 100);
   const sgstAmount = fix2((service * (rates.sgstRate || 0)) / 100);
   const igstAmount = fix2((service * (rates.igstRate || 0)) / 100);
-  const grossTotal = fix2(reimb + service + cgstAmount + sgstAmount + igstAmount);
+  const grossTotal = fix2(
+    reimb + service + cgstAmount + sgstAmount + igstAmount,
+  );
   return { ...sub, ...rates, cgstAmount, sgstAmount, igstAmount, grossTotal };
 }
 
 export type GstMode = "intra" | "inter";
 
 /** Rates for a GST mode. Intra-state: CGST + SGST from the business profile; inter-state: IGST = their sum. */
-export function ratesFor(mode: GstMode, defaults: { cgst?: number; sgst?: number }): Rates {
+export function ratesFor(
+  mode: GstMode,
+  defaults: { cgst?: number; sgst?: number },
+): Rates {
   const cgst = defaults.cgst ?? 2.5;
   const sgst = defaults.sgst ?? 2.5;
   return mode === "intra"
@@ -81,14 +94,25 @@ export function useUninvoicedConsignments(partyId: string | undefined) {
     () =>
       (list.data?.items || [])
         .filter((c) => c.invoice == null && c.paymentMode === "on_bill")
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+        .sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        ),
     [list.data],
   );
-  return { items, isLoading: !!partyId && list.isLoading, error: list.error, refetch: () => list.refetch() };
+  return {
+    items,
+    isLoading: !!partyId && list.isLoading,
+    error: list.error,
+    refetch: () => list.refetch(),
+  };
 }
 
-export function routeLabel(c: Pick<InvoiceConsignment, "originStation" | "destinationStation">) {
-  return [c.originStation, c.destinationStation].filter(Boolean).join(" → ") || "—";
+export function routeLabel(
+  c: Pick<InvoiceConsignment, "originStation" | "destinationStation">,
+) {
+  return (
+    [c.originStation, c.destinationStation].filter(Boolean).join(" → ") || "—"
+  );
 }
 
 export function consignmentLabel(c: InvoiceConsignment) {

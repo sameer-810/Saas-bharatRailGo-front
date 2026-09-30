@@ -27,7 +27,10 @@ import { useApiMutation } from "@shared/api/query";
 import { apiErrorMessage } from "@shared/api/apiClient";
 import { useBusinessProfile, type BusinessProfile } from "@shared/api/lookups";
 import { useCan, useReadOnly } from "@shared/lib/permissions";
-import { useThemeStore, type ThemePreference } from "@shared/store/useThemeStore";
+import {
+  useThemeStore,
+  type ThemePreference,
+} from "@shared/store/useThemeStore";
 import { BiltiHeaderPreview } from "../components/BiltiHeaderPreview";
 import { CardTitle, Grid, ReadOnlyBanner } from "../components/common";
 
@@ -78,12 +81,21 @@ export function SettingsBrandingScreen() {
           profile.isLoading ? (
             <LoadingBlock rows={4} />
           ) : profile.error || !profile.data ? (
-            <ErrorState message={apiErrorMessage(profile.error, "Could not load the profile")} onRetry={() => profile.refetch()} />
+            <ErrorState
+              message={apiErrorMessage(
+                profile.error,
+                "Could not load the profile",
+              )}
+              onRetry={() => profile.refetch()}
+            />
           ) : (
             <BrandEditor profile={profile.data} />
           )
         ) : (
-          <Banner tone="info" title="Only the owner can change the logo and brand colour" />
+          <Banner
+            tone="info"
+            title="Only the owner can change the logo and brand colour"
+          />
         )}
         <ThemeCard />
       </Col>
@@ -95,7 +107,10 @@ function BrandEditor({ profile }: { profile: BusinessProfile }) {
   const t = useTheme();
   const readOnly = useReadOnly();
   const setBrandColor = useThemeStore((s) => s.setBrandColor);
-  const saved = profile.brandColor && HEX.test(profile.brandColor) ? profile.brandColor : t.c.accent;
+  const saved =
+    profile.brandColor && HEX.test(profile.brandColor)
+      ? profile.brandColor
+      : t.c.accent;
   const [color, setColor] = useState(saved);
   const [hex, setHex] = useState(saved);
   const [logoError, setLogoError] = useState<string | null>(null);
@@ -109,15 +124,27 @@ function BrandEditor({ profile }: { profile: BusinessProfile }) {
     setHex(saved);
   }
 
-  const uploadLogo = useApiMutation<BusinessProfile, { dataUrl: string }>("put", "/business-profile/logo", {
-    invalidate: ["business-profile"],
-  });
-  const removeLogo = useApiMutation<BusinessProfile, void>("delete", "/business-profile/logo", {
-    invalidate: ["business-profile"],
-  });
-  const saveColor = useApiMutation<BusinessProfile, { brandColor: string }>("patch", "/business-profile", {
-    invalidate: ["business-profile"],
-  });
+  const uploadLogo = useApiMutation<BusinessProfile, { dataUrl: string }>(
+    "put",
+    "/business-profile/logo",
+    {
+      invalidate: ["business-profile"],
+    },
+  );
+  const removeLogo = useApiMutation<BusinessProfile, void>(
+    "delete",
+    "/business-profile/logo",
+    {
+      invalidate: ["business-profile"],
+    },
+  );
+  const saveColor = useApiMutation<BusinessProfile, { brandColor: string }>(
+    "patch",
+    "/business-profile",
+    {
+      invalidate: ["business-profile"],
+    },
+  );
 
   const pick = async () => {
     setLogoError(null);
@@ -133,12 +160,17 @@ function BrandEditor({ profile }: { profile: BusinessProfile }) {
       const asset = res.assets[0];
       let b64 = asset.base64 || "";
       // Web may hand back a full data URL in uri instead of base64.
-      if (!b64 && asset.uri?.startsWith("data:")) b64 = asset.uri.split(",")[1] || "";
+      if (!b64 && asset.uri?.startsWith("data:"))
+        b64 = asset.uri.split(",")[1] || "";
       if (!b64) {
         setLogoError("Could not read that image. Try another file.");
         return;
       }
-      const mime = detectMime(b64) || (asset.mimeType === "image/png" || asset.mimeType === "image/jpeg" ? asset.mimeType : null);
+      const mime =
+        detectMime(b64) ||
+        (asset.mimeType === "image/png" || asset.mimeType === "image/jpeg"
+          ? asset.mimeType
+          : null);
       if (!mime) {
         setLogoError("The logo must be a PNG or JPEG image.");
         return;
@@ -194,13 +226,17 @@ function BrandEditor({ profile }: { profile: BusinessProfile }) {
   };
 
   const colorDirty = color.toLowerCase() !== saved.toLowerCase();
-  const hexError = hex && !HEX.test(hex) ? "Use a hex value like #1A237E" : undefined;
+  const hexError =
+    hex && !HEX.test(hex) ? "Use a hex value like #1A237E" : undefined;
 
   return (
     <Col gap={16}>
       <ReadOnlyBanner />
       <Card>
-        <CardTitle title="Preview" caption="How the bilti header will look with these choices." />
+        <CardTitle
+          title="Preview"
+          caption="How the bilti header will look with these choices."
+        />
         <BiltiHeaderPreview
           color={color}
           logoDataUrl={profile.logoDataUrl}
@@ -213,7 +249,10 @@ function BrandEditor({ profile }: { profile: BusinessProfile }) {
 
       <Grid basis={360}>
         <Card testID="branding-logo-card">
-          <CardTitle title="Logo" caption="PNG or JPEG, up to 300 KB. A square logo on a plain background prints best." />
+          <CardTitle
+            title="Logo"
+            caption="PNG or JPEG, up to 300 KB. A square logo on a plain background prints best."
+          />
           <Row gap={16} align="center" wrap>
             <View
               style={{
@@ -268,13 +307,21 @@ function BrandEditor({ profile }: { profile: BusinessProfile }) {
           </Row>
           {logoError ? (
             <View style={{ marginTop: 12 }}>
-              <Banner testID="branding-logo-error" tone="danger" title="Logo not uploaded" message={logoError} />
+              <Banner
+                testID="branding-logo-error"
+                tone="danger"
+                title="Logo not uploaded"
+                message={logoError}
+              />
             </View>
           ) : null}
         </Card>
 
         <Card testID="branding-color-card">
-          <CardTitle title="Brand colour" caption="Used for buttons and highlights across the app, and on bilti and invoices." />
+          <CardTitle
+            title="Brand colour"
+            caption="Used for buttons and highlights across the app, and on bilti and invoices."
+          />
           <Row wrap gap={10}>
             {PALETTE.map((c) => {
               const active = c.toLowerCase() === color.toLowerCase();
@@ -356,7 +403,10 @@ function ThemeCard() {
   const { preference, setPreference } = useThemeStore();
   return (
     <Card testID="branding-theme-card">
-      <CardTitle title="Appearance" caption="Your own preference on this device. Dark suits the godown at night." />
+      <CardTitle
+        title="Appearance"
+        caption="Your own preference on this device. Dark suits the godown at night."
+      />
       <SegmentedControl<ThemePreference>
         testID="branding-theme"
         value={preference}

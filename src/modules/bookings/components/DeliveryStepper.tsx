@@ -7,7 +7,11 @@ import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { Check, Undo2 } from "lucide-react-native";
 import { Row, Text } from "@shared/ui";
 import { useTheme } from "@shared/useTheme";
-import { DELIVERY_FLOW, DELIVERY_LABEL, type DeliveryStatus } from "../lib/types";
+import {
+  DELIVERY_FLOW,
+  DELIVERY_LABEL,
+  type DeliveryStatus,
+} from "../lib/types";
 
 export function DeliveryStepper({
   value,
@@ -29,7 +33,11 @@ export function DeliveryStepper({
 
   return (
     <Row gap={12} wrap align="center" testID={testID}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: "center" }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ alignItems: "center" }}
+      >
         {DELIVERY_FLOW.map((s, i) => {
           const done = !returned && i < at;
           const current = !returned && i === at;
@@ -64,7 +72,8 @@ export function DeliveryStepper({
                   paddingHorizontal: 6,
                   paddingVertical: 4,
                   borderRadius: t.radius.md,
-                  backgroundColor: hovered && !current ? t.c.surfaceAlt : "transparent",
+                  backgroundColor:
+                    hovered && !current ? t.c.surfaceAlt : "transparent",
                 })}
               >
                 <View
@@ -76,23 +85,40 @@ export function DeliveryStepper({
                     justifyContent: "center",
                     borderWidth: 2,
                     borderColor: color,
-                    backgroundColor: current ? color : done ? t.c.accentSoft : t.c.surface,
+                    backgroundColor: current
+                      ? color
+                      : done
+                        ? t.c.accentSoft
+                        : t.c.surface,
                   }}
                 >
                   {pending === s ? (
-                    <ActivityIndicator size="small" color={current ? t.c.accentText : t.c.accent} />
+                    <ActivityIndicator
+                      size="small"
+                      color={current ? t.c.accentText : t.c.accent}
+                    />
                   ) : done || (current && s === "delivered") ? (
-                    <Check size={14} color={current ? t.c.surface : t.c.accent} />
+                    <Check
+                      size={14}
+                      color={current ? t.c.surface : t.c.accent}
+                    />
                   ) : (
                     <Text
                       variant="caption"
-                      style={{ fontFamily: t.fonts.mono, color: current ? t.c.accentText : t.c.textMuted }}
+                      style={{
+                        fontFamily: t.fonts.mono,
+                        color: current ? t.c.accentText : t.c.textMuted,
+                      }}
                     >
                       {i + 1}
                     </Text>
                   )}
                 </View>
-                <Text variant="caption" tone={current ? "default" : done ? "muted" : "faint"} weight={current ? "semibold" : undefined}>
+                <Text
+                  variant="caption"
+                  tone={current ? "default" : done ? "muted" : "faint"}
+                  weight={current ? "semibold" : undefined}
+                >
                   {DELIVERY_LABEL[s]}
                 </Text>
               </Pressable>

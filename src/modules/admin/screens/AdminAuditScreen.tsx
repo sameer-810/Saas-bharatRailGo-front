@@ -34,12 +34,21 @@ export function AdminAuditScreen() {
 
   useEffect(() => setPage(1), [q]);
 
-  const audit = useAdminAudit({ action: q || undefined, organization: params.organization, page, limit: 25 });
+  const audit = useAdminAudit({
+    action: q || undefined,
+    organization: params.organization,
+    page,
+    limit: 25,
+  });
 
   return (
     <Screen
       title="Audit log"
-      subtitle={audit.data ? `${audit.data.meta.total} entries` : "Every platform-admin action"}
+      subtitle={
+        audit.data
+          ? `${audit.data.meta.total} entries`
+          : "Every platform-admin action"
+      }
       testID="admin-audit"
     >
       <Col gap={10} style={{ marginBottom: 16 }}>
@@ -56,7 +65,12 @@ export function AdminAuditScreen() {
           />
         </View>
         <Row gap={6} wrap testID="admin-audit-action-chips">
-          <Chip label="All" selected={!q} onPress={() => setAction("")} testID="admin-audit-action-all" />
+          <Chip
+            label="All"
+            selected={!q}
+            onPress={() => setAction("")}
+            testID="admin-audit-action-all"
+          />
           {ACTIONS.map((a) => (
             <Chip
               key={a}
@@ -72,7 +86,9 @@ export function AdminAuditScreen() {
         testID="admin-audit-list"
         rows={audit.data?.items}
         loading={audit.isLoading || audit.isFetching}
-        error={audit.error ? { message: apiErrorMessage(audit.error) } : undefined}
+        error={
+          audit.error ? { message: apiErrorMessage(audit.error) } : undefined
+        }
         onRetry={() => audit.refetch()}
         paging={audit.data?.meta}
         onPage={setPage}

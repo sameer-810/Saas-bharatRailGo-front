@@ -17,20 +17,47 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <View style={{ flex: 1, flexDirection: "row", backgroundColor: t.c.bg }}>
       {isDesktop ? (
-        <View style={{ flex: 1.1, backgroundColor: t.c.board, padding: 48, justifyContent: "space-between" }}>
+        <View
+          style={{
+            flex: 1.1,
+            backgroundColor: t.c.board,
+            padding: 48,
+            justifyContent: "space-between",
+          }}
+        >
           <Col gap={6}>
-            <Text style={{ fontFamily: t.fonts.monoBold, color: t.c.boardText, letterSpacing: 3, fontSize: 13 }}>
+            <Text
+              style={{
+                fontFamily: t.fonts.monoBold,
+                color: t.c.boardText,
+                letterSpacing: 3,
+                fontSize: 13,
+              }}
+            >
               BHARATRAILGO
             </Text>
             <Text variant="display" style={{ color: "#F5F2EA", maxWidth: 460 }}>
               Every parcel, every train, every rupee — on one board.
             </Text>
           </Col>
-          <Board title="Departures · Parcel office" right={<BoardText dim>LIVE</BoardText>}>
+          <Board
+            title="Departures · Parcel office"
+            right={<BoardText dim>LIVE</BoardText>}
+          >
             {DEMO_ROWS.map((r, i) => (
               <Row key={r[0]} gap={10}>
-                <FlapText text={r[0]} width={5} size={16} stagger={30 + i * 10} />
-                <FlapText text={r[1]} width={4} size={16} stagger={40 + i * 10} />
+                <FlapText
+                  text={r[0]}
+                  width={5}
+                  size={16}
+                  stagger={30 + i * 10}
+                />
+                <FlapText
+                  text={r[1]}
+                  width={4}
+                  size={16}
+                  stagger={40 + i * 10}
+                />
                 <View style={{ flex: 1 }} />
                 <BoardText>{r[2]}</BoardText>
                 <View style={{ width: 96 }}>
@@ -40,16 +67,23 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
             ))}
           </Board>
           <Text variant="caption" style={{ color: "#8C8778" }}>
-            Booking · Bilti · GST invoices · Collections — for railway parcel agents.
+            Booking · Bilti · GST invoices · Collections — for railway parcel
+            agents.
           </Text>
         </View>
       ) : null}
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: isPhone ? 20 : 48 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          padding: isPhone ? 20 : 48,
+        }}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={{ width: "100%", maxWidth: 440, alignSelf: "center" }}>{children}</View>
+        <View style={{ width: "100%", maxWidth: 440, alignSelf: "center" }}>
+          {children}
+        </View>
       </ScrollView>
     </View>
   );

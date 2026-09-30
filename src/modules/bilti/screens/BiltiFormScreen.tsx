@@ -24,8 +24,18 @@ import {
 } from "@shared/ui";
 import { useLayout, useTheme } from "@shared/useTheme";
 import { useApiGet, useApiMutation } from "@shared/api/query";
-import { apiClient, apiErrorCode, apiErrorMessage, type Envelope } from "@shared/api/apiClient";
-import { loadPartyOptions, loadStationOptions, useBranches, useBusinessProfile } from "@shared/api/lookups";
+import {
+  apiClient,
+  apiErrorCode,
+  apiErrorMessage,
+  type Envelope,
+} from "@shared/api/apiClient";
+import {
+  loadPartyOptions,
+  loadStationOptions,
+  useBranches,
+  useBusinessProfile,
+} from "@shared/api/lookups";
 import { useReadOnly } from "@shared/lib/permissions";
 import { isoDay } from "@shared/lib/format";
 import { useBranchStore } from "@shared/store/useBranchStore";
@@ -33,7 +43,10 @@ import { useAppNav, useParams } from "@navigation/useAppNav";
 import { FormError, type FormErrorState } from "../components/FormError";
 import { biltiNo, partyIdOf, type Pod, type PodInput } from "../types";
 
-const optionalAmount = z.number({ invalid_type_error: "Enter a number" }).min(0, "Cannot be negative").optional();
+const optionalAmount = z
+  .number({ invalid_type_error: "Enter a number" })
+  .min(0, "Cannot be negative")
+  .optional();
 
 const schema = z.object({
   date: z
@@ -49,17 +62,26 @@ const schema = z.object({
   consigneeMobile: z.string().trim(),
   consigneeAddress: z.string().trim(),
   packages: z
-    .number({ required_error: "Enter the number of packages", invalid_type_error: "Enter a number" })
+    .number({
+      required_error: "Enter the number of packages",
+      invalid_type_error: "Enter a number",
+    })
     .int("Whole packages only")
     .min(1, "At least 1 package"),
   actualWeight: optionalAmount,
   chargeableWeight: z
-    .number({ required_error: "Chargeable weight is required", invalid_type_error: "Enter a number" })
+    .number({
+      required_error: "Chargeable weight is required",
+      invalid_type_error: "Enter a number",
+    })
     .min(0, "Cannot be negative"),
   contents: z.string().trim(),
   givenName: z.string().trim(),
   originStation: z.string().trim(),
-  destinationStation: z.string().trim().min(1, "Destination station is required"),
+  destinationStation: z
+    .string()
+    .trim()
+    .min(1, "Destination station is required"),
   paidAmount: optionalAmount,
   toPayAmount: optionalAmount,
   otherCharges: optionalAmount,
@@ -67,8 +89,17 @@ const schema = z.object({
   notes: z.string().trim(),
 });
 type Form = z.infer<typeof schema>;
-type NumKey = "packages" | "actualWeight" | "chargeableWeight" | "paidAmount" | "toPayAmount" | "otherCharges";
-type TextKey = Exclude<keyof Form, NumKey | "date" | "party" | "originStation" | "destinationStation">;
+type NumKey =
+  | "packages"
+  | "actualWeight"
+  | "chargeableWeight"
+  | "paidAmount"
+  | "toPayAmount"
+  | "otherCharges";
+type TextKey = Exclude<
+  keyof Form,
+  NumKey | "date" | "party" | "originStation" | "destinationStation"
+>;
 
 const EMPTY: Partial<Form> = {
   date: isoDay(),
@@ -128,12 +159,25 @@ interface PartyFull {
 }
 
 /** Responsive field grid: one column on phones, `cols` columns otherwise. */
-function Grid({ children, cols = 2 }: { children: React.ReactNode; cols?: number }) {
+function Grid({
+  children,
+  cols = 2,
+}: {
+  children: React.ReactNode;
+  cols?: number;
+}) {
   const { isPhone } = useLayout();
   return (
     <Row gap={12} wrap align="flex-start">
       {React.Children.toArray(children).map((c, i) => (
-        <Col key={i} style={{ flexGrow: 1, flexBasis: isPhone ? "100%" : `${Math.floor(100 / cols) - 4}%`, minWidth: 140 }}>
+        <Col
+          key={i}
+          style={{
+            flexGrow: 1,
+            flexBasis: isPhone ? "100%" : `${Math.floor(100 / cols) - 4}%`,
+            minWidth: 140,
+          }}
+        >
           {c}
         </Col>
       ))}
@@ -154,7 +198,10 @@ export function BiltiEditScreen() {
   if (one.error) {
     return (
       <Screen title="Edit bilti" back backTo="Bilti" testID="bilti-edit-screen">
-        <ErrorState message={apiErrorMessage(one.error)} onRetry={() => one.refetch()} />
+        <ErrorState
+          message={apiErrorMessage(one.error)}
+          onRetry={() => one.refetch()}
+        />
       </Screen>
     );
   }
@@ -170,7 +217,15 @@ export function BiltiEditScreen() {
 
 /* ───────────── form ───────────── */
 
-function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod; partyId?: string }) {
+function BiltiForm({
+  mode,
+  pod,
+  partyId,
+}: {
+  mode: "create" | "edit";
+  pod?: Pod;
+  partyId?: string;
+}) {
   const t = useTheme();
   const nav = useAppNav();
   const { isPhone } = useLayout();
@@ -180,25 +235,37 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
   const branchId = useBranchStore((s) => s.branchId);
   const [saveError, setSaveError] = useState<FormErrorState | null>(null);
   const [partyLabel, setPartyLabel] = useState<string | undefined>(
-    pod && pod.party && typeof pod.party === "object" ? pod.party.name : undefined,
+    pod && pod.party && typeof pod.party === "object"
+      ? pod.party.name
+      : undefined,
   );
   const [partyLoading, setPartyLoading] = useState(false);
 
-  const { control, handleSubmit, formState, setValue, getValues } = useForm<Form>({
-    resolver: zodResolver(schema),
-    defaultValues: pod ? fromPod(pod) : EMPTY,
-  });
+  const { control, handleSubmit, formState, setValue, getValues } =
+    useForm<Form>({
+      resolver: zodResolver(schema),
+      defaultValues: pod ? fromPod(pod) : EMPTY,
+    });
 
-  const create = useApiMutation<Pod, PodInput>("post", "/pods", { invalidate: ["pods", "dashboard", "reports"] });
-  const update = useApiMutation<Pod, Partial<PodInput>>("patch", pod ? `/pods/${pod.id}` : "/pods", {
+  const create = useApiMutation<Pod, PodInput>("post", "/pods", {
     invalidate: ["pods", "dashboard", "reports"],
   });
+  const update = useApiMutation<Pod, Partial<PodInput>>(
+    "patch",
+    pod ? `/pods/${pod.id}` : "/pods",
+    {
+      invalidate: ["pods", "dashboard", "reports"],
+    },
+  );
 
   // Default origin = the working branch's station (create only).
   useEffect(() => {
     if (mode !== "create" || getValues("originStation")) return;
     const list = branches.data || [];
-    const b = branchId !== "all" ? list.find((x) => x.id === branchId) : list.find((x) => x.isHeadOffice);
+    const b =
+      branchId !== "all"
+        ? list.find((x) => x.id === branchId)
+        : list.find((x) => x.isHeadOffice);
     if (b?.stationCode) setValue("originStation", b.stationCode.toUpperCase());
   }, [mode, branches.data, branchId, getValues, setValue]);
 
@@ -212,7 +279,10 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
       setValue("party", p.id);
       setValue("consignorName", p.name || "", { shouldValidate: true });
       setValue("consignorMobile", p.mobile || "");
-      setValue("consignorAddress", [p.address, p.city, p.state].filter(Boolean).join(", "));
+      setValue(
+        "consignorAddress",
+        [p.address, p.city, p.state].filter(Boolean).join(", "),
+      );
     } catch (err) {
       toast.error(apiErrorMessage(err, "Could not load the party"));
     } finally {
@@ -229,7 +299,10 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, partyId]);
 
-  const [paid, toPay, other] = useWatch({ control, name: ["paidAmount", "toPayAmount", "otherCharges"] });
+  const [paid, toPay, other] = useWatch({
+    control,
+    name: ["paidAmount", "toPayAmount", "otherCharges"],
+  });
   const total = (paid || 0) + (toPay || 0) + (other || 0);
 
   const onSubmit = handleSubmit(async (v) => {
@@ -238,11 +311,15 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
     const body: PodInput = {
       date: v.date,
       consignorName: v.consignorName,
-      consignorMobile: mode === "edit" ? v.consignorMobile : s(v.consignorMobile),
-      consignorAddress: mode === "edit" ? v.consignorAddress : s(v.consignorAddress),
+      consignorMobile:
+        mode === "edit" ? v.consignorMobile : s(v.consignorMobile),
+      consignorAddress:
+        mode === "edit" ? v.consignorAddress : s(v.consignorAddress),
       consigneeName: v.consigneeName,
-      consigneeMobile: mode === "edit" ? v.consigneeMobile : s(v.consigneeMobile),
-      consigneeAddress: mode === "edit" ? v.consigneeAddress : s(v.consigneeAddress),
+      consigneeMobile:
+        mode === "edit" ? v.consigneeMobile : s(v.consigneeMobile),
+      consigneeAddress:
+        mode === "edit" ? v.consigneeAddress : s(v.consigneeAddress),
       party: s(v.party),
       packages: v.packages,
       actualWeight: v.actualWeight,
@@ -254,13 +331,16 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
       paidAmount: v.paidAmount ?? 0,
       toPayAmount: v.toPayAmount ?? 0,
       otherCharges: v.otherCharges ?? 0,
-      railwayReceiptNumber: mode === "edit" ? v.railwayReceiptNumber : s(v.railwayReceiptNumber),
+      railwayReceiptNumber:
+        mode === "edit" ? v.railwayReceiptNumber : s(v.railwayReceiptNumber),
       notes: mode === "edit" ? v.notes : s(v.notes),
     };
     try {
       if (mode === "create") {
         const saved = await create.mutateAsync(body);
-        toast.success(`Bilti ${biltiNo(profile.data?.podNumberPrefix, saved.podNumber)} saved`);
+        toast.success(
+          `Bilti ${biltiNo(profile.data?.podNumberPrefix, saved.podNumber)} saved`,
+        );
         if (nav.replace) nav.replace("BiltiDetail", { id: saved.id });
         else nav.navigate("BiltiDetail", { id: saved.id });
       } else if (pod) {
@@ -300,7 +380,11 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
       )}
     />
   );
-  const num = (name: NumKey, label: string, props: { hint?: string; placeholder?: string } = {}) => (
+  const num = (
+    name: NumKey,
+    label: string,
+    props: { hint?: string; placeholder?: string } = {},
+  ) => (
     <Controller
       control={control}
       name={name}
@@ -316,7 +400,10 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
       )}
     />
   );
-  const station = (name: "originStation" | "destinationStation", label: string) => (
+  const station = (
+    name: "originStation" | "destinationStation",
+    label: string,
+  ) => (
     <Controller
       control={control}
       name={name}
@@ -337,13 +424,19 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
   );
 
   const title =
-    mode === "create" ? "New bilti" : `Edit bilti ${biltiNo(profile.data?.podNumberPrefix, pod?.podNumber)}`;
+    mode === "create"
+      ? "New bilti"
+      : `Edit bilti ${biltiNo(profile.data?.podNumberPrefix, pod?.podNumber)}`;
   const busy = formState.isSubmitting;
 
   return (
     <Screen
       title={title}
-      subtitle={mode === "create" ? "Receipt for goods received at the godown" : undefined}
+      subtitle={
+        mode === "create"
+          ? "Receipt for goods received at the godown"
+          : undefined
+      }
       back
       backTo="Bilti"
       maxWidth={960}
@@ -356,7 +449,15 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
             title="Read-only mode"
             message="Your subscription has expired, so bilti cannot be saved."
             testID="bilti-form-readonly"
-            action={<Button title="Plan" size="sm" variant="secondary" testID="bilti-form-plan" onPress={() => nav.navigate("Plan")} />}
+            action={
+              <Button
+                title="Plan"
+                size="sm"
+                variant="secondary"
+                testID="bilti-form-plan"
+                onPress={() => nav.navigate("Plan")}
+              />
+            }
           />
         ) : null}
         <FormError error={saveError} testID="bilti-form-error" />
@@ -369,9 +470,22 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
               name="date"
               render={({ field: f, fieldState }) =>
                 mode === "edit" ? (
-                  <TextField label="Date" value={f.value} editable={false} mono testID="bilti-date" hint="Date cannot be changed after issue" />
+                  <TextField
+                    label="Date"
+                    value={f.value}
+                    editable={false}
+                    mono
+                    testID="bilti-date"
+                    hint="Date cannot be changed after issue"
+                  />
                 ) : (
-                  <DateField testID="bilti-date" label="Date" value={f.value} onChange={f.onChange} error={fieldState.error?.message} />
+                  <DateField
+                    testID="bilti-date"
+                    label="Date"
+                    value={f.value}
+                    onChange={f.onChange}
+                    error={fieldState.error?.message}
+                  />
                 )
               }
             />
@@ -382,8 +496,12 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
                 <Combobox
                   testID="bilti-party"
                   label="Linked party (optional)"
-                  placeholder={partyLoading ? "Loading party…" : "Pick a saved customer"}
-                  valueLabel={f.value ? partyLabel || "Linked party" : undefined}
+                  placeholder={
+                    partyLoading ? "Loading party…" : "Pick a saved customer"
+                  }
+                  valueLabel={
+                    f.value ? partyLabel || "Linked party" : undefined
+                  }
                   selectedValue={f.value || null}
                   loadOptions={loadPartyOptions}
                   clearable={mode === "create"}
@@ -407,16 +525,27 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
           <Card style={{ flexGrow: 1, flexBasis: isPhone ? "100%" : 360 }}>
             <SectionHeader title="Consignor (sender)" />
             <Col gap={12}>
-              {txt("consignorName", "Name", { placeholder: "Who brought the goods" })}
-              {txt("consignorMobile", "Mobile", { keyboardType: "phone-pad", maxLength: 13 })}
+              {txt("consignorName", "Name", {
+                placeholder: "Who brought the goods",
+              })}
+              {txt("consignorMobile", "Mobile", {
+                keyboardType: "phone-pad",
+                maxLength: 13,
+              })}
               {txt("consignorAddress", "Address", { multiline: true })}
             </Col>
           </Card>
           <Card style={{ flexGrow: 1, flexBasis: isPhone ? "100%" : 360 }}>
             <SectionHeader title="Consignee (receiver)" />
             <Col gap={12}>
-              {txt("consigneeName", "Name", { placeholder: "Who receives at destination" })}
-              {txt("consigneeMobile", "Mobile", { keyboardType: "phone-pad", maxLength: 13, hint: "Used for SMS and WhatsApp updates" })}
+              {txt("consigneeName", "Name", {
+                placeholder: "Who receives at destination",
+              })}
+              {txt("consigneeMobile", "Mobile", {
+                keyboardType: "phone-pad",
+                maxLength: 13,
+                hint: "Used for SMS and WhatsApp updates",
+              })}
               {txt("consigneeAddress", "Address", { multiline: true })}
             </Col>
           </Card>
@@ -431,8 +560,12 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
               {num("chargeableWeight", "Chargeable weight (kg)")}
             </Grid>
             <Grid>
-              {txt("contents", "Contents", { placeholder: "e.g. Garments, spare parts" })}
-              {txt("givenName", "Given name", { hint: "Alias printed on the parcel" })}
+              {txt("contents", "Contents", {
+                placeholder: "e.g. Garments, spare parts",
+              })}
+              {txt("givenName", "Given name", {
+                hint: "Alias printed on the parcel",
+              })}
             </Grid>
             <Grid>
               {station("originStation", "Origin station")}
@@ -452,7 +585,11 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
             <Row
               justify="space-between"
               testID="bilti-total"
-              style={{ paddingTop: 12, borderTopWidth: 1, borderTopColor: t.c.border }}
+              style={{
+                paddingTop: 12,
+                borderTopWidth: 1,
+                borderTopColor: t.c.border,
+              }}
             >
               <Text variant="overline" tone="muted">
                 Total
@@ -465,7 +602,10 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
         <Card>
           <SectionHeader title="Other" />
           <Col gap={12}>
-            {txt("railwayReceiptNumber", "RR number", { mono: true, autoCapitalize: "characters" })}
+            {txt("railwayReceiptNumber", "RR number", {
+              mono: true,
+              autoCapitalize: "characters",
+            })}
             {txt("notes", "Notes", { multiline: true })}
           </Col>
         </Card>
@@ -475,7 +615,9 @@ function BiltiForm({ mode, pod, partyId }: { mode: "create" | "edit"; pod?: Pod;
             testID="bilti-cancel"
             title="Cancel"
             variant="secondary"
-            onPress={() => (nav.canGoBack() ? nav.goBack() : nav.navigate("Bilti"))}
+            onPress={() =>
+              nav.canGoBack() ? nav.goBack() : nav.navigate("Bilti")
+            }
           />
           <Button
             testID="bilti-save"

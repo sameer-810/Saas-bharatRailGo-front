@@ -1,6 +1,15 @@
 /** One GST invoice: header, booking lines, Pure Agent totals, and status actions. */
 import React, { useState } from "react";
-import { Ban, CheckCircle2, FileDown, Pencil, Plus, Send, Trash2, X } from "lucide-react-native";
+import {
+  Ban,
+  CheckCircle2,
+  FileDown,
+  Pencil,
+  Plus,
+  Send,
+  Trash2,
+  X,
+} from "lucide-react-native";
 import {
   Banner,
   Button,
@@ -57,32 +66,61 @@ export function InvoiceDetailScreen() {
   const inv = q.data;
 
   const statusOpts = { invalidate: INVOICE_INVALIDATE, body: () => ({}) };
-  const finalize = useApiMutation<Invoice, void>("post", `/invoices/${id}/finalize`, statusOpts);
-  const markPaid = useApiMutation<Invoice, void>("post", `/invoices/${id}/mark-paid`, statusOpts);
-  const cancel = useApiMutation<Invoice, void>("post", `/invoices/${id}/cancel`, statusOpts);
+  const finalize = useApiMutation<Invoice, void>(
+    "post",
+    `/invoices/${id}/finalize`,
+    statusOpts,
+  );
+  const markPaid = useApiMutation<Invoice, void>(
+    "post",
+    `/invoices/${id}/mark-paid`,
+    statusOpts,
+  );
+  const cancel = useApiMutation<Invoice, void>(
+    "post",
+    `/invoices/${id}/cancel`,
+    statusOpts,
+  );
   const removeLine = useApiMutation<Invoice, { cid: string }>(
     "delete",
     (v) => `/invoices/${id}/consignments/${v.cid}`,
     { invalidate: INVOICE_INVALIDATE },
   );
-  const remove = useApiMutation<unknown, void>("delete", `/invoices/${id}`, { invalidate: INVOICE_INVALIDATE });
+  const remove = useApiMutation<unknown, void>("delete", `/invoices/${id}`, {
+    invalidate: INVOICE_INVALIDATE,
+  });
 
   if (q.isLoading) {
     return (
-      <Screen title="Invoice" back backTo="Invoices" testID="invoice-detail-screen">
+      <Screen
+        title="Invoice"
+        back
+        backTo="Invoices"
+        testID="invoice-detail-screen"
+      >
         <LoadingBlock />
       </Screen>
     );
   }
   if (q.error || !inv) {
     return (
-      <Screen title="Invoice" back backTo="Invoices" testID="invoice-detail-screen">
-        <ErrorState message={q.error ? apiErrorMessage(q.error) : "Invoice not found"} onRetry={() => q.refetch()} />
+      <Screen
+        title="Invoice"
+        back
+        backTo="Invoices"
+        testID="invoice-detail-screen"
+      >
+        <ErrorState
+          message={q.error ? apiErrorMessage(q.error) : "Invoice not found"}
+          onRetry={() => q.refetch()}
+        />
       </Screen>
     );
   }
 
-  const lines = inv.consignments.filter((c): c is InvoiceConsignment => typeof c === "object" && c !== null);
+  const lines = inv.consignments.filter(
+    (c): c is InvoiceConsignment => typeof c === "object" && c !== null,
+  );
   const isDraft = inv.status === "draft";
   const isSent = inv.status === "sent";
   const pid = invoicePartyId(inv);
@@ -90,9 +128,20 @@ export function InvoiceDetailScreen() {
 
   const run = async (
     m: { mutateAsync: (v: void) => Promise<Invoice> },
-    opts: { title: string; message: string; confirmLabel: string; danger?: boolean; done: string },
+    opts: {
+      title: string;
+      message: string;
+      confirmLabel: string;
+      danger?: boolean;
+      done: string;
+    },
   ) => {
-    const ok = await confirm({ title: opts.title, message: opts.message, confirmLabel: opts.confirmLabel, danger: opts.danger });
+    const ok = await confirm({
+      title: opts.title,
+      message: opts.message,
+      confirmLabel: opts.confirmLabel,
+      danger: opts.danger,
+    });
     if (!ok) return;
     try {
       await m.mutateAsync();
@@ -120,7 +169,8 @@ export function InvoiceDetailScreen() {
   const onCancel = () =>
     run(cancel, {
       title: `Cancel bill ${inv.billNumber}?`,
-      message: "The bill is voided and its bookings are released so they can be put on another invoice. This cannot be undone.",
+      message:
+        "The bill is voided and its bookings are released so they can be put on another invoice. This cannot be undone.",
       confirmLabel: "Cancel invoice",
       danger: true,
       done: "Invoice cancelled",
@@ -129,7 +179,8 @@ export function InvoiceDetailScreen() {
   const onDelete = async () => {
     const ok = await confirm({
       title: `Delete draft ${inv.billNumber}?`,
-      message: "The draft is removed and its bookings become available to bill again.",
+      message:
+        "The draft is removed and its bookings become available to bill again.",
       confirmLabel: "Delete draft",
       danger: true,
     });
@@ -145,7 +196,9 @@ export function InvoiceDetailScreen() {
 
   const onRemoveLine = async (c: InvoiceConsignment) => {
     if (lines.length <= 1) {
-      toast.error("An invoice must keep at least one booking. Delete the draft instead.");
+      toast.error(
+        "An invoice must keep at least one booking. Delete the draft instead.",
+      );
       return;
     }
     const ok = await confirm({
@@ -193,7 +246,11 @@ export function InvoiceDetailScreen() {
       flex: 1.6,
       render: (c) => (
         <Col gap={0}>
-          <Text tone="accent" onPress={() => nav.navigate("BookingDetail", { id: c.id })} testID={`invoice-line-link-${c.id}`}>
+          <Text
+            tone="accent"
+            onPress={() => nav.navigate("BookingDetail", { id: c.id })}
+            testID={`invoice-line-link-${c.id}`}
+          >
             {formatDate(c.date)}
           </Text>
           <Text variant="caption" tone="muted" style={mono}>
@@ -213,7 +270,13 @@ export function InvoiceDetailScreen() {
         </Text>
       ),
     },
-    { key: "pkg", title: "Pkgs", flex: 0.5, align: "right", render: (c) => <Text style={mono}>{c.packages ?? "—"}</Text> },
+    {
+      key: "pkg",
+      title: "Pkgs",
+      flex: 0.5,
+      align: "right",
+      render: (c) => <Text style={mono}>{c.packages ?? "—"}</Text>,
+    },
     {
       key: "reimb",
       title: "Reimb.",
@@ -221,7 +284,13 @@ export function InvoiceDetailScreen() {
       align: "right",
       render: (c) => <Money value={c.reimbursementAmount} tone="muted" />,
     },
-    { key: "svc", title: "Service", flex: 0.9, align: "right", render: (c) => <Money value={serviceOf(c)} /> },
+    {
+      key: "svc",
+      title: "Service",
+      flex: 0.9,
+      align: "right",
+      render: (c) => <Money value={serviceOf(c)} />,
+    },
     {
       key: "total",
       title: "Total",
@@ -243,25 +312,76 @@ export function InvoiceDetailScreen() {
     />
   );
   if (canEditLines) {
-    columns.push({ key: "remove", title: "", flex: 0.4, align: "right", hideOnPhone: true, render: removeButton });
+    columns.push({
+      key: "remove",
+      title: "",
+      flex: 0.4,
+      align: "right",
+      hideOnPhone: true,
+      render: removeButton,
+    });
   }
 
   const actions = (
     <>
-      <Button title="PDF" icon={FileDown} variant="secondary" onPress={onPdf} loading={pdfBusy} testID="invoice-pdf" />
+      <Button
+        title="PDF"
+        icon={FileDown}
+        variant="secondary"
+        onPress={onPdf}
+        loading={pdfBusy}
+        testID="invoice-pdf"
+      />
       {isDraft ? (
         <>
-          <Button title="Edit" icon={Pencil} variant="secondary" onPress={() => setEditing(true)} disabled={readOnly} testID="invoice-edit" />
-          <Button title="Finalize" icon={Send} onPress={onFinalize} loading={finalize.isPending} disabled={readOnly} testID="invoice-finalize" />
+          <Button
+            title="Edit"
+            icon={Pencil}
+            variant="secondary"
+            onPress={() => setEditing(true)}
+            disabled={readOnly}
+            testID="invoice-edit"
+          />
+          <Button
+            title="Finalize"
+            icon={Send}
+            onPress={onFinalize}
+            loading={finalize.isPending}
+            disabled={readOnly}
+            testID="invoice-finalize"
+          />
           {canDelete ? (
-            <Button title="Delete" icon={Trash2} variant="danger" onPress={onDelete} loading={remove.isPending} disabled={readOnly} testID="invoice-delete" />
+            <Button
+              title="Delete"
+              icon={Trash2}
+              variant="danger"
+              onPress={onDelete}
+              loading={remove.isPending}
+              disabled={readOnly}
+              testID="invoice-delete"
+            />
           ) : null}
         </>
       ) : null}
       {isSent ? (
         <>
-          <Button title="Mark paid" icon={CheckCircle2} onPress={onMarkPaid} loading={markPaid.isPending} disabled={readOnly} testID="invoice-mark-paid" />
-          <Button title="Cancel invoice" icon={Ban} variant="danger" onPress={onCancel} loading={cancel.isPending} disabled={readOnly} testID="invoice-cancel" />
+          <Button
+            title="Mark paid"
+            icon={CheckCircle2}
+            onPress={onMarkPaid}
+            loading={markPaid.isPending}
+            disabled={readOnly}
+            testID="invoice-mark-paid"
+          />
+          <Button
+            title="Cancel invoice"
+            icon={Ban}
+            variant="danger"
+            onPress={onCancel}
+            loading={cancel.isPending}
+            disabled={readOnly}
+            testID="invoice-cancel"
+          />
         </>
       ) : null}
     </>
@@ -282,7 +402,11 @@ export function InvoiceDetailScreen() {
     >
       <Col gap={16}>
         {readOnly ? (
-          <Banner tone="warning" title="Read-only" message="Your subscription has expired, so this invoice cannot be changed. You can still open the PDF." />
+          <Banner
+            tone="warning"
+            title="Read-only"
+            message="Your subscription has expired, so this invoice cannot be changed. You can still open the PDF."
+          />
         ) : null}
         {isDraft ? (
           <Banner
@@ -293,7 +417,11 @@ export function InvoiceDetailScreen() {
           />
         ) : null}
         {inv.status === "cancelled" ? (
-          <Banner tone="danger" title="Cancelled" message="This bill is void. Its bookings were released and can be billed again." />
+          <Banner
+            tone="danger"
+            title="Cancelled"
+            message="This bill is void. Its bookings were released and can be billed again."
+          />
         ) : null}
 
         <Card>
@@ -318,7 +446,11 @@ export function InvoiceDetailScreen() {
               [
                 "Billed to",
                 pid ? (
-                  <Text tone="accent" onPress={() => nav.navigate("PartyDetail", { id: pid })} testID="invoice-party-link">
+                  <Text
+                    tone="accent"
+                    onPress={() => nav.navigate("PartyDetail", { id: pid })}
+                    testID="invoice-party-link"
+                  >
                     {snap.name || invoicePartyName(inv)}
                   </Text>
                 ) : (
@@ -352,7 +484,14 @@ export function InvoiceDetailScreen() {
             title={`Bookings on this bill (${lines.length})`}
             action={
               isDraft && !readOnly ? (
-                <Button title="Add bookings" icon={Plus} size="sm" variant="secondary" onPress={() => setAdding(true)} testID="invoice-add-consignments" />
+                <Button
+                  title="Add bookings"
+                  icon={Plus}
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => setAdding(true)}
+                  testID="invoice-add-consignments"
+                />
               ) : undefined
             }
           />
@@ -370,7 +509,11 @@ export function InvoiceDetailScreen() {
           />
         </Col>
 
-        <TotalsBlock totals={totals} amountInWords={inv.amountInWords} testID="invoice-totals" />
+        <TotalsBlock
+          totals={totals}
+          amountInWords={inv.amountInWords}
+          testID="invoice-totals"
+        />
       </Col>
 
       {isDraft ? (
@@ -379,9 +522,17 @@ export function InvoiceDetailScreen() {
             invoice={inv}
             visible={editing}
             onClose={() => setEditing(false)}
-            defaults={{ cgst: profile.data?.defaultCgstRate, sgst: profile.data?.defaultSgstRate }}
+            defaults={{
+              cgst: profile.data?.defaultCgstRate,
+              sgst: profile.data?.defaultSgstRate,
+            }}
           />
-          <AddConsignmentsDialog invoiceId={inv.id} partyId={pid} visible={adding} onClose={() => setAdding(false)} />
+          <AddConsignmentsDialog
+            invoiceId={inv.id}
+            partyId={pid}
+            visible={adding}
+            onClose={() => setAdding(false)}
+          />
         </>
       ) : null}
     </Screen>

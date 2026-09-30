@@ -4,7 +4,13 @@ import { Row } from "@shared/ui";
 import { useLayout } from "@shared/useTheme";
 
 /** Side-by-side fields on tablet/desktop, stacked on phones. */
-export function FormGrid({ children, columns }: { children: React.ReactNode; columns?: number }) {
+export function FormGrid({
+  children,
+  columns,
+}: {
+  children: React.ReactNode;
+  columns?: number;
+}) {
   const { isPhone } = useLayout();
   const items = React.Children.toArray(children).filter(Boolean);
   if (isPhone) {
@@ -14,7 +20,14 @@ export function FormGrid({ children, columns }: { children: React.ReactNode; col
   return (
     <Row gap={12} align="flex-start" wrap>
       {items.map((child, i) => (
-        <View key={i} style={{ flexBasis: `${Math.floor(100 / cols) - 2}%`, flexGrow: 1, minWidth: 160 }}>
+        <View
+          key={i}
+          style={{
+            flexBasis: `${Math.floor(100 / cols) - 2}%`,
+            flexGrow: 1,
+            minWidth: 160,
+          }}
+        >
           {child}
         </View>
       ))}

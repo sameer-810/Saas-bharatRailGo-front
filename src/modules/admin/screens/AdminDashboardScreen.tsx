@@ -31,14 +31,24 @@ import { useLayout, useTheme } from "@shared/useTheme";
 import { apiErrorMessage } from "@shared/api/apiClient";
 import { formatDate, formatMoney, formatNumber } from "@shared/lib/format";
 import { useAdminNav } from "@navigation/useAppNav";
-import { adminActions, useAdminDashboard, useAdminMutation, useAdminOrgs, type AdminOrg } from "../api";
+import {
+  adminActions,
+  useAdminDashboard,
+  useAdminMutation,
+  useAdminOrgs,
+  type AdminOrg,
+} from "../api";
 
 export function AdminDashboardScreen() {
   const t = useTheme();
   const { isPhone } = useLayout();
   const nav = useAdminNav();
   const dash = useAdminDashboard();
-  const pending = useAdminOrgs({ approvalStatus: "pending", limit: 5, page: 1 });
+  const pending = useAdminOrgs({
+    approvalStatus: "pending",
+    limit: 5,
+    page: 1,
+  });
   const approve = useAdminMutation((id: string) => adminActions.approve(id));
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -61,7 +71,8 @@ export function AdminDashboardScreen() {
 
   const d = dash.data;
   const o = d?.organizations;
-  const toOrgs = (params: Record<string, unknown>) => nav.navigate("AdminOrgs", params);
+  const toOrgs = (params: Record<string, unknown>) =>
+    nav.navigate("AdminOrgs", params);
 
   return (
     <Screen
@@ -70,10 +81,21 @@ export function AdminDashboardScreen() {
       testID="admin-dashboard"
       refreshing={dash.isRefetching}
       onRefresh={refresh}
-      actions={<Button title="Refresh" variant="secondary" size="sm" onPress={refresh} testID="admin-dashboard-refresh" />}
+      actions={
+        <Button
+          title="Refresh"
+          variant="secondary"
+          size="sm"
+          onPress={refresh}
+          testID="admin-dashboard-refresh"
+        />
+      }
     >
       {dash.error ? (
-        <ErrorState message={apiErrorMessage(dash.error)} onRetry={() => dash.refetch()} />
+        <ErrorState
+          message={apiErrorMessage(dash.error)}
+          onRetry={() => dash.refetch()}
+        />
       ) : !d || !o ? (
         <LoadingBlock rows={4} />
       ) : (
@@ -81,14 +103,23 @@ export function AdminDashboardScreen() {
           <Board
             title="Recurring revenue"
             testID="admin-revenue-board"
-            right={<BoardText dim>{`${formatNumber(o.active)} PAID`}</BoardText>}
+            right={
+              <BoardText dim>{`${formatNumber(o.active)} PAID`}</BoardText>
+            }
           >
             <Row gap={isPhone ? 16 : 40} wrap align="flex-end">
               <Col gap={6}>
                 <BoardText dim size={12}>
                   MRR
                 </BoardText>
-                <FlapText testID="admin-mrr" text={formatMoney(d.mrr, { compact: true }).replace("₹", "RS ")} size={isPhone ? 18 : 24} />
+                <FlapText
+                  testID="admin-mrr"
+                  text={formatMoney(d.mrr, { compact: true }).replace(
+                    "₹",
+                    "RS ",
+                  )}
+                  size={isPhone ? 18 : 24}
+                />
                 <BoardText dim size={12}>
                   {formatMoney(d.mrr)}
                 </BoardText>
@@ -97,7 +128,14 @@ export function AdminDashboardScreen() {
                 <BoardText dim size={12}>
                   ARR
                 </BoardText>
-                <FlapText testID="admin-arr" text={formatMoney(d.arr, { compact: true }).replace("₹", "RS ")} size={isPhone ? 18 : 24} />
+                <FlapText
+                  testID="admin-arr"
+                  text={formatMoney(d.arr, { compact: true }).replace(
+                    "₹",
+                    "RS ",
+                  )}
+                  size={isPhone ? 18 : 24}
+                />
                 <BoardText dim size={12}>
                   {formatMoney(d.arr)}
                 </BoardText>
@@ -183,12 +221,19 @@ export function AdminDashboardScreen() {
           }
         />
         {pending.error ? (
-          <ErrorState message={apiErrorMessage(pending.error)} onRetry={() => pending.refetch()} />
+          <ErrorState
+            message={apiErrorMessage(pending.error)}
+            onRetry={() => pending.refetch()}
+          />
         ) : pending.isLoading ? (
           <LoadingBlock rows={3} />
         ) : !pending.data?.items.length ? (
           <Card>
-            <EmptyState icon={CheckCircle2} title="No pending signups" message="New agency signups waiting for approval appear here." />
+            <EmptyState
+              icon={CheckCircle2}
+              title="No pending signups"
+              message="New agency signups waiting for approval appear here."
+            />
           </Card>
         ) : (
           <Card padding={0} testID="admin-pending-list">
@@ -211,15 +256,27 @@ export function AdminDashboardScreen() {
                     variant="bodyStrong"
                     tone="accent"
                     testID={`admin-pending-open-${org.id}`}
-                    onPress={() => nav.navigate("AdminOrgDetail", { id: org.id })}
+                    onPress={() =>
+                      nav.navigate("AdminOrgDetail", { id: org.id })
+                    }
                   >
                     {org.name}
                   </Text>
                   <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {[org.city, org.email, org.mobile].filter(Boolean).join(" · ") || "—"}
+                    {[org.city, org.email, org.mobile]
+                      .filter(Boolean)
+                      .join(" · ") || "—"}
                   </Text>
                   <Text variant="caption" tone="faint">
-                    {org.gstin ? <Text variant="caption" tone="faint" style={{ fontFamily: t.fonts.mono }}>{org.gstin} · </Text> : null}
+                    {org.gstin ? (
+                      <Text
+                        variant="caption"
+                        tone="faint"
+                        style={{ fontFamily: t.fonts.mono }}
+                      >
+                        {org.gstin} ·{" "}
+                      </Text>
+                    ) : null}
                     Signed up {formatDate(org.createdAt)}
                   </Text>
                 </Col>
@@ -229,7 +286,9 @@ export function AdminDashboardScreen() {
                     variant="secondary"
                     size="sm"
                     testID={`admin-pending-review-${org.id}`}
-                    onPress={() => nav.navigate("AdminOrgDetail", { id: org.id })}
+                    onPress={() =>
+                      nav.navigate("AdminOrgDetail", { id: org.id })
+                    }
                   />
                   <Button
                     title="Approve"

@@ -17,7 +17,8 @@ export function BackupCard() {
   const qc = useQueryClient();
   const profile = useBusinessProfile();
   const loginEmail = useAuthStore((s) => s.user?.email);
-  const saved = (profile.data as { backupEmail?: string } | undefined)?.backupEmail || "";
+  const saved =
+    (profile.data as { backupEmail?: string } | undefined)?.backupEmail || "";
   const [email, setEmail] = useState(saved);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
@@ -29,7 +30,11 @@ export function BackupCard() {
     try {
       await apiClient.patch("/business-profile", { backupEmail: email.trim() });
       qc.invalidateQueries({ queryKey: ["business-profile"] });
-      toast.success(email.trim() ? "Backup email saved" : "Backups will go to your login email");
+      toast.success(
+        email.trim()
+          ? "Backup email saved"
+          : "Backups will go to your login email",
+      );
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
@@ -41,9 +46,19 @@ export function BackupCard() {
     setSending(true);
     try {
       const res = await apiClient.post("/backup/email");
-      const d = res.data.data as { emailedTo: string; delivered: boolean; documents: number };
-      if (d.delivered) toast.success(`Backup of ${d.documents} records sent to ${d.emailedTo}`);
-      else toast.info("Backup prepared, but email is not set up on the server yet");
+      const d = res.data.data as {
+        emailedTo: string;
+        delivered: boolean;
+        documents: number;
+      };
+      if (d.delivered)
+        toast.success(
+          `Backup of ${d.documents} records sent to ${d.emailedTo}`,
+        );
+      else
+        toast.info(
+          "Backup prepared, but email is not set up on the server yet",
+        );
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
@@ -59,8 +74,9 @@ export function BackupCard() {
           <Col gap={4}>
             <Text variant="h3">Data backup</Text>
             <Text variant="caption" tone="muted">
-              Email yourself a complete copy of your agency&apos;s data — a spreadsheet you can open plus the files
-              needed to restore your account. We also back up the whole platform every night.
+              Email yourself a complete copy of your agency&apos;s data — a
+              spreadsheet you can open plus the files needed to restore your
+              account. We also back up the whole platform every night.
             </Text>
           </Col>
           <Row gap={8} align="flex-end" wrap>
@@ -73,10 +89,18 @@ export function BackupCard() {
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                hint={email ? undefined : `Blank = your login email (${loginEmail})`}
+                hint={
+                  email ? undefined : `Blank = your login email (${loginEmail})`
+                }
               />
             </Col>
-            <Button title="Save" variant="secondary" loading={saving} onPress={saveEmail} testID="backup-email-save" />
+            <Button
+              title="Save"
+              variant="secondary"
+              loading={saving}
+              onPress={saveEmail}
+              testID="backup-email-save"
+            />
           </Row>
           <Button
             title="Email my backup now"

@@ -8,7 +8,8 @@ import type { StateStorage } from "zustand/middleware";
  */
 export const secureStorage: StateStorage = {
   getItem: async (name) => {
-    if (Platform.OS === "web") return globalThis.localStorage?.getItem(name) ?? null;
+    if (Platform.OS === "web")
+      return globalThis.localStorage?.getItem(name) ?? null;
     return SecureStore.getItemAsync(name);
   },
   setItem: async (name, value) => {

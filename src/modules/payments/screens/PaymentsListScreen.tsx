@@ -24,7 +24,13 @@ import { formatDate } from "@shared/lib/format";
 import { useReadOnly } from "@shared/lib/permissions";
 import { useAppNav } from "@navigation/useAppNav";
 import { round2 } from "../lib";
-import { PAYMENT_MODES, PAYMENT_MODE_LABEL, partyName, type Payment, type PaymentMode } from "../types";
+import {
+  PAYMENT_MODES,
+  PAYMENT_MODE_LABEL,
+  partyName,
+  type Payment,
+  type PaymentMode,
+} from "../types";
 
 export function PaymentsListScreen() {
   const t = useTheme();
@@ -51,18 +57,32 @@ export function PaymentsListScreen() {
   const totals = useMemo(() => {
     const items = rows || [];
     const amount = round2(items.reduce((s, p) => s + (p.amount || 0), 0));
-    const advance = round2(items.reduce((s, p) => s + (p.unallocatedAmount || 0), 0));
-    return { amount, advance, allocated: round2(amount - advance), count: items.length };
+    const advance = round2(
+      items.reduce((s, p) => s + (p.unallocatedAmount || 0), 0),
+    );
+    return {
+      amount,
+      advance,
+      allocated: round2(amount - advance),
+      count: items.length,
+    };
   }, [rows]);
 
   const filtered = !!(party || mode || startDate || endDate);
-  const resetPage = <T,>(fn: (v: T) => void) => (v: T) => {
-    setPage(1);
-    fn(v);
-  };
+  const resetPage =
+    <T,>(fn: (v: T) => void) =>
+    (v: T) => {
+      setPage(1);
+      fn(v);
+    };
 
   const columns: Column<Payment>[] = [
-    { key: "date", title: "Date", flex: 0.9, render: (p) => <Text>{formatDate(p.date)}</Text> },
+    {
+      key: "date",
+      title: "Date",
+      flex: 0.9,
+      render: (p) => <Text>{formatDate(p.date)}</Text>,
+    },
     {
       key: "party",
       title: "Party",
@@ -73,14 +93,25 @@ export function PaymentsListScreen() {
         </Text>
       ),
     },
-    { key: "mode", title: "Mode", flex: 0.9, render: (p) => <Text tone="muted">{PAYMENT_MODE_LABEL[p.mode] ?? p.mode}</Text> },
+    {
+      key: "mode",
+      title: "Mode",
+      flex: 0.9,
+      render: (p) => (
+        <Text tone="muted">{PAYMENT_MODE_LABEL[p.mode] ?? p.mode}</Text>
+      ),
+    },
     {
       key: "ref",
       title: "Reference",
       flex: 1.1,
       hideOnPhone: true,
       render: (p) => (
-        <Text style={{ fontFamily: t.fonts.mono }} tone={p.referenceNumber ? "default" : "faint"} numberOfLines={1}>
+        <Text
+          style={{ fontFamily: t.fonts.mono }}
+          tone={p.referenceNumber ? "default" : "faint"}
+          numberOfLines={1}
+        >
           {p.referenceNumber || "—"}
         </Text>
       ),
@@ -91,16 +122,32 @@ export function PaymentsListScreen() {
       flex: 1.3,
       render: (p) => (
         <Col gap={0}>
-          <Money value={round2(p.amount - (p.unallocatedAmount || 0))} variant="caption" tone="muted" />
+          <Money
+            value={round2(p.amount - (p.unallocatedAmount || 0))}
+            variant="caption"
+            tone="muted"
+          />
           {p.unallocatedAmount > 0 ? (
             <Text variant="caption" tone="accent">
-              + <Money value={p.unallocatedAmount} variant="caption" tone="accent" /> advance
+              +{" "}
+              <Money
+                value={p.unallocatedAmount}
+                variant="caption"
+                tone="accent"
+              />{" "}
+              advance
             </Text>
           ) : null}
         </Col>
       ),
     },
-    { key: "amount", title: "Amount", flex: 1, align: "right", render: (p) => <Money value={p.amount} variant="bodyStrong" /> },
+    {
+      key: "amount",
+      title: "Amount",
+      flex: 1,
+      align: "right",
+      render: (p) => <Money value={p.amount} variant="bodyStrong" />,
+    },
   ];
 
   return (
@@ -139,22 +186,40 @@ export function PaymentsListScreen() {
                 valueLabel={party?.name}
                 selectedValue={party?.id ?? null}
                 loadOptions={loadPartyOptions}
-                onPick={resetPage((o: { value: string; label: string } | null) =>
-                  setParty(o ? { id: o.value, name: o.label } : null),
+                onPick={resetPage(
+                  (o: { value: string; label: string } | null) =>
+                    setParty(o ? { id: o.value, name: o.label } : null),
                 )}
                 clearable
                 testID="payments-filter-party"
               />
             </Col>
             <Col style={{ flexGrow: 1, flexBasis: isPhone ? "45%" : 170 }}>
-              <DateField label="From" value={startDate} onChange={resetPage(setStartDate)} quick={false} testID="payments-filter-from" />
+              <DateField
+                label="From"
+                value={startDate}
+                onChange={resetPage(setStartDate)}
+                quick={false}
+                testID="payments-filter-from"
+              />
             </Col>
             <Col style={{ flexGrow: 1, flexBasis: isPhone ? "45%" : 170 }}>
-              <DateField label="To" value={endDate} onChange={resetPage(setEndDate)} quick={false} testID="payments-filter-to" />
+              <DateField
+                label="To"
+                value={endDate}
+                onChange={resetPage(setEndDate)}
+                quick={false}
+                testID="payments-filter-to"
+              />
             </Col>
           </Row>
           <Row gap={8} wrap>
-            <Chip label="All modes" selected={!mode} onPress={() => resetPage(setMode)(null)} testID="payments-mode-all" />
+            <Chip
+              label="All modes"
+              selected={!mode}
+              onPress={() => resetPage(setMode)(null)}
+              testID="payments-mode-all"
+            />
             {PAYMENT_MODES.map((m) => (
               <Chip
                 key={m}
@@ -184,9 +249,21 @@ export function PaymentsListScreen() {
 
         {rows && rows.length > 0 ? (
           <Row gap={12} wrap testID="payments-page-totals">
-            <StatTile label="Received (this page)" value={<Money value={totals.amount} variant="h2" />} hint={`${totals.count} payments`} />
-            <StatTile label="Allocated" value={<Money value={totals.allocated} variant="h2" />} tone="success" />
-            <StatTile label="Advance" value={<Money value={totals.advance} variant="h2" />} hint="Not yet matched to a booking" />
+            <StatTile
+              label="Received (this page)"
+              value={<Money value={totals.amount} variant="h2" />}
+              hint={`${totals.count} payments`}
+            />
+            <StatTile
+              label="Allocated"
+              value={<Money value={totals.allocated} variant="h2" />}
+              tone="success"
+            />
+            <StatTile
+              label="Advance"
+              value={<Money value={totals.advance} variant="h2" />}
+              hint="Not yet matched to a booking"
+            />
           </Row>
         ) : null}
 
@@ -215,7 +292,9 @@ export function PaymentsListScreen() {
           empty={
             <EmptyState
               icon={Wallet}
-              title={filtered ? "No payments match these filters" : "No payments yet"}
+              title={
+                filtered ? "No payments match these filters" : "No payments yet"
+              }
               message={
                 filtered
                   ? "Try a different party, mode or date range."

@@ -44,18 +44,35 @@ export function BookingDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const canDelete = useCan("records.delete");
   const readOnly = useReadOnly();
-  const one = useApiGet<Consignment>(["consignments", id], id ? `/consignments/${id}` : null);
-  const c = one.data;
-  const [pendingStatus, setPendingStatus] = useState<DeliveryStatus | null>(null);
-
-  const setStatus = useApiMutation<Consignment, { deliveryStatus: DeliveryStatus }>(
-    "patch",
-    `/consignments/${id}/status`,
-    { invalidate: ["consignments", "dashboard", "reports"] },
+  const one = useApiGet<Consignment>(
+    ["consignments", id],
+    id ? `/consignments/${id}` : null,
   );
-  const remove = useApiMutation<unknown, void>("delete", `/consignments/${id}`, {
-    invalidate: ["consignments", "parties", "dashboard", "reports", "invoices", "payments"],
+  const c = one.data;
+  const [pendingStatus, setPendingStatus] = useState<DeliveryStatus | null>(
+    null,
+  );
+
+  const setStatus = useApiMutation<
+    Consignment,
+    { deliveryStatus: DeliveryStatus }
+  >("patch", `/consignments/${id}/status`, {
+    invalidate: ["consignments", "dashboard", "reports"],
   });
+  const remove = useApiMutation<unknown, void>(
+    "delete",
+    `/consignments/${id}`,
+    {
+      invalidate: [
+        "consignments",
+        "parties",
+        "dashboard",
+        "reports",
+        "invoices",
+        "payments",
+      ],
+    },
+  );
 
   const mono = { fontFamily: t.fonts.mono };
 
@@ -83,7 +100,8 @@ export function BookingDetailScreen() {
   const onDelete = async () => {
     const ok = await confirm({
       title: "Delete this booking?",
-      message: "It will be removed from lists, reports and any draft invoice. This cannot be undone.",
+      message:
+        "It will be removed from lists, reports and any draft invoice. This cannot be undone.",
       confirmLabel: "Delete",
       danger: true,
     });
@@ -99,22 +117,36 @@ export function BookingDetailScreen() {
 
   if (one.isLoading) {
     return (
-      <Screen title="Booking" back backTo="Bookings" testID="booking-detail-screen">
+      <Screen
+        title="Booking"
+        back
+        backTo="Bookings"
+        testID="booking-detail-screen"
+      >
         <LoadingBlock rows={6} />
       </Screen>
     );
   }
   if (one.error || !c) {
     return (
-      <Screen title="Booking" back backTo="Bookings" testID="booking-detail-screen">
-        <ErrorState message={apiErrorMessage(one.error, "Booking not found")} onRetry={one.refetch} />
+      <Screen
+        title="Booking"
+        back
+        backTo="Bookings"
+        testID="booking-detail-screen"
+      >
+        <ErrorState
+          message={apiErrorMessage(one.error, "Booking not found")}
+          onRetry={one.refetch}
+        />
       </Screen>
     );
   }
 
   const pid = partyId(c);
   const invoice = c.invoice && typeof c.invoice === "object" ? c.invoice : null;
-  const invoiceId = invoice?.id ?? (typeof c.invoice === "string" ? c.invoice : null);
+  const invoiceId =
+    invoice?.id ?? (typeof c.invoice === "string" ? c.invoice : null);
 
   return (
     <Screen
@@ -133,7 +165,9 @@ export function BookingDetailScreen() {
             icon={ScrollText}
             size={isPhone ? "sm" : "md"}
             disabled={readOnly}
-            onPress={() => nav.navigate("BiltiNew", pid ? { partyId: pid } : undefined)}
+            onPress={() =>
+              nav.navigate("BiltiNew", pid ? { partyId: pid } : undefined)
+            }
             testID="booking-create-bilti"
           />
           <Button
@@ -171,8 +205,14 @@ export function BookingDetailScreen() {
                 </Text>
               </Row>
               <Row gap={6} wrap>
-                <StatusPill status={c.paymentStatus} label={PAYMENT_STATUS_LABEL[c.paymentStatus]} />
-                <StatusPill status={c.deliveryStatus} label={DELIVERY_LABEL[c.deliveryStatus]} />
+                <StatusPill
+                  status={c.paymentStatus}
+                  label={PAYMENT_STATUS_LABEL[c.paymentStatus]}
+                />
+                <StatusPill
+                  status={c.deliveryStatus}
+                  label={DELIVERY_LABEL[c.deliveryStatus]}
+                />
               </Row>
             </Row>
             <Row gap={16} wrap>
@@ -180,7 +220,9 @@ export function BookingDetailScreen() {
                 {c.packages} pkg · {formatNumber(c.chargeableWeight)} kg
               </Text>
               <Money value={c.totalAmount} variant="h3" />
-              <Text tone="muted">{PAYMENT_MODE_LABEL[c.paymentMode] ?? c.paymentMode}</Text>
+              <Text tone="muted">
+                {PAYMENT_MODE_LABEL[c.paymentMode] ?? c.paymentMode}
+              </Text>
             </Row>
             <SectionHeader title="Delivery status" />
             <DeliveryStepper
@@ -197,11 +239,28 @@ export function BookingDetailScreen() {
           <KeyValue
             items={[
               ["Packages", <Text style={mono}>{c.packages}</Text>],
-              ["Actual weight", <Text style={mono}>{c.actualWeight != null ? `${formatNumber(c.actualWeight)} kg` : "—"}</Text>],
-              ["Chargeable weight", <Text style={mono}>{`${formatNumber(c.chargeableWeight)} kg`}</Text>],
+              [
+                "Actual weight",
+                <Text style={mono}>
+                  {c.actualWeight != null
+                    ? `${formatNumber(c.actualWeight)} kg`
+                    : "—"}
+                </Text>,
+              ],
+              [
+                "Chargeable weight",
+                <Text
+                  style={mono}
+                >{`${formatNumber(c.chargeableWeight)} kg`}</Text>,
+              ],
               ["Contents", c.contents || "—"],
               ["Type", TYPE_LABEL[c.type] ?? c.type],
-              ["Class", [c.isLease && "Lease", c.isBooking && "Booking"].filter(Boolean).join(", ") || "—"],
+              [
+                "Class",
+                [c.isLease && "Lease", c.isBooking && "Booking"]
+                  .filter(Boolean)
+                  .join(", ") || "—",
+              ],
             ]}
           />
         </Card>
@@ -214,8 +273,13 @@ export function BookingDetailScreen() {
               ["To", <Text style={mono}>{c.destinationStation}</Text>],
               ["Train no.", <Text style={mono}>{c.trainNumber || "—"}</Text>],
               ["Bogie no.", <Text style={mono}>{c.bogieNumber || "—"}</Text>],
-              ["RR no.", <Text style={mono}>{c.railwayReceiptNumber || "—"}</Text>],
-              ...(c.agentName ? ([["Agent", c.agentName]] as [string, React.ReactNode][]) : []),
+              [
+                "RR no.",
+                <Text style={mono}>{c.railwayReceiptNumber || "—"}</Text>,
+              ],
+              ...(c.agentName
+                ? ([["Agent", c.agentName]] as [string, React.ReactNode][])
+                : []),
             ]}
           />
         </Card>
@@ -229,11 +293,26 @@ export function BookingDetailScreen() {
               ["Hamali", <Money value={c.hamaliCharges} />],
               ["Other", <Money value={c.otherCharges} />],
               ["Total", <Money value={c.totalAmount} variant="h3" />],
-              ["Payment mode", PAYMENT_MODE_LABEL[c.paymentMode] ?? c.paymentMode],
+              [
+                "Payment mode",
+                PAYMENT_MODE_LABEL[c.paymentMode] ?? c.paymentMode,
+              ],
               ["Paid now (at booking)", <Money value={c.directPaid} />],
               ["Amount paid", <Money value={c.amountPaid} tone="success" />],
-              ["Balance", <Money value={c.balanceDue} tone={c.balanceDue > 0 ? "warning" : undefined} />],
-              ["Payment status", <StatusPill status={c.paymentStatus} label={PAYMENT_STATUS_LABEL[c.paymentStatus]} />],
+              [
+                "Balance",
+                <Money
+                  value={c.balanceDue}
+                  tone={c.balanceDue > 0 ? "warning" : undefined}
+                />,
+              ],
+              [
+                "Payment status",
+                <StatusPill
+                  status={c.paymentStatus}
+                  label={PAYMENT_STATUS_LABEL[c.paymentStatus]}
+                />,
+              ],
               ["Received by", c.paymentReceiver || "—"],
               [
                 "Invoice",
@@ -241,14 +320,18 @@ export function BookingDetailScreen() {
                   <Pressable
                     testID="booking-invoice-link"
                     accessibilityRole="link"
-                    onPress={() => nav.navigate("InvoiceDetail", { id: invoiceId })}
+                    onPress={() =>
+                      nav.navigate("InvoiceDetail", { id: invoiceId })
+                    }
                   >
                     <Row gap={6}>
                       <FileText size={14} color={t.c.accent} />
                       <Text tone="accent" style={mono}>
                         {invoice?.billNumber || "Open invoice"}
                       </Text>
-                      {invoice?.status ? <StatusPill status={invoice.status} /> : null}
+                      {invoice?.status ? (
+                        <StatusPill status={invoice.status} />
+                      ) : null}
                     </Row>
                   </Pressable>
                 ) : (
@@ -267,7 +350,8 @@ export function BookingDetailScreen() {
         ) : null}
 
         <Text variant="caption" tone="faint">
-          Created {formatDateTime(c.createdAt)} · Updated {formatDateTime(c.updatedAt)}
+          Created {formatDateTime(c.createdAt)} · Updated{" "}
+          {formatDateTime(c.updatedAt)}
         </Text>
       </Col>
     </Screen>

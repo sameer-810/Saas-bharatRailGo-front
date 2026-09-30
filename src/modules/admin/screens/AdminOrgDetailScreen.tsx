@@ -1,7 +1,14 @@
 /** One agency: profile, users, subscription, limits override, actions and audit trail. */
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
-import { Ban, CheckCircle2, LogOut, RotateCcw, Trash2, XCircle } from "lucide-react-native";
+import {
+  Ban,
+  CheckCircle2,
+  LogOut,
+  RotateCcw,
+  Trash2,
+  XCircle,
+} from "lucide-react-native";
 import {
   Banner,
   Button,
@@ -60,7 +67,10 @@ export function AdminOrgDetailScreen() {
   if (org.error) {
     return (
       <Screen title="Agency" back backTo="AdminOrgs" testID="admin-org-detail">
-        <ErrorState message={apiErrorMessage(org.error)} onRetry={() => org.refetch()} />
+        <ErrorState
+          message={apiErrorMessage(org.error)}
+          onRetry={() => org.refetch()}
+        />
       </Screen>
     );
   }
@@ -71,23 +81,52 @@ export function AdminOrgDetailScreen() {
       </Screen>
     );
   }
-  return <OrgDetail org={org.data} refreshing={org.isRefetching} onRefresh={() => org.refetch()} />;
+  return (
+    <OrgDetail
+      org={org.data}
+      refreshing={org.isRefetching}
+      onRefresh={() => org.refetch()}
+    />
+  );
 }
 
-function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refreshing: boolean; onRefresh: () => void }) {
+function OrgDetail({
+  org,
+  refreshing,
+  onRefresh,
+}: {
+  org: AdminOrgDetail;
+  refreshing: boolean;
+  onRefresh: () => void;
+}) {
   const t = useTheme();
-  const [dialog, setDialog] = useState<null | "reject" | "suspend" | "plan">(null);
+  const [dialog, setDialog] = useState<null | "reject" | "suspend" | "plan">(
+    null,
+  );
   const [auditPage, setAuditPage] = useState(1);
-  const audit = useAdminAudit({ organization: org.id, page: auditPage, limit: 10 });
+  const audit = useAdminAudit({
+    organization: org.id,
+    page: auditPage,
+    limit: 10,
+  });
 
   const approve = useAdminMutation(() => adminActions.approve(org.id));
-  const reject = useAdminMutation((reason: string) => adminActions.reject(org.id, reason));
-  const suspend = useAdminMutation((reason: string) => adminActions.suspend(org.id, reason));
+  const reject = useAdminMutation((reason: string) =>
+    adminActions.reject(org.id, reason),
+  );
+  const suspend = useAdminMutation((reason: string) =>
+    adminActions.suspend(org.id, reason),
+  );
   const reactivate = useAdminMutation(() => adminActions.reactivate(org.id));
   const revoke = useAdminMutation(() => adminActions.revokeSessions(org.id));
-  const extend = useAdminMutation((days: number) => adminActions.updateSubscription(org.id, { extendTrialDays: days }));
+  const extend = useAdminMutation((days: number) =>
+    adminActions.updateSubscription(org.id, { extendTrialDays: days }),
+  );
 
-  const run = async <R,>(p: Promise<{ message?: string; data: R }>, fallback: (d: R) => string) => {
+  const run = async <R,>(
+    p: Promise<{ message?: string; data: R }>,
+    fallback: (d: R) => string,
+  ) => {
     try {
       const r = await p;
       toast.success(r.message || fallback(r.data));
@@ -104,10 +143,18 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
       message: "The agency can sign in and a free trial starts today.",
       confirmLabel: "Approve",
     });
-    if (ok) await run(approve.mutateAsync(undefined), () => "Approved — trial started");
+    if (ok)
+      await run(
+        approve.mutateAsync(undefined),
+        () => "Approved — trial started",
+      );
   };
   const onReactivate = async () => {
-    const ok = await confirm({ title: `Reactivate ${org.name}?`, message: "Users can sign in again.", confirmLabel: "Reactivate" });
+    const ok = await confirm({
+      title: `Reactivate ${org.name}?`,
+      message: "Users can sign in again.",
+      confirmLabel: "Reactivate",
+    });
     if (ok) await run(reactivate.mutateAsync(undefined), () => "Reactivated");
   };
   const onRevoke = async () => {
@@ -117,15 +164,24 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
       confirmLabel: "Revoke sessions",
       danger: true,
     });
-    if (ok) await run(revoke.mutateAsync(undefined), (d) => `${d.revoked} session${d.revoked === 1 ? "" : "s"} revoked`);
+    if (ok)
+      await run(
+        revoke.mutateAsync(undefined),
+        (d) => `${d.revoked} session${d.revoked === 1 ? "" : "s"} revoked`,
+      );
   };
   const onExtend = async (days: number) => {
     const ok = await confirm({
       title: `Extend trial by ${days} days?`,
-      message: "Sets the subscription to trial and pushes the trial end date forward.",
+      message:
+        "Sets the subscription to trial and pushes the trial end date forward.",
       confirmLabel: `Add ${days} days`,
     });
-    if (ok) await run(extend.mutateAsync(days), () => `Trial extended by ${days} days`);
+    if (ok)
+      await run(
+        extend.mutateAsync(days),
+        () => `Trial extended by ${days} days`,
+      );
   };
 
   const pending = org.approvalStatus === "pending";
@@ -137,12 +193,29 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
     <>
       {pending ? (
         <>
-          <Button title="Approve" icon={CheckCircle2} onPress={onApprove} loading={approve.isPending} testID="admin-org-approve" />
-          <Button title="Reject" icon={XCircle} variant="danger" onPress={() => setDialog("reject")} testID="admin-org-reject" />
+          <Button
+            title="Approve"
+            icon={CheckCircle2}
+            onPress={onApprove}
+            loading={approve.isPending}
+            testID="admin-org-approve"
+          />
+          <Button
+            title="Reject"
+            icon={XCircle}
+            variant="danger"
+            onPress={() => setDialog("reject")}
+            testID="admin-org-reject"
+          />
         </>
       ) : null}
       {approved && !suspended ? (
-        <Button title="Change plan" variant="secondary" onPress={() => setDialog("plan")} testID="admin-org-change-plan" />
+        <Button
+          title="Change plan"
+          variant="secondary"
+          onPress={() => setDialog("plan")}
+          testID="admin-org-change-plan"
+        />
       ) : null}
     </>
   );
@@ -157,17 +230,38 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
           <Text variant="bodyStrong" numberOfLines={1}>
             {u.name}
           </Text>
-          {org.owner?.id === u.id ? <StatusPill status="info" label="Owner" /> : null}
+          {org.owner?.id === u.id ? (
+            <StatusPill status="info" label="Owner" />
+          ) : null}
         </Row>
       ),
     },
-    { key: "email", title: "Email", flex: 1.8, render: (u) => <Text variant="caption" numberOfLines={1}>{u.email}</Text> },
-    { key: "role", title: "Role", flex: 1, render: (u) => <Text variant="caption">{humanize(u.role)}</Text> },
+    {
+      key: "email",
+      title: "Email",
+      flex: 1.8,
+      render: (u) => (
+        <Text variant="caption" numberOfLines={1}>
+          {u.email}
+        </Text>
+      ),
+    },
+    {
+      key: "role",
+      title: "Role",
+      flex: 1,
+      render: (u) => <Text variant="caption">{humanize(u.role)}</Text>,
+    },
     {
       key: "active",
       title: "Status",
       flex: 0.8,
-      render: (u) => <StatusPill status={u.isActive ? "active" : "draft"} label={u.isActive ? "Active" : "Inactive"} />,
+      render: (u) => (
+        <StatusPill
+          status={u.isActive ? "active" : "draft"}
+          label={u.isActive ? "Active" : "Inactive"}
+        />
+      ),
     },
     {
       key: "login",
@@ -196,12 +290,24 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
       <Col gap={20}>
         <Row gap={8} wrap testID="admin-org-pills">
           <OrgPills org={org} />
-          {approved ? <StatusPill status={sub.status === "none" ? "draft" : sub.status} label={`Sub: ${humanize(sub.status)}`} /> : null}
-          {approved && sub.state !== "ok" ? <StatusPill status={sub.state} /> : null}
+          {approved ? (
+            <StatusPill
+              status={sub.status === "none" ? "draft" : sub.status}
+              label={`Sub: ${humanize(sub.status)}`}
+            />
+          ) : null}
+          {approved && sub.state !== "ok" ? (
+            <StatusPill status={sub.state} />
+          ) : null}
         </Row>
 
         {org.approvalStatus === "rejected" ? (
-          <Banner tone="danger" title="Signup rejected" message={org.rejectionReason || undefined} testID="admin-org-rejected-banner" />
+          <Banner
+            tone="danger"
+            title="Signup rejected"
+            message={org.rejectionReason || undefined}
+            testID="admin-org-rejected-banner"
+          />
         ) : null}
         {suspended ? (
           <Banner
@@ -213,7 +319,11 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
         ) : null}
         {org.deletion?.requestedAt ? <DeletionCard org={org} /> : null}
         {pending ? (
-          <Banner tone="warning" title="Waiting for approval" message="Review the details below, then approve or reject this signup." />
+          <Banner
+            tone="warning"
+            title="Waiting for approval"
+            message="Review the details below, then approve or reject this signup."
+          />
         ) : null}
 
         <Card>
@@ -221,14 +331,33 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
           <KeyValue
             items={[
               ["Email", org.email || "—"],
-              ["Mobile", org.mobile ? <Text style={{ fontFamily: t.fonts.mono }}>{org.mobile}</Text> : "—"],
+              [
+                "Mobile",
+                org.mobile ? (
+                  <Text style={{ fontFamily: t.fonts.mono }}>{org.mobile}</Text>
+                ) : (
+                  "—"
+                ),
+              ],
               ["City", org.city || "—"],
-              ["GSTIN", org.gstin ? <Text style={{ fontFamily: t.fonts.mono }}>{org.gstin}</Text> : "—"],
-              ["Owner", org.owner ? `${org.owner.name} · ${org.owner.email}` : "—"],
+              [
+                "GSTIN",
+                org.gstin ? (
+                  <Text style={{ fontFamily: t.fonts.mono }}>{org.gstin}</Text>
+                ) : (
+                  "—"
+                ),
+              ],
+              [
+                "Owner",
+                org.owner ? `${org.owner.name} · ${org.owner.email}` : "—",
+              ],
               ["Approved", org.approvedAt ? formatDate(org.approvedAt) : "—"],
               [
                 "Terms accepted",
-                org.consent ? `${formatDateTime(org.consent.acceptedAt)} (v${org.consent.termsVersion})` : "Not recorded",
+                org.consent
+                  ? `${formatDateTime(org.consent.acceptedAt)} (v${org.consent.termsVersion})`
+                  : "Not recorded",
               ],
             ]}
           />
@@ -241,7 +370,11 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
             rows={org.users}
             columns={userColumns}
             keyOf={(u) => u.id}
-            empty={<Card><EmptyState title="No users" /></Card>}
+            empty={
+              <Card>
+                <EmptyState title="No users" />
+              </Card>
+            }
           />
         </View>
 
@@ -250,12 +383,20 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
             title="Subscription"
             action={
               approved ? (
-                <Button title="Change plan" variant="ghost" size="sm" onPress={() => setDialog("plan")} testID="admin-org-sub-change-plan" />
+                <Button
+                  title="Change plan"
+                  variant="ghost"
+                  size="sm"
+                  onPress={() => setDialog("plan")}
+                  testID="admin-org-sub-change-plan"
+                />
               ) : undefined
             }
           />
           {!approved ? (
-            <Text tone="muted">No subscription until the agency is approved.</Text>
+            <Text tone="muted">
+              No subscription until the agency is approved.
+            </Text>
           ) : (
             <Col gap={16}>
               <KeyValue
@@ -271,16 +412,45 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
                       ) : null}
                     </Text>,
                   ],
-                  ["Status", <StatusPill key="s" status={sub.status === "none" ? "draft" : sub.status} />],
-                  ["State", <StatusPill key="st" status={sub.state} label={sub.readOnly ? "Expired · read-only" : humanize(sub.state)} />],
-                  ["Billing cycle", sub.billingCycle ? humanize(sub.billingCycle) : "—"],
+                  [
+                    "Status",
+                    <StatusPill
+                      key="s"
+                      status={sub.status === "none" ? "draft" : sub.status}
+                    />,
+                  ],
+                  [
+                    "State",
+                    <StatusPill
+                      key="st"
+                      status={sub.state}
+                      label={
+                        sub.readOnly
+                          ? "Expired · read-only"
+                          : humanize(sub.state)
+                      }
+                    />,
+                  ],
+                  [
+                    "Billing cycle",
+                    sub.billingCycle ? humanize(sub.billingCycle) : "—",
+                  ],
                   ["Ends", sub.endsAt ? formatDate(sub.endsAt) : "No end date"],
-                  ["Grace ends", sub.graceEndsAt ? formatDate(sub.graceEndsAt) : "—"],
+                  [
+                    "Grace ends",
+                    sub.graceEndsAt ? formatDate(sub.graceEndsAt) : "—",
+                  ],
                   [
                     "Days left",
                     <Text
                       key="d"
-                      tone={sub.daysLeft != null && sub.daysLeft <= 0 ? "danger" : sub.daysLeft != null && sub.daysLeft <= 7 ? "warning" : "default"}
+                      tone={
+                        sub.daysLeft != null && sub.daysLeft <= 0
+                          ? "danger"
+                          : sub.daysLeft != null && sub.daysLeft <= 7
+                            ? "warning"
+                            : "default"
+                      }
                       style={{ fontFamily: t.fonts.mono }}
                     >
                       {sub.daysLeft == null ? "∞" : String(sub.daysLeft)}
@@ -290,8 +460,18 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
               />
               <Divider />
               <Row gap={20} wrap align="flex-start">
-                <UsageMeter testID="admin-usage-users" label="Active users" used={sub.usage.users} limit={sub.limits.maxUsers} />
-                <UsageMeter testID="admin-usage-branches" label="Active branches" used={sub.usage.branches} limit={sub.limits.maxBranches} />
+                <UsageMeter
+                  testID="admin-usage-users"
+                  label="Active users"
+                  used={sub.usage.users}
+                  limit={sub.limits.maxUsers}
+                />
+                <UsageMeter
+                  testID="admin-usage-branches"
+                  label="Active branches"
+                  used={sub.usage.branches}
+                  limit={sub.limits.maxBranches}
+                />
                 <UsageMeter
                   testID="admin-usage-bookings"
                   label="Bookings this month"
@@ -305,7 +485,12 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
                   Extend trial
                 </Text>
                 {[7, 14, 30].map((d) => (
-                  <Chip key={d} label={`+${d} days`} onPress={() => onExtend(d)} testID={`admin-org-extend-${d}`} />
+                  <Chip
+                    key={d}
+                    label={`+${d} days`}
+                    onPress={() => onExtend(d)}
+                    testID={`admin-org-extend-${d}`}
+                  />
                 ))}
               </Row>
             </Col>
@@ -320,7 +505,9 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
             <Col gap={12}>
               <Row justify="space-between" gap={12} wrap>
                 <Col gap={2} flex={1} style={{ minWidth: 220 }}>
-                  <Text variant="bodyStrong">{suspended ? "Reactivate agency" : "Suspend agency"}</Text>
+                  <Text variant="bodyStrong">
+                    {suspended ? "Reactivate agency" : "Suspend agency"}
+                  </Text>
                   <Text variant="caption" tone="muted">
                     {suspended
                       ? "Lets users sign in again. The subscription is unchanged."
@@ -328,9 +515,21 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
                   </Text>
                 </Col>
                 {suspended ? (
-                  <Button title="Reactivate" icon={RotateCcw} onPress={onReactivate} loading={reactivate.isPending} testID="admin-org-reactivate" />
+                  <Button
+                    title="Reactivate"
+                    icon={RotateCcw}
+                    onPress={onReactivate}
+                    loading={reactivate.isPending}
+                    testID="admin-org-reactivate"
+                  />
                 ) : (
-                  <Button title="Suspend" icon={Ban} variant="danger" onPress={() => setDialog("suspend")} testID="admin-org-suspend" />
+                  <Button
+                    title="Suspend"
+                    icon={Ban}
+                    variant="danger"
+                    onPress={() => setDialog("suspend")}
+                    testID="admin-org-suspend"
+                  />
                 )}
               </Row>
               <Divider />
@@ -338,7 +537,8 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
                 <Col gap={2} flex={1} style={{ minWidth: 220 }}>
                   <Text variant="bodyStrong">Revoke all sessions</Text>
                   <Text variant="caption" tone="muted">
-                    Signs every user out on every device. They can sign in again.
+                    Signs every user out on every device. They can sign in
+                    again.
                   </Text>
                 </Col>
                 <Button
@@ -360,7 +560,11 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
             testID="admin-org-audit"
             rows={audit.data?.items}
             loading={audit.isLoading}
-            error={audit.error ? { message: apiErrorMessage(audit.error) } : undefined}
+            error={
+              audit.error
+                ? { message: apiErrorMessage(audit.error) }
+                : undefined
+            }
             onRetry={() => audit.refetch()}
             paging={audit.data?.meta}
             onPage={setAuditPage}
@@ -378,7 +582,8 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
         loading={reject.isPending}
         onClose={() => setDialog(null)}
         onSubmit={async (reason) => {
-          if (await run(reject.mutateAsync(reason), () => "Signup rejected")) setDialog(null);
+          if (await run(reject.mutateAsync(reason), () => "Signup rejected"))
+            setDialog(null);
         }}
       />
       <ReasonDialog
@@ -390,10 +595,17 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
         loading={suspend.isPending}
         onClose={() => setDialog(null)}
         onSubmit={async (reason) => {
-          if (await run(suspend.mutateAsync(reason), () => "Agency suspended")) setDialog(null);
+          if (await run(suspend.mutateAsync(reason), () => "Agency suspended"))
+            setDialog(null);
         }}
       />
-      {approved ? <ChangePlanDialog org={org} visible={dialog === "plan"} onClose={() => setDialog(null)} /> : null}
+      {approved ? (
+        <ChangePlanDialog
+          org={org}
+          visible={dialog === "plan"}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
     </Screen>
   );
 }
@@ -402,8 +614,12 @@ function OrgDetail({ org, refreshing, onRefresh }: { org: AdminOrgDetail; refres
 function LimitsCard({ org }: { org: AdminOrgDetail }) {
   const plans = useAdminPlans();
   const plan = plans.data?.find((p) => p.code === org.subscription.planCode);
-  const [vals, setVals] = useState<Partial<Record<keyof Limits, number | undefined>>>({});
-  const save = useAdminMutation((body: Limits) => adminActions.updateLimits(org.id, body));
+  const [vals, setVals] = useState<
+    Partial<Record<keyof Limits, number | undefined>>
+  >({});
+  const save = useAdminMutation((body: Limits) =>
+    adminActions.updateLimits(org.id, body),
+  );
 
   useEffect(() => {
     setVals({
@@ -411,7 +627,11 @@ function LimitsCard({ org }: { org: AdminOrgDetail }) {
       maxBranches: org.limitsOverride.maxBranches ?? undefined,
       maxBookingsPerMonth: org.limitsOverride.maxBookingsPerMonth ?? undefined,
     });
-  }, [org.limitsOverride.maxUsers, org.limitsOverride.maxBranches, org.limitsOverride.maxBookingsPerMonth]);
+  }, [
+    org.limitsOverride.maxUsers,
+    org.limitsOverride.maxBranches,
+    org.limitsOverride.maxBookingsPerMonth,
+  ]);
 
   const fields: { key: keyof Limits; label: string }[] = [
     { key: "maxUsers", label: "Max users" },
@@ -420,7 +640,9 @@ function LimitsCard({ org }: { org: AdminOrgDetail }) {
   ];
 
   const toNull = (v: number | undefined) => (v == null ? null : Math.floor(v));
-  const dirty = fields.some((f) => toNull(vals[f.key]) !== (org.limitsOverride[f.key] ?? null));
+  const dirty = fields.some(
+    (f) => toNull(vals[f.key]) !== (org.limitsOverride[f.key] ?? null),
+  );
 
   const submit = async () => {
     const body: Limits = {
@@ -451,7 +673,11 @@ function LimitsCard({ org }: { org: AdminOrgDetail }) {
               value={vals[f.key]}
               onChange={(v) => setVals((s) => ({ ...s, [f.key]: v }))}
               placeholder="Plan default"
-              hint={plan ? `Plan: ${limitLabel(plan.limits[f.key])}` : "Plan default"}
+              hint={
+                plan
+                  ? `Plan: ${limitLabel(plan.limits[f.key])}`
+                  : "Plan default"
+              }
             />
           </View>
         ))}
@@ -464,7 +690,14 @@ function LimitsCard({ org }: { org: AdminOrgDetail }) {
           testID="admin-limits-clear"
           onPress={() => setVals({})}
         />
-        <Button title="Save limits" size="sm" loading={save.isPending} disabled={!dirty} onPress={submit} testID="admin-limits-save" />
+        <Button
+          title="Save limits"
+          size="sm"
+          loading={save.isPending}
+          disabled={!dirty}
+          onPress={submit}
+          testID="admin-limits-save"
+        />
       </Row>
     </Card>
   );
@@ -478,7 +711,9 @@ function DeletionCard({ org }: { org: AdminOrgDetail }) {
   const nav = useAdminNav();
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
-  const purge = useAdminMutation((slug: string) => adminActions.purge(org.id, slug));
+  const purge = useAdminMutation((slug: string) =>
+    adminActions.purge(org.id, slug),
+  );
   const d = org.deletion;
   const allowedFrom = d.purgeAllowedFrom ? new Date(d.purgeAllowedFrom) : null;
   const [openedAt] = useState(() => Date.now());
@@ -526,7 +761,11 @@ function DeletionCard({ org }: { org: AdminOrgDetail }) {
         testID="admin-purge-dialog"
         footer={
           <Row gap={8} justify="flex-end">
-            <Button title="Cancel" variant="secondary" onPress={() => setOpen(false)} />
+            <Button
+              title="Cancel"
+              variant="secondary"
+              onPress={() => setOpen(false)}
+            />
             <Button
               testID="admin-purge-confirm"
               title="Delete everything"
@@ -540,8 +779,10 @@ function DeletionCard({ org }: { org: AdminOrgDetail }) {
       >
         <Col gap={12}>
           <Text tone="muted">
-            Every booking, bilti, bill, party, payment, user, branch and log entry of this agency is permanently
-            deleted. Your GST invoices and payment records for their subscription are kept. This cannot be undone.
+            Every booking, bilti, bill, party, payment, user, branch and log
+            entry of this agency is permanently deleted. Your GST invoices and
+            payment records for their subscription are kept. This cannot be
+            undone.
           </Text>
           <TextField
             testID="admin-purge-slug"

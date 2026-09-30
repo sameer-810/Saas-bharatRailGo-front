@@ -28,7 +28,12 @@ export function MoreScreen() {
             return (
               <React.Fragment key={n.route}>
                 {i > 0 ? <Divider /> : null}
-                <Card padding={14} onPress={() => nav.navigate(n.route)} style={{ borderWidth: 0 }} testID={`more-${n.route}`}>
+                <Card
+                  padding={14}
+                  onPress={() => nav.navigate(n.route)}
+                  style={{ borderWidth: 0 }}
+                  testID={`more-${n.route}`}
+                >
                   <Row gap={12}>
                     <Icon size={18} color={t.c.accent} />
                     <Text style={{ flex: 1 }}>{n.label}</Text>
@@ -43,9 +48,17 @@ export function MoreScreen() {
           Quick actions
         </Text>
         <Row wrap gap={8}>
-          {QUICK_ACTIONS.filter((a) => !a.perm || can(role, a.perm)).map((a) => (
-            <Button key={a.route} title={a.label} variant="secondary" size="sm" onPress={() => nav.navigate(a.route)} />
-          ))}
+          {QUICK_ACTIONS.filter((a) => !a.perm || can(role, a.perm)).map(
+            (a) => (
+              <Button
+                key={a.route}
+                title={a.label}
+                variant="secondary"
+                size="sm"
+                onPress={() => nav.navigate(a.route)}
+              />
+            ),
+          )}
         </Row>
         <Card>
           <Row justify="space-between">
@@ -64,7 +77,13 @@ export function MoreScreen() {
             />
           </Row>
         </Card>
-        <Button title="Log out" icon={LogOut} variant="secondary" onPress={() => logout()} testID="more-logout" />
+        <Button
+          title="Log out"
+          icon={LogOut}
+          variant="secondary"
+          onPress={() => logout()}
+          testID="more-logout"
+        />
       </Col>
     </Screen>
   );

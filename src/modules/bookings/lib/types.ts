@@ -1,8 +1,18 @@
 /** Consignment ("booking") shapes and enums — mirror of bharatrailgo-back consignment module. */
 import type { Option } from "@shared/ui/controls";
 
-export const PAYMENT_MODES = ["paid_source", "to_pay", "on_bill", "slip"] as const;
-export const PAYMENT_STATUS = ["pending", "partial", "received", "settled"] as const;
+export const PAYMENT_MODES = [
+  "paid_source",
+  "to_pay",
+  "on_bill",
+  "slip",
+] as const;
+export const PAYMENT_STATUS = [
+  "pending",
+  "partial",
+  "received",
+  "settled",
+] as const;
 export const CONSIGNMENT_TYPES = [
   "railway_booking",
   "own_bogie",
@@ -10,9 +20,22 @@ export const CONSIGNMENT_TYPES = [
   "agent_received",
   "delivery",
 ] as const;
-export const DELIVERY_STATUS = ["received", "loaded", "in_transit", "unloaded", "delivered", "returned"] as const;
+export const DELIVERY_STATUS = [
+  "received",
+  "loaded",
+  "in_transit",
+  "unloaded",
+  "delivered",
+  "returned",
+] as const;
 /** The forward lifecycle shown on the stepper ("returned" is a side exit). */
-export const DELIVERY_FLOW = ["received", "loaded", "in_transit", "unloaded", "delivered"] as const;
+export const DELIVERY_FLOW = [
+  "received",
+  "loaded",
+  "in_transit",
+  "unloaded",
+  "delivered",
+] as const;
 
 export type PaymentMode = (typeof PAYMENT_MODES)[number];
 export type PaymentStatus = (typeof PAYMENT_STATUS)[number];
@@ -50,18 +73,24 @@ export const DELIVERY_LABEL: Record<DeliveryStatus, string> = {
   returned: "Returned",
 };
 
-export const paymentModeOptions: Option<PaymentMode>[] = PAYMENT_MODES.map((v) => ({
-  value: v,
-  label: PAYMENT_MODE_LABEL[v],
-}));
-export const paymentStatusOptions: Option<PaymentStatus>[] = PAYMENT_STATUS.map((v) => ({
-  value: v,
-  label: PAYMENT_STATUS_LABEL[v],
-}));
-export const typeOptions: Option<ConsignmentType>[] = CONSIGNMENT_TYPES.map((v) => ({
-  value: v,
-  label: TYPE_LABEL[v],
-}));
+export const paymentModeOptions: Option<PaymentMode>[] = PAYMENT_MODES.map(
+  (v) => ({
+    value: v,
+    label: PAYMENT_MODE_LABEL[v],
+  }),
+);
+export const paymentStatusOptions: Option<PaymentStatus>[] = PAYMENT_STATUS.map(
+  (v) => ({
+    value: v,
+    label: PAYMENT_STATUS_LABEL[v],
+  }),
+);
+export const typeOptions: Option<ConsignmentType>[] = CONSIGNMENT_TYPES.map(
+  (v) => ({
+    value: v,
+    label: TYPE_LABEL[v],
+  }),
+);
 
 export interface ConsignmentParty {
   id: string;
@@ -150,8 +179,14 @@ export interface DailySummary {
     grandPackages: number;
     grandWeight: number;
     grandTotalAmount: number;
-    byPaymentMode: Record<string, { count: number; packages: number; amount: number }>;
-    byStation: Record<string, { count: number; packages: number; weight: number; amount: number }>;
+    byPaymentMode: Record<
+      string,
+      { count: number; packages: number; amount: number }
+    >;
+    byStation: Record<
+      string,
+      { count: number; packages: number; weight: number; amount: number }
+    >;
   };
 }
 
@@ -164,7 +199,12 @@ export interface LoadingListGroup {
 export interface LoadingList {
   date: string;
   stations: LoadingListGroup[];
-  grandTotals: { packages: number; weight: number; amount: number; totalConsignments: number };
+  grandTotals: {
+    packages: number;
+    weight: number;
+    amount: number;
+    totalConsignments: number;
+  };
 }
 
 /** Route params BookingNew understands (also produced by the quick-entry bar). */

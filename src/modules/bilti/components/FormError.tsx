@@ -8,10 +8,18 @@ export interface FormErrorState {
   message: string;
 }
 
-export function FormError({ error, testID }: { error: FormErrorState | null; testID?: string }) {
+export function FormError({
+  error,
+  testID,
+}: {
+  error: FormErrorState | null;
+  testID?: string;
+}) {
   const nav = useAppNav();
   if (!error) return null;
-  const planIssue = error.code === "PLAN_LIMIT_REACHED" || error.code === "SUBSCRIPTION_EXPIRED";
+  const planIssue =
+    error.code === "PLAN_LIMIT_REACHED" ||
+    error.code === "SUBSCRIPTION_EXPIRED";
   return (
     <Banner
       testID={testID}

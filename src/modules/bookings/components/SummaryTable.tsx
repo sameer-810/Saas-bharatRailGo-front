@@ -26,11 +26,23 @@ export function SummaryTable({
   const t = useTheme();
   const { isPhone } = useLayout();
   const cell = (c: SummaryCol, v: React.ReactNode, strong?: boolean) => (
-    <View key={c.key} style={{ flex: c.flex ?? 1, minWidth: isPhone ? 90 : undefined, paddingRight: 10, alignItems: c.align === "right" ? "flex-end" : "flex-start" }}>
+    <View
+      key={c.key}
+      style={{
+        flex: c.flex ?? 1,
+        minWidth: isPhone ? 90 : undefined,
+        paddingRight: 10,
+        alignItems: c.align === "right" ? "flex-end" : "flex-start",
+      }}
+    >
       {typeof v === "string" || typeof v === "number" ? (
         <Text
           variant={strong ? "bodyStrong" : "body"}
-          style={c.mono ? { fontFamily: t.fonts.mono, fontVariant: ["tabular-nums"] } : undefined}
+          style={
+            c.mono
+              ? { fontFamily: t.fonts.mono, fontVariant: ["tabular-nums"] }
+              : undefined
+          }
         >
           {String(v)}
         </Text>
@@ -51,9 +63,24 @@ export function SummaryTable({
         minWidth: isPhone ? cols.length * 100 : undefined,
       }}
     >
-      <Row gap={0} style={{ backgroundColor: t.c.surfaceAlt, paddingHorizontal: 14, minHeight: 38 }}>
+      <Row
+        gap={0}
+        style={{
+          backgroundColor: t.c.surfaceAlt,
+          paddingHorizontal: 14,
+          minHeight: 38,
+        }}
+      >
         {cols.map((c) => (
-          <View key={c.key} style={{ flex: c.flex ?? 1, minWidth: isPhone ? 90 : undefined, paddingRight: 10, alignItems: c.align === "right" ? "flex-end" : "flex-start" }}>
+          <View
+            key={c.key}
+            style={{
+              flex: c.flex ?? 1,
+              minWidth: isPhone ? 90 : undefined,
+              paddingRight: 10,
+              alignItems: c.align === "right" ? "flex-end" : "flex-start",
+            }}
+          >
             <Text variant="overline" tone="muted">
               {c.title}
             </Text>
@@ -61,12 +88,32 @@ export function SummaryTable({
         ))}
       </Row>
       {rows.map((r) => (
-        <Row key={r.key} gap={0} testID={testID ? `${testID}-row-${r.key}` : undefined} style={{ paddingHorizontal: 14, minHeight: 44, borderTopWidth: 1, borderTopColor: t.c.border }}>
+        <Row
+          key={r.key}
+          gap={0}
+          testID={testID ? `${testID}-row-${r.key}` : undefined}
+          style={{
+            paddingHorizontal: 14,
+            minHeight: 44,
+            borderTopWidth: 1,
+            borderTopColor: t.c.border,
+          }}
+        >
           {cols.map((c) => cell(c, r.cells[c.key] ?? "—"))}
         </Row>
       ))}
       {totals ? (
-        <Row gap={0} testID={testID ? `${testID}-totals` : undefined} style={{ paddingHorizontal: 14, minHeight: 46, borderTopWidth: 2, borderTopColor: t.c.borderStrong, backgroundColor: t.c.surfaceAlt }}>
+        <Row
+          gap={0}
+          testID={testID ? `${testID}-totals` : undefined}
+          style={{
+            paddingHorizontal: 14,
+            minHeight: 46,
+            borderTopWidth: 2,
+            borderTopColor: t.c.borderStrong,
+            backgroundColor: t.c.surfaceAlt,
+          }}
+        >
           {cols.map((c) => cell(c, totals[c.key] ?? "", true))}
         </Row>
       ) : null}

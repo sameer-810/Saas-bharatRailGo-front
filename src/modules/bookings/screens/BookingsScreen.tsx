@@ -1,7 +1,12 @@
 /** Bookings list — quick entry on top, filters, paged DataList. */
 import React, { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
-import { ClipboardList, FileBarChart, PackagePlus, SlidersHorizontal } from "lucide-react-native";
+import {
+  ClipboardList,
+  FileBarChart,
+  PackagePlus,
+  SlidersHorizontal,
+} from "lucide-react-native";
 import {
   Button,
   Card,
@@ -22,7 +27,11 @@ import {
 } from "@shared/ui";
 import { useLayout, useTheme } from "@shared/useTheme";
 import { useApiGet, useApiList } from "@shared/api/query";
-import { loadPartyOptions, loadStationOptions, type PartyLite } from "@shared/api/lookups";
+import {
+  loadPartyOptions,
+  loadStationOptions,
+  type PartyLite,
+} from "@shared/api/lookups";
 import { useReadOnly } from "@shared/lib/permissions";
 import { formatDate, formatNumber } from "@shared/lib/format";
 import { useDebounced } from "@shared/hooks/useDebounced";
@@ -47,7 +56,12 @@ export function BookingsScreen() {
   const { isPhone } = useLayout();
   const nav = useAppNav();
   const readOnly = useReadOnly();
-  const params = useParams<{ destinationStation: string; partyId: string; startDate: string; endDate: string }>();
+  const params = useParams<{
+    destinationStation: string;
+    partyId: string;
+    startDate: string;
+    endDate: string;
+  }>();
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -61,20 +75,34 @@ export function BookingsScreen() {
     params.partyId ? { value: String(params.partyId) } : null,
   );
   const [station, setStation] = useState<string | null>(
-    params.destinationStation ? String(params.destinationStation).toUpperCase() : null,
+    params.destinationStation
+      ? String(params.destinationStation).toUpperCase()
+      : null,
   );
   const [paymentMode, setPaymentMode] = useState<PaymentMode | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
-  const [deliveryStatus, setDeliveryStatus] = useState<DeliveryStatus | null>(null);
-  const [showFilters, setShowFilters] = useState(!isPhone || !!params.partyId || !!params.destinationStation);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(
+    null,
+  );
+  const [deliveryStatus, setDeliveryStatus] = useState<DeliveryStatus | null>(
+    null,
+  );
+  const [showFilters, setShowFilters] = useState(
+    !isPhone || !!params.partyId || !!params.destinationStation,
+  );
 
   // Route params can change while the screen stays mounted.
   useEffect(() => {
     if (params.partyId) setParty({ value: String(params.partyId) });
-    if (params.destinationStation) setStation(String(params.destinationStation).toUpperCase());
+    if (params.destinationStation)
+      setStation(String(params.destinationStation).toUpperCase());
     if (params.startDate) setStartDate(String(params.startDate));
     if (params.endDate) setEndDate(String(params.endDate));
-  }, [params.partyId, params.destinationStation, params.startDate, params.endDate]);
+  }, [
+    params.partyId,
+    params.destinationStation,
+    params.startDate,
+    params.endDate,
+  ]);
 
   // Label for a party that came in via route params.
   const partyLookup = useApiGet<PartyLite>(
@@ -97,8 +125,20 @@ export function BookingsScreen() {
   const filterKey = JSON.stringify(filters);
   useEffect(() => setPage(1), [filterKey]);
 
-  const list = useApiList<Consignment>("consignments", "/consignments", { page, limit: 20, ...filters });
-  const activeCount = [party, station, paymentMode, paymentStatus, deliveryStatus, startDate, endDate].filter(Boolean).length;
+  const list = useApiList<Consignment>("consignments", "/consignments", {
+    page,
+    limit: 20,
+    ...filters,
+  });
+  const activeCount = [
+    party,
+    station,
+    paymentMode,
+    paymentStatus,
+    deliveryStatus,
+    startDate,
+    endDate,
+  ].filter(Boolean).length;
 
   const clearAll = () => {
     setSearch("");
@@ -182,8 +222,14 @@ export function BookingsScreen() {
         flex: 1.3,
         render: (c) => (
           <Row gap={6} wrap>
-            <StatusPill status={c.paymentStatus} label={PAYMENT_STATUS_LABEL[c.paymentStatus]} />
-            <StatusPill status={c.deliveryStatus} label={DELIVERY_LABEL[c.deliveryStatus]} />
+            <StatusPill
+              status={c.paymentStatus}
+              label={PAYMENT_STATUS_LABEL[c.paymentStatus]}
+            />
+            <StatusPill
+              status={c.deliveryStatus}
+              label={DELIVERY_LABEL[c.deliveryStatus]}
+            />
           </Row>
         ),
       },
@@ -228,7 +274,11 @@ export function BookingsScreen() {
       onRefresh={list.refetch}
     >
       <Col gap={16}>
-        {!readOnly ? <QuickEntryBar onSubmit={(p) => nav.navigate("BookingNew", { ...p })} /> : null}
+        {!readOnly ? (
+          <QuickEntryBar
+            onSubmit={(p) => nav.navigate("BookingNew", { ...p })}
+          />
+        ) : null}
 
         <Col gap={10}>
           <Row gap={8} align="flex-start">
@@ -254,20 +304,36 @@ export function BookingsScreen() {
               <Col gap={12}>
                 <Row gap={12} wrap align="flex-start">
                   <View style={{ flexGrow: 1, flexBasis: 150 }}>
-                    <DateField testID="bookings-from" label="From" value={startDate} onChange={(v) => setStartDate(v || undefined)} quick={false} />
+                    <DateField
+                      testID="bookings-from"
+                      label="From"
+                      value={startDate}
+                      onChange={(v) => setStartDate(v || undefined)}
+                      quick={false}
+                    />
                   </View>
                   <View style={{ flexGrow: 1, flexBasis: 150 }}>
-                    <DateField testID="bookings-to" label="To" value={endDate} onChange={(v) => setEndDate(v || undefined)} quick={false} />
+                    <DateField
+                      testID="bookings-to"
+                      label="To"
+                      value={endDate}
+                      onChange={(v) => setEndDate(v || undefined)}
+                      quick={false}
+                    />
                   </View>
                   <View style={{ flexGrow: 2, flexBasis: 220 }}>
                     <Combobox<string>
                       testID="bookings-party"
                       label="Party"
                       placeholder="Any party"
-                      valueLabel={party ? partyLabel || "Selected party" : undefined}
+                      valueLabel={
+                        party ? partyLabel || "Selected party" : undefined
+                      }
                       selectedValue={party?.value ?? null}
                       loadOptions={loadPartyOptions}
-                      onPick={(o) => setParty(o ? { value: o.value, label: o.label } : null)}
+                      onPick={(o) =>
+                        setParty(o ? { value: o.value, label: o.label } : null)
+                      }
                       clearable
                     />
                   </View>
@@ -318,12 +384,20 @@ export function BookingsScreen() {
                       key={s}
                       label={DELIVERY_LABEL[s]}
                       selected={deliveryStatus === s}
-                      onPress={() => setDeliveryStatus(deliveryStatus === s ? null : s)}
+                      onPress={() =>
+                        setDeliveryStatus(deliveryStatus === s ? null : s)
+                      }
                       testID={`bookings-delivery-${s}`}
                     />
                   ))}
                   {activeCount || search ? (
-                    <Button size="sm" variant="ghost" title="Clear all" onPress={clearAll} testID="bookings-clear-filters" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title="Clear all"
+                      onPress={clearAll}
+                      testID="bookings-clear-filters"
+                    />
                   ) : null}
                 </Row>
               </Col>
@@ -333,7 +407,8 @@ export function BookingsScreen() {
 
         {list.data?.meta ? (
           <Text variant="caption" tone="muted" testID="bookings-count">
-            {list.data.meta.total} booking{list.data.meta.total === 1 ? "" : "s"}
+            {list.data.meta.total} booking
+            {list.data.meta.total === 1 ? "" : "s"}
           </Text>
         ) : null}
 
@@ -354,7 +429,8 @@ export function BookingsScreen() {
                 {partyName(c)}
               </Text>
               <Text variant="caption" tone="muted" style={mono}>
-                {formatDate(c.date)} · {c.originStation} → {c.destinationStation}
+                {formatDate(c.date)} · {c.originStation} →{" "}
+                {c.destinationStation}
               </Text>
             </View>
           )}
@@ -364,7 +440,14 @@ export function BookingsScreen() {
               <EmptyState
                 title="No bookings match"
                 message="Try a different date range or clear the filters."
-                action={<Button title="Clear filters" variant="secondary" onPress={clearAll} testID="bookings-empty-clear" />}
+                action={
+                  <Button
+                    title="Clear filters"
+                    variant="secondary"
+                    onPress={clearAll}
+                    testID="bookings-empty-clear"
+                  />
+                }
               />
             ) : (
               <EmptyState

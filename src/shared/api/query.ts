@@ -17,7 +17,12 @@ import {
   useQueryClient,
   type UseQueryOptions,
 } from "@tanstack/react-query";
-import { apiClient, cleanParams, type Envelope, type Paging } from "./apiClient";
+import {
+  apiClient,
+  cleanParams,
+  type Envelope,
+  type Paging,
+} from "./apiClient";
 import { useBranchStore } from "../store/useBranchStore";
 
 export interface ListResult<T> {
@@ -40,7 +45,9 @@ export function useApiList<T>(
   return useQuery<ListResult<T>>({
     queryKey: [resource, "list", url, cleanParams(params), branch],
     queryFn: async () => {
-      const res = await apiClient.get<Envelope<T[]>>(url, { params: cleanParams(params) });
+      const res = await apiClient.get<Envelope<T[]>>(url, {
+        params: cleanParams(params),
+      });
       const items = res.data.data ?? [];
       const meta = (res.data.meta as Paging) ?? {
         total: items.length,
@@ -66,7 +73,9 @@ export function useApiGet<T>(
   return useQuery<T>({
     queryKey: [...key, cleanParams(params), branch],
     queryFn: async () => {
-      const res = await apiClient.get<Envelope<T>>(url as string, { params: cleanParams(params) });
+      const res = await apiClient.get<Envelope<T>>(url as string, {
+        params: cleanParams(params),
+      });
       return res.data.data;
     },
     enabled: !!url,
@@ -98,7 +107,9 @@ export function useApiMutation<TData = unknown, TVars = unknown>(
     },
     onSuccess: async () => {
       await Promise.all(
-        (opts.invalidate || []).map((k) => qc.invalidateQueries({ queryKey: [k] })),
+        (opts.invalidate || []).map((k) =>
+          qc.invalidateQueries({ queryKey: [k] }),
+        ),
       );
       // Usage counters (bookings this month, users) live in /auth/me.
       qc.invalidateQueries({ queryKey: ["me"] });

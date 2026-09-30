@@ -1,11 +1,17 @@
 /** Indian formatting helpers — rupees, dates, numbers. */
 
-const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const inr = new Intl.NumberFormat("en-IN", {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+});
 const inr0 = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 const num = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
 
 /** ₹1,23,456.00 — or ₹1.2L / ₹3.4Cr when compact. */
-export function formatMoney(v: number | null | undefined, { compact = false } = {}): string {
+export function formatMoney(
+  v: number | null | undefined,
+  { compact = false } = {},
+): string {
   const n = Number(v || 0);
   if (compact) {
     const abs = Math.abs(n);
@@ -21,7 +27,20 @@ export function formatNumber(v: number | null | undefined): string {
   return num.format(Number(v || 0));
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 /** 24 Sep 2026 */
 export function formatDate(v: string | Date | null | undefined): string {

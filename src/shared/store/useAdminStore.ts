@@ -27,6 +27,9 @@ export const useAdminStore = create<AdminState>()(
       setSession: (token, admin) => set({ token, admin }),
       logout: () => set({ token: null, admin: null }),
     }),
-    { name: "bharatrailgo-admin", storage: createJSONStorage(() => secureStorage) },
+    {
+      name: "bharatrailgo-admin",
+      storage: createJSONStorage(() => secureStorage),
+    },
   ),
 );

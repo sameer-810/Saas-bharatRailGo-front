@@ -25,14 +25,20 @@ export function AddConsignmentsDialog({
     if (visible) setSelected(new Set());
   }, [visible]);
 
-  const add = useApiMutation<Invoice, { consignmentIds: string[] }>("post", `/invoices/${invoiceId}/consignments`, {
-    invalidate: INVOICE_INVALIDATE,
-  });
+  const add = useApiMutation<Invoice, { consignmentIds: string[] }>(
+    "post",
+    `/invoices/${invoiceId}/consignments`,
+    {
+      invalidate: INVOICE_INVALIDATE,
+    },
+  );
 
   const save = async () => {
     try {
       await add.mutateAsync({ consignmentIds: [...selected] });
-      toast.success(`${selected.size} booking${selected.size === 1 ? "" : "s"} added`);
+      toast.success(
+        `${selected.size} booking${selected.size === 1 ? "" : "s"} added`,
+      );
       onClose();
     } catch (e) {
       toast.error(apiErrorMessage(e));
@@ -48,7 +54,12 @@ export function AddConsignmentsDialog({
       width={640}
       footer={
         <>
-          <Button title="Cancel" variant="secondary" onPress={onClose} testID="invoice-add-cancel" />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onPress={onClose}
+            testID="invoice-add-cancel"
+          />
           <Button
             title={selected.size ? `Add ${selected.size}` : "Add"}
             onPress={save}
@@ -59,7 +70,11 @@ export function AddConsignmentsDialog({
         </>
       }
     >
-      <Text tone="muted">{"Only this party's on-bill bookings that are not on any invoice are shown."}</Text>
+      <Text tone="muted">
+        {
+          "Only this party's on-bill bookings that are not on any invoice are shown."
+        }
+      </Text>
       <ConsignmentPicker
         items={open.items}
         selected={selected}

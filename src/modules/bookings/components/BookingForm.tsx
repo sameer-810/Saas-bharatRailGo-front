@@ -30,7 +30,12 @@ import {
 } from "@shared/ui";
 import { useLayout, useTheme } from "@shared/useTheme";
 import { useApiMutation } from "@shared/api/query";
-import { apiClient, apiErrorCode, apiErrorMessage, type Envelope } from "@shared/api/apiClient";
+import {
+  apiClient,
+  apiErrorCode,
+  apiErrorMessage,
+  type Envelope,
+} from "@shared/api/apiClient";
 import {
   loadPartyOptions,
   loadStationOptions,
@@ -57,18 +62,29 @@ import {
   type Quote,
 } from "../lib/types";
 
-const optNum = z.number({ invalid_type_error: "Enter a number" }).min(0, "Cannot be negative").optional();
+const optNum = z
+  .number({ invalid_type_error: "Enter a number" })
+  .min(0, "Cannot be negative")
+  .optional();
 const optStr = z.string().trim().optional();
 
 const schema = z
   .object({
     date: z.string().trim().min(1, "Date is required"),
     party: z.string().min(1, "Pick a party"),
-    type: z.enum(CONSIGNMENT_TYPES, { errorMap: () => ({ message: "Pick a booking type" }) }),
-    destinationStation: z.string().trim().min(1, "Destination station is required"),
+    type: z.enum(CONSIGNMENT_TYPES, {
+      errorMap: () => ({ message: "Pick a booking type" }),
+    }),
+    destinationStation: z
+      .string()
+      .trim()
+      .min(1, "Destination station is required"),
     originStation: optStr,
     packages: z
-      .number({ required_error: "Enter packages", invalid_type_error: "Enter packages" })
+      .number({
+        required_error: "Enter packages",
+        invalid_type_error: "Enter packages",
+      })
       .int("Whole packages only")
       .min(1, "At least 1 package"),
     actualWeight: optNum,
@@ -79,14 +95,23 @@ const schema = z
     bogieNumber: optStr,
     railwayReceiptNumber: optStr,
     freightAmount: z
-      .number({ required_error: "Freight amount required", invalid_type_error: "Freight amount required" })
+      .number({
+        required_error: "Freight amount required",
+        invalid_type_error: "Freight amount required",
+      })
       .min(0, "Cannot be negative"),
     reimbursementAmount: optNum,
     hamaliCharges: optNum,
     otherCharges: optNum,
-    paymentMode: z.enum(PAYMENT_MODES, { errorMap: () => ({ message: "Pick a payment mode" }) }),
+    paymentMode: z.enum(PAYMENT_MODES, {
+      errorMap: () => ({ message: "Pick a payment mode" }),
+    }),
     directPaid: optNum,
-    paymentReceiver: z.string().trim().max(60, "At most 60 characters").optional(),
+    paymentReceiver: z
+      .string()
+      .trim()
+      .max(60, "At most 60 characters")
+      .optional(),
     isLease: z.boolean(),
     isBooking: z.boolean(),
     notes: optStr,
@@ -101,9 +126,16 @@ const schema = z
       });
     }
     const total =
-      (v.freightAmount || 0) + (v.reimbursementAmount || 0) + (v.hamaliCharges || 0) + (v.otherCharges || 0);
+      (v.freightAmount || 0) +
+      (v.reimbursementAmount || 0) +
+      (v.hamaliCharges || 0) +
+      (v.otherCharges || 0);
     if ((v.directPaid || 0) > Math.round(total * 100) / 100 + 0.001) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["directPaid"], message: "More than the booking total" });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["directPaid"],
+        message: "More than the booking total",
+      });
     }
   });
 
@@ -117,7 +149,9 @@ function round2(n: number) {
 
 /** Remove empty strings / undefined so the API only sees what was entered. */
 function compact<T extends Record<string, unknown>>(o: T): Partial<T> {
-  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== "")) as Partial<T>;
+  return Object.fromEntries(
+    Object.entries(o).filter(([, v]) => v !== undefined && v !== ""),
+  ) as Partial<T>;
 }
 
 function fromConsignment(c: Consignment): BookingFormValues {
@@ -170,33 +204,39 @@ export function BookingForm({
   const branchId = useBranchStore((s) => s.branchId);
   const receivers = profile.data?.paymentReceivers ?? [];
 
-  const [partyLabel, setPartyLabel] = useState<string | undefined>(initial ? partyNameOf(initial) : undefined);
-  const [blocked, setBlocked] = useState<{ code: string; message: string } | null>(null);
+  const [partyLabel, setPartyLabel] = useState<string | undefined>(
+    initial ? partyNameOf(initial) : undefined,
+  );
+  const [blocked, setBlocked] = useState<{
+    code: string;
+    message: string;
+  } | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoting, setQuoting] = useState(false);
 
-  const { control, handleSubmit, setValue, getValues, reset, formState } = useForm<BookingFormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: initial
-      ? fromConsignment(initial)
-      : {
-          date: isoDay(),
-          party: "",
-          type: "railway_booking",
-          destinationStation: "",
-          originStation: "MUM",
-          contents: "",
-          agentName: "",
-          trainNumber: "",
-          bogieNumber: "",
-          railwayReceiptNumber: "",
-          paymentReceiver: "",
-          isLease: false,
-          isBooking: false,
-          notes: "",
-        },
-  });
+  const { control, handleSubmit, setValue, getValues, reset, formState } =
+    useForm<BookingFormValues>({
+      resolver: zodResolver(schema),
+      defaultValues: initial
+        ? fromConsignment(initial)
+        : {
+            date: isoDay(),
+            party: "",
+            type: "railway_booking",
+            destinationStation: "",
+            originStation: "MUM",
+            contents: "",
+            agentName: "",
+            trainNumber: "",
+            bogieNumber: "",
+            railwayReceiptNumber: "",
+            paymentReceiver: "",
+            isLease: false,
+            isBooking: false,
+            notes: "",
+          },
+    });
 
   // Edit: when the record arrives / refreshes, load it into the form.
   useEffect(() => {
@@ -210,9 +250,15 @@ export function BookingForm({
   useEffect(() => {
     if (mode !== "create" || !branches.data) return;
     const b =
-      branches.data.find((x) => x.id === branchId) ?? branches.data.find((x) => x.isHeadOffice) ?? branches.data[0];
+      branches.data.find((x) => x.id === branchId) ??
+      branches.data.find((x) => x.isHeadOffice) ??
+      branches.data[0];
     const code = b?.stationCode?.trim().toUpperCase();
-    if (code && !formState.dirtyFields.originStation && !prefill?.originStation) {
+    if (
+      code &&
+      !formState.dirtyFields.originStation &&
+      !prefill?.originStation
+    ) {
       setValue("originStation", code);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,10 +271,17 @@ export function BookingForm({
       if (!p) return;
       if (!partyLabel) setPartyLabel(p.name);
       if (!getValues("destinationStation") && p.defaultStation) {
-        setValue("destinationStation", p.defaultStation.toUpperCase(), { shouldDirty: true });
+        setValue("destinationStation", p.defaultStation.toUpperCase(), {
+          shouldDirty: true,
+        });
       }
-      const pm = p.defaultPaymentMode as BookingFormValues["paymentMode"] | undefined;
-      if (!getValues("paymentMode") && pm && (PAYMENT_MODES as readonly string[]).includes(pm)) {
+      const pm = p.defaultPaymentMode as
+        BookingFormValues["paymentMode"] | undefined;
+      if (
+        !getValues("paymentMode") &&
+        pm &&
+        (PAYMENT_MODES as readonly string[]).includes(pm)
+      ) {
         setValue("paymentMode", pm, { shouldDirty: true });
       }
     } catch {
@@ -240,16 +293,32 @@ export function BookingForm({
   useEffect(() => {
     if (!prefill || mode !== "create") return;
     const opts = { shouldDirty: true, shouldValidate: false } as const;
-    if (prefill.destinationStation) setValue("destinationStation", prefill.destinationStation.toUpperCase(), opts);
-    if (prefill.originStation) setValue("originStation", prefill.originStation.toUpperCase(), opts);
-    if (prefill.packages != null && !Number.isNaN(Number(prefill.packages))) setValue("packages", Number(prefill.packages), opts);
-    if (prefill.chargeableWeight != null && !Number.isNaN(Number(prefill.chargeableWeight))) {
+    if (prefill.destinationStation)
+      setValue(
+        "destinationStation",
+        prefill.destinationStation.toUpperCase(),
+        opts,
+      );
+    if (prefill.originStation)
+      setValue("originStation", prefill.originStation.toUpperCase(), opts);
+    if (prefill.packages != null && !Number.isNaN(Number(prefill.packages)))
+      setValue("packages", Number(prefill.packages), opts);
+    if (
+      prefill.chargeableWeight != null &&
+      !Number.isNaN(Number(prefill.chargeableWeight))
+    ) {
       setValue("chargeableWeight", Number(prefill.chargeableWeight), opts);
     }
-    if (prefill.paymentMode && (PAYMENT_MODES as readonly string[]).includes(prefill.paymentMode)) {
+    if (
+      prefill.paymentMode &&
+      (PAYMENT_MODES as readonly string[]).includes(prefill.paymentMode)
+    ) {
       setValue("paymentMode", prefill.paymentMode, opts);
     }
-    if (prefill.freightAmount != null && !Number.isNaN(Number(prefill.freightAmount))) {
+    if (
+      prefill.freightAmount != null &&
+      !Number.isNaN(Number(prefill.freightAmount))
+    ) {
       setValue("freightAmount", Number(prefill.freightAmount), opts);
     }
     if (prefill.partyId) {
@@ -262,12 +331,25 @@ export function BookingForm({
 
   const w = useWatch({ control });
   const total = round2(
-    (w.freightAmount || 0) + (w.reimbursementAmount || 0) + (w.hamaliCharges || 0) + (w.otherCharges || 0),
+    (w.freightAmount || 0) +
+      (w.reimbursementAmount || 0) +
+      (w.hamaliCharges || 0) +
+      (w.otherCharges || 0),
   );
   const isAgent = String(w.type || "").startsWith("agent_");
 
-  const invalidate = ["consignments", "parties", "dashboard", "reports", "invoices"];
-  const create = useApiMutation<Consignment, Record<string, unknown>>("post", "/consignments", { invalidate });
+  const invalidate = [
+    "consignments",
+    "parties",
+    "dashboard",
+    "reports",
+    "invoices",
+  ];
+  const create = useApiMutation<Consignment, Record<string, unknown>>(
+    "post",
+    "/consignments",
+    { invalidate },
+  );
   const update = useApiMutation<Consignment, Record<string, unknown>>(
     "patch",
     `/consignments/${initial?.id ?? ""}`,
@@ -291,7 +373,9 @@ export function BookingForm({
       const q = res.data.data;
       setQuote(q);
       if (!q.lines.length) {
-        toast.info("No rate card heads match — set them up in Settings → Rates");
+        toast.info(
+          "No rate card heads match — set them up in Settings → Rates",
+        );
         return;
       }
       const opts = { shouldDirty: true, shouldValidate: true } as const;
@@ -299,7 +383,9 @@ export function BookingForm({
       setValue("hamaliCharges", q.hamaliCharges || undefined, opts);
       setValue("otherCharges", q.otherCharges || undefined, opts);
       setValue("reimbursementAmount", q.reimbursementAmount || undefined, opts);
-      toast.success(`Charges filled from rate card · ${formatMoney(q.totalAmount)}`);
+      toast.success(
+        `Charges filled from rate card · ${formatMoney(q.totalAmount)}`,
+      );
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
@@ -335,7 +421,12 @@ export function BookingForm({
     try {
       let saved: Consignment;
       if (mode === "create") {
-        saved = await create.mutateAsync({ ...common, date: v.date, party: v.party, directPaid: v.directPaid });
+        saved = await create.mutateAsync({
+          ...common,
+          date: v.date,
+          party: v.party,
+          directPaid: v.directPaid,
+        });
         toast.success("Booking saved");
       } else {
         // Send text fields even when emptied, so a cleared RR no. / note is actually cleared.
@@ -347,12 +438,16 @@ export function BookingForm({
           railwayReceiptNumber: v.railwayReceiptNumber ?? "",
           notes: v.notes ?? "",
           paymentReceiver: v.paymentReceiver ?? "",
-          ...(String(v.type).startsWith("agent_") ? { agentName: v.agentName ?? "" } : {}),
+          ...(String(v.type).startsWith("agent_")
+            ? { agentName: v.agentName ?? "" }
+            : {}),
         };
         const oldDirect = initial?.directPaid || 0;
         const newDirect = v.directPaid || 0;
-        if (round2(oldDirect) !== round2(newDirect)) body.directPaid = newDirect;
-        else if (v.paymentStatus && v.paymentStatus !== initial?.paymentStatus) body.paymentStatus = v.paymentStatus;
+        if (round2(oldDirect) !== round2(newDirect))
+          body.directPaid = newDirect;
+        else if (v.paymentStatus && v.paymentStatus !== initial?.paymentStatus)
+          body.paymentStatus = v.paymentStatus;
         saved = await update.mutateAsync(body);
         toast.success("Booking updated");
       }
@@ -374,7 +469,14 @@ export function BookingForm({
 
   /* ── field helpers ── */
   const text = (
-    name: "contents" | "agentName" | "trainNumber" | "bogieNumber" | "railwayReceiptNumber" | "notes" | "paymentReceiver",
+    name:
+      | "contents"
+      | "agentName"
+      | "trainNumber"
+      | "bogieNumber"
+      | "railwayReceiptNumber"
+      | "notes"
+      | "paymentReceiver",
     label: string,
     props: Partial<React.ComponentProps<typeof TextField>> = {},
   ) => (
@@ -416,13 +518,18 @@ export function BookingForm({
           label={label}
           hint={hint}
           value={f.value as number | undefined}
-          onChange={(n) => f.onChange(name === "packages" && n != null ? Math.floor(n) : n)}
+          onChange={(n) =>
+            f.onChange(name === "packages" && n != null ? Math.floor(n) : n)
+          }
           error={fieldState.error?.message}
         />
       )}
     />
   );
-  const station = (name: "destinationStation" | "originStation", label: string) => (
+  const station = (
+    name: "destinationStation" | "originStation",
+    label: string,
+  ) => (
     <Controller
       control={control}
       name={name}
@@ -449,7 +556,15 @@ export function BookingForm({
           tone="warning"
           title="Your subscription has expired — the app is read-only"
           message="Renew your plan to add or change bookings."
-          action={<Button size="sm" title="Plan" variant="secondary" onPress={() => nav.navigate("Plan")} testID="booking-plan-readonly" />}
+          action={
+            <Button
+              size="sm"
+              title="Plan"
+              variant="secondary"
+              onPress={() => nav.navigate("Plan")}
+              testID="booking-plan-readonly"
+            />
+          }
           testID="booking-readonly-banner"
         />
       ) : null}
@@ -462,11 +577,25 @@ export function BookingForm({
               : "Your subscription has expired"
           }
           message={`${blocked.message} Nothing was saved — upgrade or renew, then save again.`}
-          action={<Button size="sm" title="Plan" onPress={() => nav.navigate("Plan")} testID="booking-plan-button" />}
+          action={
+            <Button
+              size="sm"
+              title="Plan"
+              onPress={() => nav.navigate("Plan")}
+              testID="booking-plan-button"
+            />
+          }
           testID="booking-blocked-banner"
         />
       ) : null}
-      {formError ? <Banner tone="danger" title="Could not save" message={formError} testID="booking-error" /> : null}
+      {formError ? (
+        <Banner
+          tone="danger"
+          title="Could not save"
+          message={formError}
+          testID="booking-error"
+        />
+      ) : null}
 
       {/* ── Party & date ── */}
       <Card>
@@ -477,7 +606,13 @@ export function BookingForm({
               control={control}
               name="date"
               render={({ field: f, fieldState }) => (
-                <DateField testID="booking-date" label="Date" value={f.value} onChange={f.onChange} error={fieldState.error?.message} />
+                <DateField
+                  testID="booking-date"
+                  label="Date"
+                  value={f.value}
+                  onChange={f.onChange}
+                  error={fieldState.error?.message}
+                />
               )}
             />
             <Controller
@@ -488,7 +623,9 @@ export function BookingForm({
                   testID="booking-party"
                   label="Party"
                   placeholder="Search party"
-                  valueLabel={f.value ? partyLabel || "Selected party" : undefined}
+                  valueLabel={
+                    f.value ? partyLabel || "Selected party" : undefined
+                  }
                   selectedValue={f.value || null}
                   loadOptions={loadPartyOptions}
                   onPick={(o) => {
@@ -507,7 +644,9 @@ export function BookingForm({
               <Text variant="caption" tone="faint">
                 Date
               </Text>
-              <Text testID="booking-date-readonly">{formatDate(initial?.date)}</Text>
+              <Text testID="booking-date-readonly">
+                {formatDate(initial?.date)}
+              </Text>
             </Col>
             <Col gap={2}>
               <Text variant="caption" tone="faint">
@@ -515,7 +654,11 @@ export function BookingForm({
               </Text>
               <Text testID="booking-party-readonly">{partyLabel || "—"}</Text>
             </Col>
-            <Text variant="caption" tone="faint" style={{ alignSelf: "flex-end" }}>
+            <Text
+              variant="caption"
+              tone="faint"
+              style={{ alignSelf: "flex-end" }}
+            >
               Date and party cannot be changed after booking.
             </Text>
           </Row>
@@ -549,11 +692,22 @@ export function BookingForm({
             {number("actualWeight", "Actual weight (kg)")}
             {number("chargeableWeight", "Chargeable weight (kg)")}
           </FormGrid>
-          {text("contents", "Contents", { placeholder: "e.g. Garments, spare parts" })}
+          {text("contents", "Contents", {
+            placeholder: "e.g. Garments, spare parts",
+          })}
           <FormGrid columns={3}>
-            {text("trainNumber", "Train no.", { mono: true, autoCapitalize: "characters" })}
-            {text("bogieNumber", "Bogie no.", { mono: true, autoCapitalize: "characters" })}
-            {text("railwayReceiptNumber", "RR no.", { mono: true, autoCapitalize: "characters" })}
+            {text("trainNumber", "Train no.", {
+              mono: true,
+              autoCapitalize: "characters",
+            })}
+            {text("bogieNumber", "Bogie no.", {
+              mono: true,
+              autoCapitalize: "characters",
+            })}
+            {text("railwayReceiptNumber", "RR no.", {
+              mono: true,
+              autoCapitalize: "characters",
+            })}
           </FormGrid>
           {isAgent ? text("agentName", "Agent name") : null}
         </Col>
@@ -605,7 +759,11 @@ export function BookingForm({
           />
           <FormGrid columns={4}>
             {number("freightAmount", "Freight")}
-            {number("reimbursementAmount", "Reimbursement", "Railway freight paid on behalf")}
+            {number(
+              "reimbursementAmount",
+              "Reimbursement",
+              "Railway freight paid on behalf",
+            )}
             {number("hamaliCharges", "Hamali")}
             {number("otherCharges", "Other")}
           </FormGrid>
@@ -613,7 +771,12 @@ export function BookingForm({
           {quote && quote.lines.length ? (
             <View
               testID="booking-quote-lines"
-              style={{ backgroundColor: t.c.surfaceAlt, borderRadius: t.radius.md, padding: 12, gap: 6 }}
+              style={{
+                backgroundColor: t.c.surfaceAlt,
+                borderRadius: t.radius.md,
+                padding: 12,
+                gap: 6,
+              }}
             >
               <Row justify="space-between">
                 <Text variant="overline" tone="muted">
@@ -626,12 +789,25 @@ export function BookingForm({
               {quote.lines.map((l, i) => (
                 <Row key={`${l.name}-${i}`} justify="space-between" gap={8}>
                   <Text variant="caption" style={{ flex: 1 }}>
-                    {l.name} <Text variant="caption" tone="faint">({l.appliesTo})</Text>
+                    {l.name}{" "}
+                    <Text variant="caption" tone="faint">
+                      ({l.appliesTo})
+                    </Text>
                   </Text>
-                  <Text variant="caption" tone="muted" style={{ fontFamily: t.fonts.mono }}>
-                    {l.basis === "flat" ? "flat" : `${l.qty} × ${formatMoney(l.rate)}${l.basis === "per_kg" ? "/kg" : "/pkg"}`}
+                  <Text
+                    variant="caption"
+                    tone="muted"
+                    style={{ fontFamily: t.fonts.mono }}
+                  >
+                    {l.basis === "flat"
+                      ? "flat"
+                      : `${l.qty} × ${formatMoney(l.rate)}${l.basis === "per_kg" ? "/kg" : "/pkg"}`}
                   </Text>
-                  <Money value={l.amount} variant="caption" style={{ minWidth: 90, textAlign: "right" }} />
+                  <Money
+                    value={l.amount}
+                    variant="caption"
+                    style={{ minWidth: 90, textAlign: "right" }}
+                  />
                 </Row>
               ))}
             </View>
@@ -652,16 +828,27 @@ export function BookingForm({
                   <NumberField
                     testID="booking-directPaid"
                     label="Paid now"
-                    hint={mode === "edit" ? "Cash taken on this booking (payments are added separately)" : "Cash taken at the counter"}
+                    hint={
+                      mode === "edit"
+                        ? "Cash taken on this booking (payments are added separately)"
+                        : "Cash taken at the counter"
+                    }
                     value={f.value}
                     onChange={f.onChange}
                     error={fieldState.error?.message}
                   />
                   <Row gap={6}>
-                    <Chip label="Nothing" selected={!f.value} onPress={() => f.onChange(undefined)} testID="booking-paid-none" />
+                    <Chip
+                      label="Nothing"
+                      selected={!f.value}
+                      onPress={() => f.onChange(undefined)}
+                      testID="booking-paid-none"
+                    />
                     <Chip
                       label={`Full ${formatMoney(total)}`}
-                      selected={!!f.value && round2(f.value) === total && total > 0}
+                      selected={
+                        !!f.value && round2(f.value) === total && total > 0
+                      }
                       onPress={() => f.onChange(total || undefined)}
                       testID="booking-paid-full"
                     />
@@ -686,7 +873,9 @@ export function BookingForm({
                 )}
               />
             ) : (
-              text("paymentReceiver", "Payment received by", { placeholder: "Name (optional)" })
+              text("paymentReceiver", "Payment received by", {
+                placeholder: "Name (optional)",
+              })
             )}
           </FormGrid>
 
@@ -716,30 +905,56 @@ export function BookingForm({
             control={control}
             name="isLease"
             render={({ field: f }) => (
-              <Toggle testID="booking-isLease" label="Lease" hint="Party books on a leased bogie" value={!!f.value} onChange={f.onChange} />
+              <Toggle
+                testID="booking-isLease"
+                label="Lease"
+                hint="Party books on a leased bogie"
+                value={!!f.value}
+                onChange={f.onChange}
+              />
             )}
           />
           <Controller
             control={control}
             name="isBooking"
             render={({ field: f }) => (
-              <Toggle testID="booking-isBooking" label="Booking" hint="Regular booking party" value={!!f.value} onChange={f.onChange} />
+              <Toggle
+                testID="booking-isBooking"
+                label="Booking"
+                hint="Regular booking party"
+                value={!!f.value}
+                onChange={f.onChange}
+              />
             )}
           />
           {text("notes", "Notes", { multiline: true })}
         </Col>
       </Card>
 
-      <Row justify="flex-end" gap={8} style={isPhone ? { flexDirection: "column-reverse", alignItems: "stretch" } : undefined}>
+      <Row
+        justify="flex-end"
+        gap={8}
+        style={
+          isPhone
+            ? { flexDirection: "column-reverse", alignItems: "stretch" }
+            : undefined
+        }
+      >
         <Button
           title="Cancel"
           variant="secondary"
-          onPress={() => (nav.canGoBack() ? nav.goBack() : nav.navigate("Bookings"))}
+          onPress={() =>
+            nav.canGoBack() ? nav.goBack() : nav.navigate("Bookings")
+          }
           testID="booking-cancel"
           fullWidth={isPhone}
         />
         <Button
-          title={mode === "create" ? `Save booking · ${formatMoney(total)}` : "Save changes"}
+          title={
+            mode === "create"
+              ? `Save booking · ${formatMoney(total)}`
+              : "Save changes"
+          }
           icon={Save}
           size="lg"
           onPress={onSubmit}

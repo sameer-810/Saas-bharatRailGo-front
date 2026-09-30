@@ -1,7 +1,16 @@
 /** Bookings / revenue trend as simple bars (Views only, no chart library). */
 import React, { useMemo, useState } from "react";
 import { Pressable, View } from "react-native";
-import { Card, Col, Money, Row, SectionHeader, SegmentedControl, Skeleton, Text } from "@shared/ui";
+import {
+  Card,
+  Col,
+  Money,
+  Row,
+  SectionHeader,
+  SegmentedControl,
+  Skeleton,
+  Text,
+} from "@shared/ui";
 import { useTheme } from "@shared/useTheme";
 import { addDays, formatMoney, isoDay } from "@shared/lib/format";
 import type { DailyRow, DashboardMetrics } from "../types";
@@ -66,9 +75,13 @@ export function TrendCard({
   const val = (b: Bar) => (metric === "revenue" ? b.revenue : b.bookings);
   const max = Math.max(1, ...bars.map(val));
   const total = bars.reduce((s, b) => s + val(b), 0);
-  const focus = bars.find((b) => b.key === picked) ?? bars.find((b) => b.current) ?? bars[bars.length - 1];
+  const focus =
+    bars.find((b) => b.key === picked) ??
+    bars.find((b) => b.current) ??
+    bars[bars.length - 1];
   const loading = range === "14d" ? dailyLoading && !daily : !monthly;
-  const fmt = (n: number) => (metric === "revenue" ? formatMoney(n, { compact: true }) : String(n));
+  const fmt = (n: number) =>
+    metric === "revenue" ? formatMoney(n, { compact: true }) : String(n);
 
   return (
     <Card testID="trend-card">
@@ -92,7 +105,13 @@ export function TrendCard({
       <Row justify="space-between" align="flex-end" wrap gap={8}>
         <Col gap={2}>
           <Text variant="caption" tone="faint">
-            {focus ? (focus.current ? (range === "14d" ? "Today" : "This month") : focus.label) : "—"}
+            {focus
+              ? focus.current
+                ? range === "14d"
+                  ? "Today"
+                  : "This month"
+                : focus.label
+              : "—"}
           </Text>
           {metric === "revenue" ? (
             <Money value={focus ? focus.revenue : 0} variant="h1" />
@@ -121,7 +140,11 @@ export function TrendCard({
         {loading ? (
           <Skeleton height={140} />
         ) : (
-          <Row gap={range === "14d" ? 4 : 10} align="flex-end" style={{ height: 150 }}>
+          <Row
+            gap={range === "14d" ? 4 : 10}
+            align="flex-end"
+            style={{ height: 150 }}
+          >
             {bars.map((b) => {
               const h = Math.max(3, (val(b) / max) * 120);
               const active = focus?.key === b.key;
@@ -132,7 +155,13 @@ export function TrendCard({
                   accessibilityRole="button"
                   accessibilityLabel={`${b.label}: ${fmt(val(b))}`}
                   onPress={() => setPicked(b.key)}
-                  style={{ flex: 1, alignItems: "center", justifyContent: "flex-end", height: "100%", gap: 6 }}
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                    height: "100%",
+                    gap: 6,
+                  }}
                 >
                   <View
                     style={{

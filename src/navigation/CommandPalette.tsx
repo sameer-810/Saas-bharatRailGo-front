@@ -4,9 +4,22 @@
  * Enter on keyboards.
  */
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
+import {
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from "react-native";
 import { create } from "zustand";
-import { ArrowRight, Search, User, Zap, ReceiptText } from "lucide-react-native";
+import {
+  ArrowRight,
+  Search,
+  User,
+  Zap,
+  ReceiptText,
+} from "lucide-react-native";
 import { useTheme } from "@shared/useTheme";
 import { Row, Text } from "@shared/ui";
 import { apiClient } from "@shared/api/apiClient";
@@ -16,7 +29,10 @@ import { can } from "@shared/lib/permissions";
 import { NAV_ITEMS, QUICK_ACTIONS } from "./navItems";
 import { navigationRef } from "./navigationRef";
 
-export const useCommandPalette = create<{ open: boolean; setOpen: (o: boolean) => void }>((set) => ({
+export const useCommandPalette = create<{
+  open: boolean;
+  setOpen: (o: boolean) => void;
+}>((set) => ({
   open: false,
   setOpen: (open) => set({ open }),
 }));
@@ -30,7 +46,10 @@ interface Entry {
 }
 
 function go(route: string, params?: Record<string, unknown>) {
-  if (navigationRef.isReady()) (navigationRef as unknown as { navigate: (r: string, p?: unknown) => void }).navigate(route, params);
+  if (navigationRef.isReady())
+    (
+      navigationRef as unknown as { navigate: (r: string, p?: unknown) => void }
+    ).navigate(route, params);
 }
 
 export function CommandPalette() {
@@ -48,7 +67,9 @@ export function CommandPalette() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        useCommandPalette.getState().setOpen(!useCommandPalette.getState().open);
+        useCommandPalette
+          .getState()
+          .setOpen(!useCommandPalette.getState().open);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -70,8 +91,12 @@ export function CommandPalette() {
     }
     let alive = true;
     Promise.all([
-      apiClient.get("/parties", { params: { search: dq, limit: 5 } }).catch(() => null),
-      apiClient.get("/pods", { params: { search: dq, limit: 5 } }).catch(() => null),
+      apiClient
+        .get("/parties", { params: { search: dq, limit: 5 } })
+        .catch(() => null),
+      apiClient
+        .get("/pods", { params: { search: dq, limit: 5 } })
+        .catch(() => null),
     ]).then(([parties, pods]) => {
       if (!alive) return;
       const out: Entry[] = [];
@@ -103,12 +128,28 @@ export function CommandPalette() {
   const entries = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const match = (s: string) => !needle || s.toLowerCase().includes(needle);
-    const actions: Entry[] = QUICK_ACTIONS.filter((a) => !a.perm || can(role, a.perm))
+    const actions: Entry[] = QUICK_ACTIONS.filter(
+      (a) => !a.perm || can(role, a.perm),
+    )
       .filter((a) => match(`${a.label} ${a.keywords}`))
-      .map((a) => ({ key: `a-${a.route}`, label: a.label, hint: "Action", icon: Zap, run: () => go(a.route) }));
-    const screens: Entry[] = NAV_ITEMS.filter((n) => !n.perm || can(role, n.perm))
+      .map((a) => ({
+        key: `a-${a.route}`,
+        label: a.label,
+        hint: "Action",
+        icon: Zap,
+        run: () => go(a.route),
+      }));
+    const screens: Entry[] = NAV_ITEMS.filter(
+      (n) => !n.perm || can(role, n.perm),
+    )
       .filter((n) => match(`${n.label} ${n.keywords || ""}`))
-      .map((n) => ({ key: `s-${n.route}`, label: n.label, hint: "Go to", icon: n.icon, run: () => go(n.route) }));
+      .map((n) => ({
+        key: `s-${n.route}`,
+        label: n.label,
+        hint: "Go to",
+        icon: n.icon,
+        run: () => go(n.route),
+      }));
     return [...actions, ...screens, ...remote].slice(0, 14);
   }, [q, remote, role]);
 
@@ -120,10 +161,21 @@ export function CommandPalette() {
   };
 
   return (
-    <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+    <Modal
+      visible={open}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setOpen(false)}
+    >
       <Pressable
         onPress={() => setOpen(false)}
-        style={{ flex: 1, backgroundColor: t.c.overlay, alignItems: "center", paddingTop: 80, paddingHorizontal: 16 }}
+        style={{
+          flex: 1,
+          backgroundColor: t.c.overlay,
+          alignItems: "center",
+          paddingTop: 80,
+          paddingHorizontal: 16,
+        }}
       >
         <Pressable
           onPress={() => undefined}
@@ -138,7 +190,15 @@ export function CommandPalette() {
             overflow: "hidden",
           }}
         >
-          <Row gap={10} style={{ paddingHorizontal: 16, height: 56, borderBottomWidth: 1, borderBottomColor: t.c.border }}>
+          <Row
+            gap={10}
+            style={{
+              paddingHorizontal: 16,
+              height: 56,
+              borderBottomWidth: 1,
+              borderBottomColor: t.c.border,
+            }}
+          >
             <Search size={18} color={t.c.textFaint} />
             <TextInput
               autoFocus
@@ -152,7 +212,8 @@ export function CommandPalette() {
               placeholderTextColor={t.c.textFaint}
               onKeyPress={(e) => {
                 const key = (e.nativeEvent as { key: string }).key;
-                if (key === "ArrowDown") setCursor((c) => Math.min(c + 1, entries.length - 1));
+                if (key === "ArrowDown")
+                  setCursor((c) => Math.min(c + 1, entries.length - 1));
                 if (key === "ArrowUp") setCursor((c) => Math.max(c - 1, 0));
                 if (key === "Escape") setOpen(false);
               }}
@@ -167,7 +228,10 @@ export function CommandPalette() {
               Esc
             </Text>
           </Row>
-          <ScrollView style={{ maxHeight: 420 }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            style={{ maxHeight: 420 }}
+            keyboardShouldPersistTaps="handled"
+          >
             {entries.length === 0 ? (
               <Text tone="faint" style={{ padding: 16 }}>
                 No matches
@@ -191,14 +255,21 @@ export function CommandPalette() {
                       backgroundColor: active ? t.c.accentSoft : "transparent",
                     }}
                   >
-                    <Icon size={16} color={active ? t.c.accent : t.c.textMuted} />
+                    <Icon
+                      size={16}
+                      color={active ? t.c.accent : t.c.textMuted}
+                    />
                     <Text style={{ flex: 1 }} numberOfLines={1}>
                       {e.label}
                     </Text>
                     <Text variant="caption" tone="faint">
                       {e.hint}
                     </Text>
-                    {active ? <ArrowRight size={14} color={t.c.accent} /> : <View style={{ width: 14 }} />}
+                    {active ? (
+                      <ArrowRight size={14} color={t.c.accent} />
+                    ) : (
+                      <View style={{ width: 14 }} />
+                    )}
                   </Pressable>
                 );
               })

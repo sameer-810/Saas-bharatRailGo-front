@@ -21,9 +21,21 @@ const AppStack = createNativeStackNavigator();
 function AuthNavigator() {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-      <AuthStack.Screen name="Login" component={LoginScreen as React.ComponentType} options={{ title: "Sign in · BharatRailGo" }} />
-      <AuthStack.Screen name="Signup" component={SignupScreen as React.ComponentType} options={{ title: "Start free trial · BharatRailGo" }} />
-      <AuthStack.Screen name="Pending" component={PendingScreen as React.ComponentType} options={{ title: "In review · BharatRailGo" }} />
+      <AuthStack.Screen
+        name="Login"
+        component={LoginScreen as React.ComponentType}
+        options={{ title: "Sign in · BharatRailGo" }}
+      />
+      <AuthStack.Screen
+        name="Signup"
+        component={SignupScreen as React.ComponentType}
+        options={{ title: "Start free trial · BharatRailGo" }}
+      />
+      <AuthStack.Screen
+        name="Pending"
+        component={PendingScreen as React.ComponentType}
+        options={{ title: "In review · BharatRailGo" }}
+      />
     </AuthStack.Navigator>
   );
 }
@@ -33,7 +45,9 @@ function AppNavigator() {
     <AppStack.Navigator
       screenOptions={{ headerShown: false, animation: "fade" }}
       layout={({ children, state }) => (
-        <AppShell current={state.routes[state.index]?.name ?? "Home"}>{children}</AppShell>
+        <AppShell current={state.routes[state.index]?.name ?? "Home"}>
+          {children}
+        </AppShell>
       )}
     >
       {Object.entries(appScreens).map(([name, component]) => (
@@ -41,7 +55,9 @@ function AppNavigator() {
           key={name}
           name={name}
           component={component as React.ComponentType}
-          options={{ title: `${name.replace(/([a-z])([A-Z])/g, "$1 $2")} · BharatRailGo` }}
+          options={{
+            title: `${name.replace(/([a-z])([A-Z])/g, "$1 $2")} · BharatRailGo`,
+          }}
         />
       ))}
     </AppStack.Navigator>
@@ -60,14 +76,24 @@ export function RootNavigator() {
 
   if (!isHydrated || !isAuthChecked) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: t.c.bg }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: t.c.bg,
+        }}
+      >
         <ActivityIndicator color={t.c.accent} />
       </View>
     );
   }
 
   return (
-    <Root.Navigator screenOptions={{ headerShown: false }} key={signedIn ? "app" : "auth"}>
+    <Root.Navigator
+      screenOptions={{ headerShown: false }}
+      key={signedIn ? "app" : "auth"}
+    >
       {signedIn ? (
         <Root.Screen name="App" component={AppNavigator} />
       ) : (

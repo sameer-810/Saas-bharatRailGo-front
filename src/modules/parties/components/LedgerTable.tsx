@@ -24,7 +24,13 @@ interface Row_ extends LedgerRow {
 }
 
 /** ₹1,234.00 Dr / Cr — positive balance means the party owes us. */
-export function Balance({ value, variant }: { value: number; variant?: "money" | "h3" | "h2" }) {
+export function Balance({
+  value,
+  variant,
+}: {
+  value: number;
+  variant?: "money" | "h3" | "h2";
+}) {
   const t = useTheme();
   return (
     <Row gap={4} align="baseline">
@@ -73,22 +79,38 @@ export function LedgerTable({
     }
     const debit = inRange.reduce((a, r) => a + (r.debit || 0), 0);
     const credit = inRange.reduce((a, r) => a + (r.credit || 0), 0);
-    const closing = inRange.length ? inRange[inRange.length - 1].balance : broughtForward;
+    const closing = inRange.length
+      ? inRange[inRange.length - 1].balance
+      : broughtForward;
     return { inRange, broughtForward, debit, credit, closing };
   }, [rows, from, to]);
 
   const filtered = !!(from || to);
 
   const columns: Column<Row_>[] = [
-    { key: "date", title: "Date", flex: 1, render: (r) => <Text tone="muted">{formatDate(r.date)}</Text> },
+    {
+      key: "date",
+      title: "Date",
+      flex: 1,
+      render: (r) => <Text tone="muted">{formatDate(r.date)}</Text>,
+    },
     {
       key: "particulars",
       title: "Particulars",
       flex: 2.6,
       render: (r) => (
         <Col gap={0}>
-          <Text numberOfLines={2} style={r.type === "consignment" ? { fontFamily: t.fonts.mono } : undefined}>
-            {r.type === "consignment" ? `Booking · ${r.description}` : r.description}
+          <Text
+            numberOfLines={2}
+            style={
+              r.type === "consignment"
+                ? { fontFamily: t.fonts.mono }
+                : undefined
+            }
+          >
+            {r.type === "consignment"
+              ? `Booking · ${r.description}`
+              : r.description}
           </Text>
         </Col>
       ),
@@ -98,26 +120,54 @@ export function LedgerTable({
       title: "Debit",
       flex: 1.1,
       align: "right",
-      render: (r) => (r.debit ? <Money value={r.debit} /> : <Text tone="faint">—</Text>),
+      render: (r) =>
+        r.debit ? <Money value={r.debit} /> : <Text tone="faint">—</Text>,
     },
     {
       key: "credit",
       title: "Credit",
       flex: 1.1,
       align: "right",
-      render: (r) => (r.credit ? <Money value={r.credit} tone="success" /> : <Text tone="faint">—</Text>),
+      render: (r) =>
+        r.credit ? (
+          <Money value={r.credit} tone="success" />
+        ) : (
+          <Text tone="faint">—</Text>
+        ),
     },
-    { key: "balance", title: "Balance", flex: 1.3, align: "right", render: (r) => <Balance value={r.balance} /> },
+    {
+      key: "balance",
+      title: "Balance",
+      flex: 1.3,
+      align: "right",
+      render: (r) => <Balance value={r.balance} />,
+    },
   ];
 
   return (
     <Col gap={12} testID="party-ledger">
       <Row gap={12} wrap align="flex-end">
-        <Col style={{ minWidth: 150, flexGrow: isPhone ? 1 : 0, flexBasis: 170 }}>
-          <DateField testID="party-ledger-from" label="From" value={from} onChange={setFrom} quick={false} />
+        <Col
+          style={{ minWidth: 150, flexGrow: isPhone ? 1 : 0, flexBasis: 170 }}
+        >
+          <DateField
+            testID="party-ledger-from"
+            label="From"
+            value={from}
+            onChange={setFrom}
+            quick={false}
+          />
         </Col>
-        <Col style={{ minWidth: 150, flexGrow: isPhone ? 1 : 0, flexBasis: 170 }}>
-          <DateField testID="party-ledger-to" label="To" value={to} onChange={setTo} quick={false} />
+        <Col
+          style={{ minWidth: 150, flexGrow: isPhone ? 1 : 0, flexBasis: 170 }}
+        >
+          <DateField
+            testID="party-ledger-to"
+            label="To"
+            value={to}
+            onChange={setTo}
+            quick={false}
+          />
         </Col>
         {filtered ? (
           <Button
@@ -133,7 +183,11 @@ export function LedgerTable({
       </Row>
 
       {filtered && from ? (
-        <Row justify="space-between" testID="party-ledger-bf" style={{ paddingHorizontal: 4 }}>
+        <Row
+          justify="space-between"
+          testID="party-ledger-bf"
+          style={{ paddingHorizontal: 4 }}
+        >
           <Text tone="muted">Brought forward (before {formatDate(from)})</Text>
           <Balance value={view.broughtForward} />
         </Row>
@@ -148,22 +202,30 @@ export function LedgerTable({
         error={error}
         onRetry={onRetry}
         onRowPress={(r) => {
-          if (r.type === "consignment" && r.refId) nav.navigate("BookingDetail", { id: r.refId });
-          else if (r.type === "payment" && r.refId) nav.navigate("PaymentDetail", { id: r.refId });
+          if (r.type === "consignment" && r.refId)
+            nav.navigate("BookingDetail", { id: r.refId });
+          else if (r.type === "payment" && r.refId)
+            nav.navigate("PaymentDetail", { id: r.refId });
         }}
         phoneTitle={(r) => (
           <Col gap={2}>
             <Text variant="caption" tone="faint">
               {formatDate(r.date)}
             </Text>
-            <Text numberOfLines={2}>{r.type === "consignment" ? `Booking · ${r.description}` : r.description}</Text>
+            <Text numberOfLines={2}>
+              {r.type === "consignment"
+                ? `Booking · ${r.description}`
+                : r.description}
+            </Text>
           </Col>
         )}
         phoneRight={(r) => <Balance value={r.balance} />}
         empty={
           <EmptyState
             icon={BookOpen}
-            title={filtered ? "No entries in this period" : "No transactions yet"}
+            title={
+              filtered ? "No entries in this period" : "No transactions yet"
+            }
             message={
               filtered
                 ? "Widen the date range to see more."

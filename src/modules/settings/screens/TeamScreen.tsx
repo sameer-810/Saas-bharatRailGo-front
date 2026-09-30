@@ -3,7 +3,14 @@
  * change role and branches. Owner manages everyone; managers only staff.
  */
 import React, { useMemo, useState } from "react";
-import { KeyRound, Pencil, Plus, Power, UserPlus, Users } from "lucide-react-native";
+import {
+  KeyRound,
+  Pencil,
+  Plus,
+  Power,
+  UserPlus,
+  Users,
+} from "lucide-react-native";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -33,7 +40,13 @@ import { useCan, useReadOnly } from "@shared/lib/permissions";
 import { formatDateTime } from "@shared/lib/format";
 import { useAuthStore } from "@shared/store/useAuthStore";
 import type { TeamUser } from "../types";
-import { PlanLimitBanner, ReadOnlyBanner, atLimit, usageText, useSubscription } from "../components/common";
+import {
+  PlanLimitBanner,
+  ReadOnlyBanner,
+  atLimit,
+  usageText,
+  useSubscription,
+} from "../components/common";
 
 type EditableRole = "staff" | "manager";
 
@@ -64,13 +77,18 @@ function BranchPicker({
               testID={`${testID}-${b.code}`}
               label={`${b.name}${b.isHeadOffice ? " (HO)" : ""}`}
               selected={on}
-              onPress={() => onChange(on ? value.filter((x) => x !== b.id) : [...value, b.id])}
+              onPress={() =>
+                onChange(
+                  on ? value.filter((x) => x !== b.id) : [...value, b.id],
+                )
+              }
             />
           );
         })}
       </Row>
       <Text variant="caption" tone={error ? "danger" : "faint"}>
-        {error || "Staff only see bookings of these branches. None selected = head office."}
+        {error ||
+          "Staff only see bookings of these branches. None selected = head office."}
       </Text>
     </Col>
   );
@@ -147,11 +165,21 @@ function AddUserDialog({
   const [limitHit, setLimitHit] = useState(false);
   const create = useApiMutation<TeamUser, AddForm>("post", "/auth/users", {
     invalidate: ["users"],
-    body: (v) => ({ ...v, email: v.email.trim().toLowerCase(), branches: v.role === "staff" ? v.branches : undefined }),
+    body: (v) => ({
+      ...v,
+      email: v.email.trim().toLowerCase(),
+      branches: v.role === "staff" ? v.branches : undefined,
+    }),
   });
   const { control, handleSubmit, reset } = useForm<AddForm>({
     resolver: zodResolver(addSchema),
-    defaultValues: { name: "", email: "", password: "", role: "staff", branches: [] },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      role: "staff",
+      branches: [],
+    },
   });
   const role = useWatch({ control, name: "role" });
 
@@ -184,17 +212,36 @@ function AddUserDialog({
       testID="team-add-dialog"
       footer={
         <>
-          <Button testID="team-add-cancel" title="Cancel" variant="secondary" onPress={close} />
-          <Button testID="team-add-save" title="Add user" icon={UserPlus} loading={create.isPending} onPress={submit} />
+          <Button
+            testID="team-add-cancel"
+            title="Cancel"
+            variant="secondary"
+            onPress={close}
+          />
+          <Button
+            testID="team-add-save"
+            title="Add user"
+            icon={UserPlus}
+            loading={create.isPending}
+            onPress={submit}
+          />
         </>
       }
     >
-      {limitHit ? <PlanLimitBanner what="users" testID="team-add-limit" /> : null}
+      {limitHit ? (
+        <PlanLimitBanner what="users" testID="team-add-limit" />
+      ) : null}
       <Controller
         control={control}
         name="name"
         render={({ field: f, fieldState }) => (
-          <TextField testID="team-add-name" label="Name" value={f.value} onChangeText={f.onChange} error={fieldState.error?.message} />
+          <TextField
+            testID="team-add-name"
+            label="Name"
+            value={f.value}
+            onChangeText={f.onChange}
+            error={fieldState.error?.message}
+          />
         )}
       />
       <Controller
@@ -231,14 +278,25 @@ function AddUserDialog({
       <Controller
         control={control}
         name="role"
-        render={({ field: f }) => <RolePicker testID="team-add-role" value={f.value} onChange={f.onChange} />}
+        render={({ field: f }) => (
+          <RolePicker
+            testID="team-add-role"
+            value={f.value}
+            onChange={f.onChange}
+          />
+        )}
       />
       {role === "staff" ? (
         <Controller
           control={control}
           name="branches"
           render={({ field: f }) => (
-            <BranchPicker testID="team-add-branch" branches={branches} value={f.value} onChange={f.onChange} />
+            <BranchPicker
+              testID="team-add-branch"
+              branches={branches}
+              value={f.value}
+              onChange={f.onChange}
+            />
           )}
         />
       ) : null}
@@ -272,11 +330,13 @@ function EditUserDialog({
     setLastId(null);
     onClose();
   };
-  const update = useApiMutation<TeamUser, { id: string; body: Record<string, unknown> }>(
-    "patch",
-    (v) => `/auth/users/${v.id}`,
-    { invalidate: ["users"], body: (v) => v.body },
-  );
+  const update = useApiMutation<
+    TeamUser,
+    { id: string; body: Record<string, unknown> }
+  >("patch", (v) => `/auth/users/${v.id}`, {
+    invalidate: ["users"],
+    body: (v) => v.body,
+  });
 
   const save = async () => {
     if (!user) return;
@@ -284,7 +344,11 @@ function EditUserDialog({
     if (name.trim() && name.trim() !== user.name) body.name = name.trim();
     if (user.role !== "owner" && role !== user.role) body.role = role;
     const nextRole = user.role === "owner" ? "owner" : role;
-    if (nextRole === "staff" && JSON.stringify([...picked].sort()) !== JSON.stringify([...user.branches].sort())) {
+    if (
+      nextRole === "staff" &&
+      JSON.stringify([...picked].sort()) !==
+        JSON.stringify([...user.branches].sort())
+    ) {
       body.branches = picked;
     }
     if (!Object.keys(body).length) {
@@ -308,17 +372,39 @@ function EditUserDialog({
       testID="team-edit-dialog"
       footer={
         <>
-          <Button testID="team-edit-cancel" title="Cancel" variant="secondary" onPress={close} />
-          <Button testID="team-edit-save" title="Save" loading={update.isPending} onPress={save} disabled={!name.trim()} />
+          <Button
+            testID="team-edit-cancel"
+            title="Cancel"
+            variant="secondary"
+            onPress={close}
+          />
+          <Button
+            testID="team-edit-save"
+            title="Save"
+            loading={update.isPending}
+            onPress={save}
+            disabled={!name.trim()}
+          />
         </>
       }
     >
-      <TextField testID="team-edit-name" label="Name" value={name} onChangeText={setName} />
-      {user && (user.role === "staff" || (user.role === "manager" && canManagers)) ? (
+      <TextField
+        testID="team-edit-name"
+        label="Name"
+        value={name}
+        onChangeText={setName}
+      />
+      {user &&
+      (user.role === "staff" || (user.role === "manager" && canManagers)) ? (
         <RolePicker testID="team-edit-role" value={role} onChange={setRole} />
       ) : null}
       {user && user.role !== "owner" && role === "staff" ? (
-        <BranchPicker testID="team-edit-branch" branches={branches} value={picked} onChange={setPicked} />
+        <BranchPicker
+          testID="team-edit-branch"
+          branches={branches}
+          value={picked}
+          onChange={setPicked}
+        />
       ) : null}
     </Dialog>
   );
@@ -326,13 +412,23 @@ function EditUserDialog({
 
 /* ─────────────── Reset password ─────────────── */
 
-function ResetPasswordDialog({ user, onClose }: { user: TeamUser | null; onClose: () => void }) {
+function ResetPasswordDialog({
+  user,
+  onClose,
+}: {
+  user: TeamUser | null;
+  onClose: () => void;
+}) {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
-  const update = useApiMutation<TeamUser, { id: string; password: string }>("patch", (v) => `/auth/users/${v.id}`, {
-    invalidate: ["users"],
-    body: (v) => ({ password: v.password }),
-  });
+  const update = useApiMutation<TeamUser, { id: string; password: string }>(
+    "patch",
+    (v) => `/auth/users/${v.id}`,
+    {
+      invalidate: ["users"],
+      body: (v) => ({ password: v.password }),
+    },
+  );
   const close = () => {
     setPw("");
     setPw2("");
@@ -359,7 +455,12 @@ function ResetPasswordDialog({ user, onClose }: { user: TeamUser | null; onClose
       testID="team-reset-dialog"
       footer={
         <>
-          <Button testID="team-reset-cancel" title="Cancel" variant="secondary" onPress={close} />
+          <Button
+            testID="team-reset-cancel"
+            title="Cancel"
+            variant="secondary"
+            onPress={close}
+          />
           <Button
             testID="team-reset-save"
             title="Reset password"
@@ -370,7 +471,10 @@ function ResetPasswordDialog({ user, onClose }: { user: TeamUser | null; onClose
         </>
       }
     >
-      <Text tone="muted">They will be signed out on every device and must log in with the new password.</Text>
+      <Text tone="muted">
+        They will be signed out on every device and must log in with the new
+        password.
+      </Text>
       <TextField
         testID="team-reset-password"
         label="New password"
@@ -401,9 +505,15 @@ export function TeamScreen() {
   const readOnly = useReadOnly();
   const me = useAuthStore((s) => s.user);
   const { sub } = useSubscription();
-  const users = useApiGet<TeamUser[]>(["users"], canManage ? "/auth/users" : null);
+  const users = useApiGet<TeamUser[]>(
+    ["users"],
+    canManage ? "/auth/users" : null,
+  );
   const branchesQ = useBranches(true);
-  const branches = useMemo(() => (branchesQ.data || []).filter((b) => b.isActive), [branchesQ.data]);
+  const branches = useMemo(
+    () => (branchesQ.data || []).filter((b) => b.isActive),
+    [branchesQ.data],
+  );
   const branchName = useMemo(() => {
     const m = new Map<string, Branch>();
     (branchesQ.data || []).forEach((b) => m.set(b.id, b));
@@ -415,10 +525,14 @@ export function TeamScreen() {
   const [resetting, setResetting] = useState<TeamUser | null>(null);
   const [limitHit, setLimitHit] = useState(false);
 
-  const toggle = useApiMutation<TeamUser, { id: string; isActive: boolean }>("patch", (v) => `/auth/users/${v.id}`, {
-    invalidate: ["users"],
-    body: (v) => ({ isActive: v.isActive }),
-  });
+  const toggle = useApiMutation<TeamUser, { id: string; isActive: boolean }>(
+    "patch",
+    (v) => `/auth/users/${v.id}`,
+    {
+      invalidate: ["users"],
+      body: (v) => ({ isActive: v.isActive }),
+    },
+  );
 
   const usedUsers = sub?.usage?.users;
   const maxUsers = sub?.limits?.maxUsers ?? null;
@@ -435,7 +549,8 @@ export function TeamScreen() {
     if (!activating) {
       const ok = await confirm({
         title: `Deactivate ${u.name}?`,
-        message: "They are signed out right away and cannot log in. Their bookings stay. You can reactivate them later.",
+        message:
+          "They are signed out right away and cannot log in. Their bookings stay. You can reactivate them later.",
         confirmLabel: "Deactivate",
         danger: true,
       });
@@ -443,7 +558,9 @@ export function TeamScreen() {
     }
     try {
       await toggle.mutateAsync({ id: u.id, isActive: activating });
-      toast.success(activating ? `${u.name} reactivated` : `${u.name} deactivated`);
+      toast.success(
+        activating ? `${u.name} reactivated` : `${u.name} deactivated`,
+      );
     } catch (err) {
       if (apiErrorCode(err) === "PLAN_LIMIT_REACHED") setLimitHit(true);
       toast.error(apiErrorMessage(err));
@@ -453,7 +570,9 @@ export function TeamScreen() {
   const branchLabel = (u: TeamUser) => {
     if (u.role !== "staff") return "All branches";
     if (!u.branches.length) return "—";
-    return u.branches.map((id) => branchName.get(id)?.name || "Removed branch").join(", ");
+    return u.branches
+      .map((id) => branchName.get(id)?.name || "Removed branch")
+      .join(", ");
   };
 
   const columns: Column<TeamUser>[] = [
@@ -476,7 +595,9 @@ export function TeamScreen() {
     {
       key: "role",
       title: "Role",
-      render: (u) => <Text>{u.role.charAt(0).toUpperCase() + u.role.slice(1)}</Text>,
+      render: (u) => (
+        <Text>{u.role.charAt(0).toUpperCase() + u.role.slice(1)}</Text>
+      ),
     },
     {
       key: "branches",
@@ -491,7 +612,12 @@ export function TeamScreen() {
     {
       key: "status",
       title: "Status",
-      render: (u) => <StatusPill status={u.isActive ? "active" : "inactive"} label={u.isActive ? "Active" : "Inactive"} />,
+      render: (u) => (
+        <StatusPill
+          status={u.isActive ? "active" : "inactive"}
+          label={u.isActive ? "Active" : "Inactive"}
+        />
+      ),
     },
     {
       key: "last",
@@ -511,8 +637,18 @@ export function TeamScreen() {
       render: (u) =>
         canTouch(u) && !readOnly ? (
           <Row gap={0}>
-            <IconButton testID={`team-edit-${u.id}`} icon={Pencil} label="Edit" onPress={() => setEditing(u)} />
-            <IconButton testID={`team-reset-${u.id}`} icon={KeyRound} label="Reset password" onPress={() => setResetting(u)} />
+            <IconButton
+              testID={`team-edit-${u.id}`}
+              icon={Pencil}
+              label="Edit"
+              onPress={() => setEditing(u)}
+            />
+            <IconButton
+              testID={`team-reset-${u.id}`}
+              icon={KeyRound}
+              label="Reset password"
+              onPress={() => setResetting(u)}
+            />
             {u.id !== me?.id ? (
               <IconButton
                 testID={`team-toggle-${u.id}`}
@@ -534,7 +670,10 @@ export function TeamScreen() {
   if (!canManage) {
     return (
       <Screen title="Team" back backTo="Settings" testID="team-screen">
-        <Banner tone="info" title="Only the owner and managers can manage the team" />
+        <Banner
+          tone="info"
+          title="Only the owner and managers can manage the team"
+        />
       </Screen>
     );
   }
@@ -581,7 +720,8 @@ export function TeamScreen() {
         ) : null}
         {!canManagers ? (
           <Text variant="caption" tone="muted">
-            As a manager you can add and manage staff accounts. Managers and the owner are managed by the owner.
+            As a manager you can add and manage staff accounts. Managers and the
+            owner are managed by the owner.
           </Text>
         ) : null}
         <DataList<TeamUser>
@@ -603,9 +743,21 @@ export function TeamScreen() {
         />
       </Col>
 
-      <AddUserDialog visible={adding} onClose={() => setAdding(false)} branches={branches} onLimit={() => setLimitHit(true)} />
-      <EditUserDialog user={editing} onClose={() => setEditing(null)} branches={branches} />
-      <ResetPasswordDialog user={resetting} onClose={() => setResetting(null)} />
+      <AddUserDialog
+        visible={adding}
+        onClose={() => setAdding(false)}
+        branches={branches}
+        onLimit={() => setLimitHit(true)}
+      />
+      <EditUserDialog
+        user={editing}
+        onClose={() => setEditing(null)}
+        branches={branches}
+      />
+      <ResetPasswordDialog
+        user={resetting}
+        onClose={() => setResetting(null)}
+      />
     </Screen>
   );
 }

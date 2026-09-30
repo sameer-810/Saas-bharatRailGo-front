@@ -16,7 +16,13 @@ import {
   View,
   type TextInputProps,
 } from "react-native";
-import { Check, ChevronDown, Search, X, type LucideIcon } from "lucide-react-native";
+import {
+  Check,
+  ChevronDown,
+  Search,
+  X,
+  type LucideIcon,
+} from "lucide-react-native";
 import { useTheme } from "../useTheme";
 import { Text, Row, Col } from "./primitives";
 import { isoDay, addDays } from "../lib/format";
@@ -63,7 +69,13 @@ export function Button({
       accessibilityState={{ disabled: !!off, busy: !!loading }}
       disabled={off}
       onPress={onPress}
-      style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => ({
+      style={({
+        pressed,
+        hovered,
+      }: {
+        pressed: boolean;
+        hovered?: boolean;
+      }) => ({
         height: h,
         paddingHorizontal: size === "sm" ? 12 : 18,
         borderRadius: t.radius.md,
@@ -84,7 +96,10 @@ export function Button({
       ) : Icon ? (
         <Icon size={size === "sm" ? 15 : 18} color={palette.fg} />
       ) : null}
-      <Text variant="label" style={{ color: palette.fg, fontSize: size === "lg" ? 15 : 14 }}>
+      <Text
+        variant="label"
+        style={{ color: palette.fg, fontSize: size === "lg" ? 15 : 14 }}
+      >
         {title}
       </Text>
     </Pressable>
@@ -107,7 +122,12 @@ export function IconButton({
   size?: number;
 }) {
   const t = useTheme();
-  const color = tone === "danger" ? t.c.danger : tone === "accent" ? t.c.accent : t.c.textMuted;
+  const color =
+    tone === "danger"
+      ? t.c.danger
+      : tone === "accent"
+        ? t.c.accent
+        : t.c.textMuted;
   return (
     <Pressable
       testID={testID}
@@ -115,7 +135,13 @@ export function IconButton({
       accessibilityLabel={label}
       onPress={onPress}
       hitSlop={6}
-      style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => ({
+      style={({
+        pressed,
+        hovered,
+      }: {
+        pressed: boolean;
+        hovered?: boolean;
+      }) => ({
         width: size,
         height: size,
         borderRadius: t.radius.md,
@@ -140,74 +166,76 @@ export interface TextFieldProps extends Omit<TextInputProps, "style"> {
   mono?: boolean;
 }
 
-export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
-  { label, error, hint, left, right, mono, multiline, testID, ...rest },
-  ref,
-) {
-  const t = useTheme();
-  const [focused, setFocused] = useState(false);
-  return (
-    <Col gap={6}>
-      {label ? (
-        <Text variant="label" tone="muted">
-          {label}
-        </Text>
-      ) : null}
-      <Row
-        gap={8}
-        style={{
-          minHeight: multiline ? 88 : 44,
-          paddingHorizontal: 12,
-          borderRadius: t.radius.md,
-          borderWidth: 1,
-          borderColor: error ? t.c.danger : focused ? t.c.accent : t.c.border,
-          backgroundColor: t.c.surfaceSunken,
-          alignItems: multiline ? "flex-start" : "center",
-        }}
-      >
-        {left}
-        <TextInput
-          ref={ref}
-          testID={testID}
-          accessibilityLabel={label}
-          placeholderTextColor={t.c.textFaint}
-          multiline={multiline}
-          onFocus={(e) => {
-            setFocused(true);
-            rest.onFocus?.(e);
+export const TextField = forwardRef<TextInput, TextFieldProps>(
+  function TextField(
+    { label, error, hint, left, right, mono, multiline, testID, ...rest },
+    ref,
+  ) {
+    const t = useTheme();
+    const [focused, setFocused] = useState(false);
+    return (
+      <Col gap={6}>
+        {label ? (
+          <Text variant="label" tone="muted">
+            {label}
+          </Text>
+        ) : null}
+        <Row
+          gap={8}
+          style={{
+            minHeight: multiline ? 88 : 44,
+            paddingHorizontal: 12,
+            borderRadius: t.radius.md,
+            borderWidth: 1,
+            borderColor: error ? t.c.danger : focused ? t.c.accent : t.c.border,
+            backgroundColor: t.c.surfaceSunken,
+            alignItems: multiline ? "flex-start" : "center",
           }}
-          onBlur={(e) => {
-            setFocused(false);
-            rest.onBlur?.(e);
-          }}
-          {...rest}
-          style={[
-            t.type.body,
-            {
-              flex: 1,
-              color: t.c.text,
-              paddingVertical: multiline ? 10 : 0,
-              minHeight: multiline ? 80 : 42,
-              textAlignVertical: multiline ? "top" : "center",
-            },
-            mono && { fontFamily: t.fonts.mono },
-            Platform.OS === "web" && ({ outlineStyle: "none" } as object),
-          ]}
-        />
-        {right}
-      </Row>
-      {error ? (
-        <Text variant="caption" tone="danger">
-          {error}
-        </Text>
-      ) : hint ? (
-        <Text variant="caption" tone="faint">
-          {hint}
-        </Text>
-      ) : null}
-    </Col>
-  );
-});
+        >
+          {left}
+          <TextInput
+            ref={ref}
+            testID={testID}
+            accessibilityLabel={label}
+            placeholderTextColor={t.c.textFaint}
+            multiline={multiline}
+            onFocus={(e) => {
+              setFocused(true);
+              rest.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setFocused(false);
+              rest.onBlur?.(e);
+            }}
+            {...rest}
+            style={[
+              t.type.body,
+              {
+                flex: 1,
+                color: t.c.text,
+                paddingVertical: multiline ? 10 : 0,
+                minHeight: multiline ? 80 : 42,
+                textAlignVertical: multiline ? "top" : "center",
+              },
+              mono && { fontFamily: t.fonts.mono },
+              Platform.OS === "web" && ({ outlineStyle: "none" } as object),
+            ]}
+          />
+          {right}
+        </Row>
+        {error ? (
+          <Text variant="caption" tone="danger">
+            {error}
+          </Text>
+        ) : hint ? (
+          <Text variant="caption" tone="faint">
+            {hint}
+          </Text>
+        ) : null}
+      </Col>
+    );
+  },
+);
 
 /** Numeric field that reports numbers (or undefined when empty). */
 export function NumberField({
@@ -261,7 +289,11 @@ export function SearchInput({
       left={<Search size={16} color={t.c.textFaint} />}
       right={
         value ? (
-          <Pressable accessibilityLabel="Clear search" onPress={() => onChangeText("")} hitSlop={8}>
+          <Pressable
+            accessibilityLabel="Clear search"
+            onPress={() => onChangeText("")}
+            hitSlop={8}
+          >
             <X size={16} color={t.c.textFaint} />
           </Pressable>
         ) : null
@@ -377,7 +409,9 @@ export function Combobox<V extends string | number = string>({
     if (!q) return all;
     const needle = q.toLowerCase();
     return all.filter(
-      (o) => o.label.toLowerCase().includes(needle) || o.hint?.toLowerCase().includes(needle),
+      (o) =>
+        o.label.toLowerCase().includes(needle) ||
+        o.hint?.toLowerCase().includes(needle),
     );
   }, [loadOptions, remote, staticOptions, q]);
 
@@ -405,11 +439,19 @@ export function Combobox<V extends string | number = string>({
           gap: 8,
         }}
       >
-        <Text style={{ flex: 1 }} tone={valueLabel ? "default" : "faint"} numberOfLines={1}>
+        <Text
+          style={{ flex: 1 }}
+          tone={valueLabel ? "default" : "faint"}
+          numberOfLines={1}
+        >
           {valueLabel || placeholder}
         </Text>
         {clearable && valueLabel ? (
-          <Pressable accessibilityLabel="Clear" hitSlop={8} onPress={() => onPick(null)}>
+          <Pressable
+            accessibilityLabel="Clear"
+            hitSlop={8}
+            onPress={() => onPick(null)}
+          >
             <X size={16} color={t.c.textFaint} />
           </Pressable>
         ) : (
@@ -422,9 +464,19 @@ export function Combobox<V extends string | number = string>({
         </Text>
       ) : null}
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+      <Modal
+        visible={open}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+      >
         <Pressable
-          style={{ flex: 1, backgroundColor: t.c.overlay, justifyContent: "center", padding: 16 }}
+          style={{
+            flex: 1,
+            backgroundColor: t.c.overlay,
+            justifyContent: "center",
+            padding: 16,
+          }}
           onPress={() => setOpen(false)}
         >
           <Pressable
@@ -452,7 +504,9 @@ export function Combobox<V extends string | number = string>({
                 />
               ) : null}
             </View>
-            {loading ? <ActivityIndicator style={{ padding: 16 }} color={t.c.accent} /> : null}
+            {loading ? (
+              <ActivityIndicator style={{ padding: 16 }} color={t.c.accent} />
+            ) : null}
             <FlatList
               data={list}
               keyExtractor={(o) => String(o.value)}
@@ -468,7 +522,9 @@ export function Combobox<V extends string | number = string>({
                 const active = item.value === selectedValue;
                 return (
                   <Pressable
-                    testID={testID ? `${testID}-option-${item.value}` : undefined}
+                    testID={
+                      testID ? `${testID}-option-${item.value}` : undefined
+                    }
                     accessibilityRole="button"
                     onPress={() => {
                       onPick(item);
@@ -481,7 +537,11 @@ export function Combobox<V extends string | number = string>({
                       flexDirection: "row",
                       alignItems: "center",
                       gap: 8,
-                      backgroundColor: active ? t.c.accentSoft : hovered ? t.c.surfaceAlt : "transparent",
+                      backgroundColor: active
+                        ? t.c.accentSoft
+                        : hovered
+                          ? t.c.surfaceAlt
+                          : "transparent",
                     })}
                   >
                     <Col gap={2} flex={1}>
@@ -497,7 +557,17 @@ export function Combobox<V extends string | number = string>({
                 );
               }}
             />
-            {footer ? <View style={{ borderTopWidth: 1, borderTopColor: t.c.border, padding: 8 }}>{footer}</View> : null}
+            {footer ? (
+              <View
+                style={{
+                  borderTopWidth: 1,
+                  borderTopColor: t.c.border,
+                  padding: 8,
+                }}
+              >
+                {footer}
+              </View>
+            ) : null}
           </Pressable>
         </Pressable>
       </Modal>
@@ -567,7 +637,8 @@ export function DateField({
           "data-testid": testID,
           "aria-label": label,
           value: value || "",
-          onChange: (e: { target: { value: string } }) => onChange(e.target.value),
+          onChange: (e: { target: { value: string } }) =>
+            onChange(e.target.value),
           style: {
             height: 44,
             padding: "0 12px",

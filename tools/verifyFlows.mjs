@@ -78,7 +78,10 @@ const businessFlow = {
 
     await ctx.check("quick entry parses a one-line booking", async () => {
       await ctx.visit("/bookings");
-      await page.fill('[data-testid="quick-entry-input"]', "NDLS 3pkg 60kg Ramesh topay");
+      await page.fill(
+        '[data-testid="quick-entry-input"]',
+        "NDLS 3pkg 60kg Ramesh topay",
+      );
       await ctx.expectVisible("quick-entry-chip-destination");
       await ctx.expectVisible("quick-entry-chip-packages");
       await ctx.expectVisible("quick-entry-chip-weight");
@@ -91,11 +94,18 @@ const businessFlow = {
       await ctx.expectVisible("booking-save");
       await ctx.expectText("Ramesh Traders");
     });
-    await ctx.check("rate card suggests NDLS charges (15/kg + hamali + docket = ₹950)", async () => {
-      await page.click('[data-testid="booking-suggest"]');
-      await ctx.expectVisible("booking-quote-lines");
-      await page.getByTestId("booking-total").getByText("950", { exact: false }).first().waitFor({ timeout: 10000 });
-    });
+    await ctx.check(
+      "rate card suggests NDLS charges (15/kg + hamali + docket = ₹950)",
+      async () => {
+        await page.click('[data-testid="booking-suggest"]');
+        await ctx.expectVisible("booking-quote-lines");
+        await page
+          .getByTestId("booking-total")
+          .getByText("950", { exact: false })
+          .first()
+          .waitFor({ timeout: 10000 });
+      },
+    );
     await ctx.check("booking saves and opens its detail", async () => {
       await page.click('[data-testid="booking-save"]');
       await page.waitForURL(/\/bookings\/[a-f0-9]{24}$/, { timeout: 15000 });
@@ -120,21 +130,29 @@ const businessFlow = {
       await ctx.expectVisible("bilti-sms-result");
     });
 
-    await ctx.check("payment shows a FIFO allocation preview and saves", async () => {
-      await ctx.visit("/payments/new");
-      await pick(ctx, "payment-party", "Ramesh");
-      await page.fill('[data-testid="payment-amount"]', "500");
-      await ctx.expectVisible("payment-preview");
-      await page.click('[data-testid="payment-save"]');
-      await ctx.expectVisible("payment-saved", 20000);
-    });
+    await ctx.check(
+      "payment shows a FIFO allocation preview and saves",
+      async () => {
+        await ctx.visit("/payments/new");
+        await pick(ctx, "payment-party", "Ramesh");
+        await page.fill('[data-testid="payment-amount"]', "500");
+        await ctx.expectVisible("payment-preview");
+        await page.click('[data-testid="payment-save"]');
+        await ctx.expectVisible("payment-saved", 20000);
+      },
+    );
 
     await ctx.check("invoice PDF opens", async () => {
       const token = await ctx.tokenFor(ctx.CREDS.owner);
-      const inv = (await ctx.api("GET", "/invoices?status=sent&limit=1", { token }))[0];
+      const inv = (
+        await ctx.api("GET", "/invoices?status=sent&limit=1", { token })
+      )[0];
       await ctx.visit(`/invoices/${inv.id}`);
       await ctx.expectVisible("invoice-pdf");
-      const [popup] = await Promise.all([page.waitForEvent("popup", { timeout: 15000 }), page.click('[data-testid="invoice-pdf"]')]);
+      const [popup] = await Promise.all([
+        page.waitForEvent("popup", { timeout: 15000 }),
+        page.click('[data-testid="invoice-pdf"]'),
+      ]);
       await popup.close();
     });
   },
@@ -149,58 +167,89 @@ const billingFlow = {
 
     await ctx.check("plan cards list each limit once", async () => {
       await ctx.visit("/settings/plan");
-      const text = await page.locator('[data-testid="plan-card-starter"] >> visible=true').first().innerText();
+      const text = await page
+        .locator('[data-testid="plan-card-starter"] >> visible=true')
+        .first()
+        .innerText();
       const n = (text.match(/3 users/g) || []).length;
       if (n !== 1) throw new Error(`"3 users" appears ${n} times`);
       if (/1 branches/.test(text)) throw new Error("plural typo: 1 branches");
     });
 
-    await ctx.check("plan screen offers online payment with GST breakdown", async () => {
-      await ctx.visit("/settings/plan");
-      await ctx.expectVisible("plan-pay-pro");
-      await page.click('[data-testid="plan-pay-pro"]');
-      await ctx.expectVisible("pay-dialog");
-      await page.click('[data-testid="pay-cycle-yearly"]');
-      await ctx.expectVisible("pay-breakdown");
-      await ctx.expectText("CGST 9%");
-    });
+    await ctx.check(
+      "plan screen offers online payment with GST breakdown",
+      async () => {
+        await ctx.visit("/settings/plan");
+        await ctx.expectVisible("plan-pay-pro");
+        await page.click('[data-testid="plan-pay-pro"]');
+        await ctx.expectVisible("pay-dialog");
+        await page.click('[data-testid="pay-cycle-yearly"]');
+        await ctx.expectVisible("pay-breakdown");
+        await ctx.expectText("CGST 9%");
+      },
+    );
 
     let popup;
-    await ctx.check("a declined payment is shown and can be retried", async () => {
-      [popup] = await Promise.all([page.waitForEvent("popup"), page.click('[data-testid="pay-start"]')]);
-      await popup.waitForSelector('[data-testid="fake-fail"]');
-      await popup.click('[data-testid="fake-fail"]');
-      await popup.close();
-      await ctx.expectVisible("pay-failed", 20000);
-    });
+    await ctx.check(
+      "a declined payment is shown and can be retried",
+      async () => {
+        [popup] = await Promise.all([
+          page.waitForEvent("popup"),
+          page.click('[data-testid="pay-start"]'),
+        ]);
+        await popup.waitForSelector('[data-testid="fake-fail"]');
+        await popup.click('[data-testid="fake-fail"]');
+        await popup.close();
+        await ctx.expectVisible("pay-failed", 20000);
+      },
+    );
 
     await ctx.check("paying on retry activates Pro instantly", async () => {
-      [popup] = await Promise.all([page.waitForEvent("popup"), page.click('[data-testid="pay-reopen"]')]);
+      [popup] = await Promise.all([
+        page.waitForEvent("popup"),
+        page.click('[data-testid="pay-reopen"]'),
+      ]);
       await popup.waitForSelector('[data-testid="fake-success"]');
       await popup.click('[data-testid="fake-success"]');
       await popup.close();
       await ctx.expectVisible("pay-success", 20000);
       const me = await ctx.api("GET", "/auth/me", { token });
-      if (me.subscription.planCode !== "pro" || me.subscription.status !== "active") {
-        throw new Error(`plan is ${me.subscription.planCode}/${me.subscription.status}`);
+      if (
+        me.subscription.planCode !== "pro" ||
+        me.subscription.status !== "active"
+      ) {
+        throw new Error(
+          `plan is ${me.subscription.planCode}/${me.subscription.status}`,
+        );
       }
     });
 
-    await ctx.check("GST invoice appears in billing history and opens as PDF", async () => {
-      await page.click('[data-testid="pay-done"]');
-      await ctx.expectVisible("billing-history");
-      const btn = page.locator('[data-testid^="billing-invoice-pdf-"] >> visible=true').first();
-      await btn.waitFor({ timeout: 15000 });
-      const [pdf] = await Promise.all([page.waitForEvent("popup"), btn.click()]);
-      await pdf.close();
-    });
+    await ctx.check(
+      "GST invoice appears in billing history and opens as PDF",
+      async () => {
+        await page.click('[data-testid="pay-done"]');
+        await ctx.expectVisible("billing-history");
+        const btn = page
+          .locator('[data-testid^="billing-invoice-pdf-"] >> visible=true')
+          .first();
+        await btn.waitFor({ timeout: 15000 });
+        const [pdf] = await Promise.all([
+          page.waitForEvent("popup"),
+          btn.click(),
+        ]);
+        await pdf.close();
+      },
+    );
 
     let autopayCheckout;
     await ctx.check("autopay can be set up", async () => {
       await ctx.visit("/settings/plan");
       await page.click('[data-testid="plan-pay-growth"]');
       await page.click('[data-testid="pay-mode-autopay"]');
-      [popup] = await Promise.all([page.waitForEvent("popup"), page.click('[data-testid="pay-start"]')]);
+      [popup] = await Promise.all([
+        page.waitForEvent("popup"),
+        page.click('[data-testid="pay-start"]'),
+      ]);
       autopayCheckout = new URL(popup.url()).pathname;
       await popup.click('[data-testid="fake-success"]');
       await popup.close();
@@ -209,15 +258,25 @@ const billingFlow = {
       await ctx.expectVisible("autopay-card");
     });
 
-    await ctx.check("a failed renewal shows Payment due; a successful one clears it", async () => {
-      const origin = new URL(ctx.API).origin;
-      await fetch(`${origin}${autopayCheckout}/renewal_fail`, { method: "POST", redirect: "manual" });
-      await ctx.visit("/settings/plan");
-      await ctx.expectText("Payment due");
-      await fetch(`${origin}${autopayCheckout}/renewal_success`, { method: "POST", redirect: "manual" });
-      const me = await ctx.api("GET", "/auth/me", { token });
-      if (me.subscription.status !== "active") throw new Error("still " + me.subscription.status);
-    });
+    await ctx.check(
+      "a failed renewal shows Payment due; a successful one clears it",
+      async () => {
+        const origin = new URL(ctx.API).origin;
+        await fetch(`${origin}${autopayCheckout}/renewal_fail`, {
+          method: "POST",
+          redirect: "manual",
+        });
+        await ctx.visit("/settings/plan");
+        await ctx.expectText("Payment due");
+        await fetch(`${origin}${autopayCheckout}/renewal_success`, {
+          method: "POST",
+          redirect: "manual",
+        });
+        const me = await ctx.api("GET", "/auth/me", { token });
+        if (me.subscription.status !== "active")
+          throw new Error("still " + me.subscription.status);
+      },
+    );
 
     await ctx.check("owner can stop autopay", async () => {
       await ctx.visit("/settings/plan");
@@ -225,7 +284,12 @@ const billingFlow = {
       await page.click('[data-testid="confirm-ok"]');
       await ctx.expectVisible("toast-success");
       await page.waitForTimeout(800);
-      if (await page.locator('[data-testid="autopay-card"] >> visible=true').count()) throw new Error("autopay still on");
+      if (
+        await page
+          .locator('[data-testid="autopay-card"] >> visible=true')
+          .count()
+      )
+        throw new Error("autopay still on");
     });
   },
 };
@@ -249,34 +313,49 @@ const privacyFlow = {
     await ctx.check("activity log filters by kind of action", async () => {
       await page.click('[data-testid="activity-group-auth"]');
       await page.waitForTimeout(600);
-      if (await page.getByText("Created a booking").count()) throw new Error("filter did not apply");
+      if (await page.getByText("Created a booking").count())
+        throw new Error("filter did not apply");
       await ctx.expectText("Signed in");
       await page.click('[data-testid="activity-group-all"]');
     });
 
-    await ctx.check("a customer's data downloads from the party page", async () => {
-      const party = (await ctx.api("GET", "/parties?limit=1", { token }))[0];
-      await ctx.visit(`/parties/${party.id}`);
-      await ctx.expectVisible("party-privacy");
-      const [download] = await Promise.all([
-        page.waitForEvent("download", { timeout: 15000 }),
-        page.click('[data-testid="party-privacy-export"]'),
-      ]);
-      if (!/^customer-data-.*.json$/.test(download.suggestedFilename())) throw new Error(download.suggestedFilename());
-    });
-    await ctx.check("erasing a customer needs ERASE typed, then shows the erased banner", async () => {
-      const p = await ctx.api("POST", "/parties", { token, body: { name: "Walk-in Privacy Test", mobile: "9844444444" } });
-      await ctx.visit(`/parties/${p.id}`);
-      await page.click('[data-testid="party-privacy-erase"]');
-      await ctx.expectVisible("party-erase-dialog");
-      if (await page.locator('[data-testid="party-erase-confirm"]').isEnabled()) throw new Error("erase enabled before typing");
-      await page.fill('[data-testid="party-erase-type"]', "erase");
-      await page.click('[data-testid="party-erase-confirm"]');
-      await ctx.expectVisible("toast-success");
-      await ctx.expectVisible("party-erased-banner");
-      const after = await ctx.api("GET", `/parties/${p.id}`, { token });
-      if (after.mobile || after.erasureMode !== "anonymised") throw new Error(JSON.stringify(after));
-    });
+    await ctx.check(
+      "a customer's data downloads from the party page",
+      async () => {
+        const party = (await ctx.api("GET", "/parties?limit=1", { token }))[0];
+        await ctx.visit(`/parties/${party.id}`);
+        await ctx.expectVisible("party-privacy");
+        const [download] = await Promise.all([
+          page.waitForEvent("download", { timeout: 15000 }),
+          page.click('[data-testid="party-privacy-export"]'),
+        ]);
+        if (!/^customer-data-.*.json$/.test(download.suggestedFilename()))
+          throw new Error(download.suggestedFilename());
+      },
+    );
+    await ctx.check(
+      "erasing a customer needs ERASE typed, then shows the erased banner",
+      async () => {
+        const p = await ctx.api("POST", "/parties", {
+          token,
+          body: { name: "Walk-in Privacy Test", mobile: "9844444444" },
+        });
+        await ctx.visit(`/parties/${p.id}`);
+        await page.click('[data-testid="party-privacy-erase"]');
+        await ctx.expectVisible("party-erase-dialog");
+        if (
+          await page.locator('[data-testid="party-erase-confirm"]').isEnabled()
+        )
+          throw new Error("erase enabled before typing");
+        await page.fill('[data-testid="party-erase-type"]', "erase");
+        await page.click('[data-testid="party-erase-confirm"]');
+        await ctx.expectVisible("toast-success");
+        await ctx.expectVisible("party-erased-banner");
+        const after = await ctx.api("GET", `/parties/${p.id}`, { token });
+        if (after.mobile || after.erasureMode !== "anonymised")
+          throw new Error(JSON.stringify(after));
+      },
+    );
 
     await ctx.check("owner downloads all agency data", async () => {
       await ctx.visit("/settings");
@@ -286,35 +365,52 @@ const privacyFlow = {
         page.waitForEvent("download", { timeout: 30000 }),
         page.click('[data-testid="privacy-export"]'),
       ]);
-      if (!download.suggestedFilename().endsWith(".zip")) throw new Error(download.suggestedFilename());
+      if (!download.suggestedFilename().endsWith(".zip"))
+        throw new Error(download.suggestedFilename());
     });
-    await ctx.check("owner requests account deletion (password + confirm)", async () => {
-      await page.fill('[data-testid="privacy-deletion-password"]', ctx.CREDS.owner.password);
-      await page.fill('[data-testid="privacy-deletion-reason"]', "Verify run");
-      await page.click('[data-testid="privacy-deletion-request"]');
-      await page.click('[data-testid="confirm-ok"]');
-      await ctx.expectVisible("privacy-deletion-banner");
-    });
+    await ctx.check(
+      "owner requests account deletion (password + confirm)",
+      async () => {
+        await page.fill(
+          '[data-testid="privacy-deletion-password"]',
+          ctx.CREDS.owner.password,
+        );
+        await page.fill(
+          '[data-testid="privacy-deletion-reason"]',
+          "Verify run",
+        );
+        await page.click('[data-testid="privacy-deletion-request"]');
+        await page.click('[data-testid="confirm-ok"]');
+        await ctx.expectVisible("privacy-deletion-banner");
+      },
+    );
     await ctx.check("the request shows in the activity log", async () => {
       await ctx.visit("/settings/activity");
       await ctx.expectText("Requested account deletion");
     });
 
-    await ctx.check("platform admin sees the deletion request; purge waits for the grace period", async () => {
-      await ctx.logout();
-      await ctx.visit("/admin");
-      await page.fill('[data-testid="admin-email"]', ctx.CREDS.admin.email);
-      await page.fill('[data-testid="admin-password"]', ctx.CREDS.admin.password);
-      await page.click('[data-testid="admin-login-submit"]');
-      await ctx.expectVisible("admin-nav-AdminOrgs");
-      await page.click('[data-testid="admin-nav-AdminOrgs"]');
-      await page.click('[data-testid="admin-orgs-filter-deletion"]');
-      await ctx.expectText("Shree Ganesh Parcel Services");
-      const me = await ctx.api("GET", "/auth/me", { token });
-      await ctx.visit(`/admin/organizations/${me.organization.id}`);
-      await ctx.expectVisible("admin-org-deletion-banner");
-      if (await page.locator('[data-testid="admin-org-purge"]').isEnabled()) throw new Error("purge enabled inside the grace period");
-    });
+    await ctx.check(
+      "platform admin sees the deletion request; purge waits for the grace period",
+      async () => {
+        await ctx.logout();
+        await ctx.visit("/admin");
+        await page.fill('[data-testid="admin-email"]', ctx.CREDS.admin.email);
+        await page.fill(
+          '[data-testid="admin-password"]',
+          ctx.CREDS.admin.password,
+        );
+        await page.click('[data-testid="admin-login-submit"]');
+        await ctx.expectVisible("admin-nav-AdminOrgs");
+        await page.click('[data-testid="admin-nav-AdminOrgs"]');
+        await page.click('[data-testid="admin-orgs-filter-deletion"]');
+        await ctx.expectText("Shree Ganesh Parcel Services");
+        const me = await ctx.api("GET", "/auth/me", { token });
+        await ctx.visit(`/admin/organizations/${me.organization.id}`);
+        await ctx.expectVisible("admin-org-deletion-banner");
+        if (await page.locator('[data-testid="admin-org-purge"]').isEnabled())
+          throw new Error("purge enabled inside the grace period");
+      },
+    );
 
     await ctx.check("owner cancels the deletion", async () => {
       await ctx.visit("/admin");
@@ -327,15 +423,25 @@ const privacyFlow = {
       if (status.deletion.requestedAt) throw new Error("still requested");
     });
 
-    await ctx.check("staff see neither the activity log nor privacy settings", async () => {
-      await ctx.logout();
-      await ctx.login(ctx.CREDS.staff);
-      await ctx.visit("/settings");
-      await ctx.expectVisible("screen-title");
-      for (const id of ["nav-Activity", "settings-card-activity", "settings-card-privacy"]) {
-        if (await page.locator(`[data-testid="${id}"] >> visible=true`).count()) throw new Error(`${id} visible to staff`);
-      }
-    });
+    await ctx.check(
+      "staff see neither the activity log nor privacy settings",
+      async () => {
+        await ctx.logout();
+        await ctx.login(ctx.CREDS.staff);
+        await ctx.visit("/settings");
+        await ctx.expectVisible("screen-title");
+        for (const id of [
+          "nav-Activity",
+          "settings-card-activity",
+          "settings-card-privacy",
+        ]) {
+          if (
+            await page.locator(`[data-testid="${id}"] >> visible=true`).count()
+          )
+            throw new Error(`${id} visible to staff`);
+        }
+      },
+    );
   },
 };
 
@@ -355,35 +461,50 @@ export const flows = [
         await page.click('[data-testid="login-submit"]');
         await ctx.expectVisible("login-error");
       });
-      await ctx.check("signup validates required fields and GSTIN", async () => {
-        await page.click('[data-testid="go-signup"]');
-        await ctx.expectVisible("signup-businessName");
-        await page.fill('[data-testid="signup-gstin"]', "BADGSTIN");
-        await page.click('[data-testid="signup-submit"]');
-        await ctx.expectText("Enter your agency name");
-        await ctx.expectText("valid 15-character GSTIN");
-      });
-      await ctx.check("signup succeeds and lands on the review screen", async () => {
-        await page.fill('[data-testid="signup-businessName"]', "Verify Parcel Co");
-        await page.fill('[data-testid="signup-gstin"]', "27ABCDE1234F1Z5");
-        await page.fill('[data-testid="signup-officeAddress"]', "Station Road, Pune");
-        await page.fill('[data-testid="signup-name"]', "Verify Owner");
-        await page.fill('[data-testid="signup-email"]', "verify@parcel.test");
-        await page.fill('[data-testid="signup-password"]', "Verify#2026");
-        await page.click('[data-testid="signup-submit"]');
-        await ctx.expectVisible("signup-acceptTerms-error");
-        await ctx.expectText("Please accept the Terms and Privacy Policy");
-        await page.click('[data-testid="signup-acceptTerms"]');
-        await page.click('[data-testid="signup-submit"]');
-        await ctx.expectVisible("pending-card");
-      });
-      await ctx.check("pending agency login goes to the review screen", async () => {
-        await ctx.visit("/login");
-        await page.fill('[data-testid="login-email"]', "verify@parcel.test");
-        await page.fill('[data-testid="login-password"]', "Verify#2026");
-        await page.click('[data-testid="login-submit"]');
-        await ctx.expectVisible("pending-card");
-      });
+      await ctx.check(
+        "signup validates required fields and GSTIN",
+        async () => {
+          await page.click('[data-testid="go-signup"]');
+          await ctx.expectVisible("signup-businessName");
+          await page.fill('[data-testid="signup-gstin"]', "BADGSTIN");
+          await page.click('[data-testid="signup-submit"]');
+          await ctx.expectText("Enter your agency name");
+          await ctx.expectText("valid 15-character GSTIN");
+        },
+      );
+      await ctx.check(
+        "signup succeeds and lands on the review screen",
+        async () => {
+          await page.fill(
+            '[data-testid="signup-businessName"]',
+            "Verify Parcel Co",
+          );
+          await page.fill('[data-testid="signup-gstin"]', "27ABCDE1234F1Z5");
+          await page.fill(
+            '[data-testid="signup-officeAddress"]',
+            "Station Road, Pune",
+          );
+          await page.fill('[data-testid="signup-name"]', "Verify Owner");
+          await page.fill('[data-testid="signup-email"]', "verify@parcel.test");
+          await page.fill('[data-testid="signup-password"]', "Verify#2026");
+          await page.click('[data-testid="signup-submit"]');
+          await ctx.expectVisible("signup-acceptTerms-error");
+          await ctx.expectText("Please accept the Terms and Privacy Policy");
+          await page.click('[data-testid="signup-acceptTerms"]');
+          await page.click('[data-testid="signup-submit"]');
+          await ctx.expectVisible("pending-card");
+        },
+      );
+      await ctx.check(
+        "pending agency login goes to the review screen",
+        async () => {
+          await ctx.visit("/login");
+          await page.fill('[data-testid="login-email"]', "verify@parcel.test");
+          await page.fill('[data-testid="login-password"]', "Verify#2026");
+          await page.click('[data-testid="login-submit"]');
+          await ctx.expectVisible("pending-card");
+        },
+      );
     },
   },
   {
@@ -395,11 +516,15 @@ export const flows = [
       for (const [name, pattern] of ROUTES) {
         const url = pattern.replace(/:(\w+)/g, (_, k) => ids[k] || "missing");
         await ctx.check(`owner · ${name}`, async () => {
-          if (url.includes("missing")) throw new Error(`no fixture id for ${pattern}`);
+          if (url.includes("missing"))
+            throw new Error(`no fixture id for ${pattern}`);
           await ctx.visit(url);
           await ctx.expectVisible("screen-title", 20000);
           await ctx.expectNoPlaceholder();
-          const failed = await ctx.page.locator('[data-testid="empty-state"]').getByText("Could not load this").count();
+          const failed = await ctx.page
+            .locator('[data-testid="empty-state"]')
+            .getByText("Could not load this")
+            .count();
           if (failed) throw new Error("screen shows a load error");
         });
       }
@@ -427,10 +552,17 @@ export const flows = [
       const token = await ctx.tokenFor(ctx.CREDS.owner);
       const branches = await ctx.api("GET", "/branches", { token });
       const delhi = branches.find((b) => b.code === "DEL");
-      const party = await ctx.api("POST", "/parties", { token, body: { name: "Delhi Only Party" } });
+      const party = await ctx.api("POST", "/parties", {
+        token,
+        body: { name: "Delhi Only Party" },
+      });
       await fetch(`${ctx.API}/consignments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, "X-Branch-Id": delhi.id },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "X-Branch-Id": delhi.id,
+        },
         body: JSON.stringify({
           date: TODAY,
           party: party.id,
@@ -443,15 +575,23 @@ export const flows = [
         }),
       });
 
-      await ctx.check("switching to the Delhi branch filters every list", async () => {
-        await ctx.visit("/bookings");
-        await page.click('[data-testid="branch-switcher"]');
-        await page.click(`[data-testid="branch-switcher-option-${delhi.id}"]`);
-        await page.waitForTimeout(1200);
-        await ctx.expectText("Delhi Only Party");
-        const ho = await page.getByText("Ramesh Traders").count();
-        if (ho) throw new Error("head-office bookings still visible after picking Delhi");
-      });
+      await ctx.check(
+        "switching to the Delhi branch filters every list",
+        async () => {
+          await ctx.visit("/bookings");
+          await page.click('[data-testid="branch-switcher"]');
+          await page.click(
+            `[data-testid="branch-switcher-option-${delhi.id}"]`,
+          );
+          await page.waitForTimeout(1200);
+          await ctx.expectText("Delhi Only Party");
+          const ho = await page.getByText("Ramesh Traders").count();
+          if (ho)
+            throw new Error(
+              "head-office bookings still visible after picking Delhi",
+            );
+        },
+      );
       await ctx.check("back to all branches", async () => {
         await page.click('[data-testid="branch-switcher"]');
         await page.click('[data-testid="branch-switcher-option-all"]');
@@ -467,14 +607,19 @@ export const flows = [
       await ctx.login(ctx.CREDS.staff);
       await ctx.check("staff sidebar hides Branches", async () => {
         await ctx.expectVisible("sidebar");
-        if (await page.locator('[data-testid="nav-Branches"]').count()) throw new Error("Branches visible to staff");
+        if (await page.locator('[data-testid="nav-Branches"]').count())
+          throw new Error("Branches visible to staff");
       });
-      await ctx.check("staff bookings list shows only Delhi bookings", async () => {
-        await ctx.visit("/bookings");
-        await ctx.expectVisible("screen-title");
-        await page.waitForTimeout(800);
-        if (await page.getByText("Ramesh Traders").count()) throw new Error("head-office booking leaked to Delhi staff");
-      });
+      await ctx.check(
+        "staff bookings list shows only Delhi bookings",
+        async () => {
+          await ctx.visit("/bookings");
+          await ctx.expectVisible("screen-title");
+          await page.waitForTimeout(800);
+          if (await page.getByText("Ramesh Traders").count())
+            throw new Error("head-office booking leaked to Delhi staff");
+        },
+      );
       await ctx.check("staff departure board renders", async () => {
         await ctx.visit("/");
         await ctx.expectVisible("screen-title");
@@ -508,7 +653,9 @@ export const flows = [
       await ctx.check("phone: new booking form fits", async () => {
         await ctx.visit("/bookings/new");
         await ctx.expectVisible("screen-title");
-        const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth > window.innerWidth + 1,
+        );
         if (overflow) throw new Error("horizontal overflow on phone");
       });
     },
@@ -543,7 +690,10 @@ export const flows = [
         await ctx.visit("/admin");
         await ctx.expectVisible("admin-email");
         await page.fill('[data-testid="admin-email"]', ctx.CREDS.admin.email);
-        await page.fill('[data-testid="admin-password"]', ctx.CREDS.admin.password);
+        await page.fill(
+          '[data-testid="admin-password"]',
+          ctx.CREDS.admin.password,
+        );
         await page.click('[data-testid="admin-login-submit"]');
         await ctx.expectVisible("admin-nav-AdminOrgs");
       });
@@ -551,13 +701,18 @@ export const flows = [
         await ctx.expectVisible("screen-title");
         await ctx.expectNoPlaceholder();
       });
-      await ctx.check("admin agencies list shows the pending signup", async () => {
-        await page.click('[data-testid="admin-nav-AdminOrgs"]');
-        await ctx.expectText("Maa Durga Roadlines");
-      });
+      await ctx.check(
+        "admin agencies list shows the pending signup",
+        async () => {
+          await page.click('[data-testid="admin-nav-AdminOrgs"]');
+          await ctx.expectText("Maa Durga Roadlines");
+        },
+      );
       await ctx.check("admin agency detail", async () => {
         const token = await ctx.adminToken();
-        const res = await fetch(`${ctx.API}/admin/organizations?search=Maa`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(`${ctx.API}/admin/organizations?search=Maa`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const org = (await res.json()).data[0];
         await ctx.visit(`/admin/organizations/${org.id}`);
         await ctx.expectText("Maa Durga Roadlines");
@@ -570,9 +725,12 @@ export const flows = [
         await ctx.page.click('[data-testid="confirm-ok"]');
         await ctx.expectVisible("toast-success");
         const t = await ctx.adminToken();
-        const r = await fetch(`${ctx.API}/admin/organizations?search=Maa`, { headers: { Authorization: `Bearer ${t}` } });
+        const r = await fetch(`${ctx.API}/admin/organizations?search=Maa`, {
+          headers: { Authorization: `Bearer ${t}` },
+        });
         const o = (await r.json()).data[0];
-        if (o.approvalStatus !== "approved") throw new Error("still " + o.approvalStatus);
+        if (o.approvalStatus !== "approved")
+          throw new Error("still " + o.approvalStatus);
       });
       await ctx.check("admin plans", async () => {
         await page.click('[data-testid="admin-nav-AdminPlans"]');
@@ -591,39 +749,54 @@ export const flows = [
     async run(ctx) {
       const { page } = ctx;
       await ctx.login(ctx.CREDS.owner);
-      await ctx.check("owner saves a backup email and emails a backup", async () => {
-        await ctx.visit("/settings");
-        await ctx.expectVisible("backup-card");
-        await page.fill('[data-testid="backup-email"]', "vault@ganesh.test");
-        await page.click('[data-testid="backup-email-save"]');
-        await ctx.expectVisible("toast-success");
-        const token = await ctx.tokenFor(ctx.CREDS.owner);
-        const profile = await ctx.api("GET", "/business-profile", { token });
-        if (profile.backupEmail !== "vault@ganesh.test") throw new Error("backup email not saved");
-        await page.click('[data-testid="backup-send"]');
-        await ctx.expectVisible("toast-info", 20000);
-      });
+      await ctx.check(
+        "owner saves a backup email and emails a backup",
+        async () => {
+          await ctx.visit("/settings");
+          await ctx.expectVisible("backup-card");
+          await page.fill('[data-testid="backup-email"]', "vault@ganesh.test");
+          await page.click('[data-testid="backup-email-save"]');
+          await ctx.expectVisible("toast-success");
+          const token = await ctx.tokenFor(ctx.CREDS.owner);
+          const profile = await ctx.api("GET", "/business-profile", { token });
+          if (profile.backupEmail !== "vault@ganesh.test")
+            throw new Error("backup email not saved");
+          await page.click('[data-testid="backup-send"]');
+          await ctx.expectVisible("toast-info", 20000);
+        },
+      );
       await ctx.check("staff do not see the backup card", async () => {
         await ctx.logout();
         await ctx.login(ctx.CREDS.staff);
         await ctx.visit("/settings");
         await ctx.expectVisible("screen-title");
-        if (await page.locator('[data-testid="backup-card"] >> visible=true').count()) throw new Error("staff can email backups");
+        if (
+          await page
+            .locator('[data-testid="backup-card"] >> visible=true')
+            .count()
+        )
+          throw new Error("staff can email backups");
       });
-      await ctx.check("platform admin runs a backup and sees it in history", async () => {
-        await ctx.logout();
-        await ctx.visit("/admin");
-        await page.fill('[data-testid="admin-email"]', ctx.CREDS.admin.email);
-        await page.fill('[data-testid="admin-password"]', ctx.CREDS.admin.password);
-        await page.click('[data-testid="admin-login-submit"]');
-        await ctx.expectVisible("admin-nav-AdminBackups");
-        await page.click('[data-testid="admin-nav-AdminBackups"]');
-        await ctx.expectVisible("admin-backup-drive-warning");
-        await page.click('[data-testid="admin-backup-run"]');
-        await page.click('[data-testid="confirm-ok"]');
-        await ctx.expectVisible("toast-success", 30000);
-        await ctx.expectText("email (SMTP not configured");
-      });
+      await ctx.check(
+        "platform admin runs a backup and sees it in history",
+        async () => {
+          await ctx.logout();
+          await ctx.visit("/admin");
+          await page.fill('[data-testid="admin-email"]', ctx.CREDS.admin.email);
+          await page.fill(
+            '[data-testid="admin-password"]',
+            ctx.CREDS.admin.password,
+          );
+          await page.click('[data-testid="admin-login-submit"]');
+          await ctx.expectVisible("admin-nav-AdminBackups");
+          await page.click('[data-testid="admin-nav-AdminBackups"]');
+          await ctx.expectVisible("admin-backup-drive-warning");
+          await page.click('[data-testid="admin-backup-run"]');
+          await page.click('[data-testid="confirm-ok"]');
+          await ctx.expectVisible("toast-success", 30000);
+          await ctx.expectText("email (SMTP not configured");
+        },
+      );
     },
   },
   privacyFlow,
@@ -634,12 +807,21 @@ export const flows = [
       const token = await ctx.tokenFor(ctx.CREDS.owner);
       const me = await ctx.api("GET", "/auth/me", { token });
       const patch = (body) =>
-        fetch(`${ctx.API}/admin/organizations/${me.organization.id}/subscription`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${admin}` },
-          body: JSON.stringify(body),
-        });
-      await patch({ status: "trial", trialEndsAt: new Date(Date.now() - 20 * 864e5).toISOString() });
+        fetch(
+          `${ctx.API}/admin/organizations/${me.organization.id}/subscription`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${admin}`,
+            },
+            body: JSON.stringify(body),
+          },
+        );
+      await patch({
+        status: "trial",
+        trialEndsAt: new Date(Date.now() - 20 * 864e5).toISOString(),
+      });
       await ctx.login(ctx.CREDS.owner);
       await ctx.check("read-only banner is shown", async () => {
         await ctx.expectVisible("banner-readonly");
