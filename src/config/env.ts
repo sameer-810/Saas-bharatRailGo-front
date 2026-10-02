@@ -7,7 +7,7 @@ const ENV = {
     apiUrl: process.env.EXPO_PUBLIC_API_URL_DEV || "http://localhost:5001/api",
   },
   production: {
-    apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:5001/api",
+    apiUrl: process.env.EXPO_PUBLIC_API_URL || "https://saas-bharatrailgo-back.onrender.com/api",
   },
 };
 
