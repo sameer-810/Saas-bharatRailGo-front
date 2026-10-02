@@ -79,9 +79,14 @@ jobs:
 
       - name: Setup Android SDK (puts sdkmanager on PATH + accepts licenses)
         uses: android-actions/setup-android@v3
+        with:
+          # The action's default list still asks for the retired "tools" package,
+          # which newer sdkmanager versions refuse. Install nothing here; the next
+          # step installs exactly what the build needs.
+          packages: ""
 
       - name: Install required Android SDK packages
-        run: sdkmanager "platforms;android-36" "build-tools;34.0.0" "ndk;27.3.13750724" "cmake;3.22.1"
+        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;34.0.0" "ndk;27.3.13750724" "cmake;3.22.1"
 
       # The API address is a repository variable, not code: change it in
       # Settings → Secrets and variables → Actions → Variables. The build stops
