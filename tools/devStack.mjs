@@ -128,7 +128,7 @@ export async function startStack({ log = console.log } = {}) {
     env,
     stdio: "ignore",
   });
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 360; i++) {
     try {
       if ((await fetch(`http://localhost:${API_PORT}/health`)).ok) break;
     } catch {

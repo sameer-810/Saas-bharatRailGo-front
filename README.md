@@ -33,3 +33,19 @@ docs/FRONTEND_GUIDE.md       conventions every module follows
 Modules: auth, dashboard (departure board), bookings (quick entry, loading list), bilti,
 parties (ledger), payments (FIFO preview), invoices (GST), reports (Excel export), settings
 (business, branding, team, branches, stations, rate card, plan), admin (platform console at `/admin`).
+
+## GitHub workflows
+
+| Workflow | Runs | What it does |
+|---|---|---|
+| **CI** (`ci.yml`) | every push and pull request | Typecheck, lint, unit tests; the full Playwright run when `BACK_REPO_TOKEN` is set |
+| **Build Android** (`build-android.yml`) | by hand: Actions → Build Android → Run workflow | `production` → signed `.aab` for the Play Store; `preview` → `.apk` to install on a phone. Published under **Releases** |
+| **Build iOS** (`build-ios.yml`) | by hand | `.ipa` for TestFlight. Needs a paid Apple Developer account and one first build from a computer (see the file's header) |
+| **OTA Update** (`ota-update.yml`) | by hand | Sends a JS/UI-only change to installed apps in about 2 minutes, with no new build |
+
+One-time setup in GitHub → Settings → Secrets and variables → Actions:
+
+- **Secret** `EXPO_TOKEN` — an access token of the Expo account `bharat-rail-gos-team`.
+- **Variable** `EXPO_PUBLIC_API_URL` — the API address, e.g. `https://your-api-host/api`. Builds stop if it is missing.
+
+App icons: `node tools/makeIcons.mjs` regenerates `assets/`.

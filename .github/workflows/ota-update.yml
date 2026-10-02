@@ -1,0 +1,63 @@
+name: OTA Update (eas update)
+
+# Pushes a JavaScript/UI-only change to already-installed apps in ~2 minutes,
+# with NO new build and NO Play review. Run it from the GitHub "Actions" tab →
+# "OTA Update (eas update)" → "Run workflow" → type what changed.
+#
+# IMPORTANT: OTA can ONLY change JS/TS, styles, images and other JS-bundle
+# assets. It CANNOT change native code, permissions, app.json native config,
+# or add native modules — those still need a full .apk build. It also only
+# reaches devices that already installed a build on the SAME channel and same
+# app version (runtimeVersion = appVersion = 1.0.0).
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "What changed in this update (shown in EAS dashboard)"
+        required: true
+        default: "JS/UI update"
+      branch:
+        description: "Which channel/branch to publish to (must match the installed build)"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - production
+          - development
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install eas-cli
+        run: npm install -g eas-cli
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish OTA update
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          # CI=1 makes eas/expo run non-interactively (the export step rejects
+          # the --non-interactive flag, so we use this env instead).
+          CI: "1"
+          # EXPO_PUBLIC_* are inlined into the JS bundle at export time, so they
+          # must match what the installed build was made with.
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_SITE_URL: https://saas-bharat-rail-go-web.vercel.app
+        # Android only for now — add ios once an iPhone build is in TestFlight.
+        run: |
+          node tools/setApiUrl.mjs
+          eas update \
+            --branch "${{ github.event.inputs.branch }}" \
+            --platform android \
+            --message "${{ github.event.inputs.message }}"

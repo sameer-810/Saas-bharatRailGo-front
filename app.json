@@ -3,21 +3,76 @@
     "name": "BharatRailGo",
     "slug": "bharatrailgo",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "default",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "bharatrailgo",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#111317"
+    },
     "android": {
       "package": "com.bharatrailgo.app",
-      "permissions": ["android.permission.INTERNET"],
-      "softwareKeyboardLayoutMode": "resize"
+      "permissions": [
+        "android.permission.INTERNET"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111317"
+      },
+      "softwareKeyboardLayoutMode": "resize",
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.bharatrailgo.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "BharatRailGo uses your photo library to pick your agency's logo, which is printed on your bilti and invoices.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "web": {
+      "favicon": "./assets/favicon.png",
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-secure-store", "expo-font"]
+    "plugins": [
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "BharatRailGo uses your photo library to pick your agency's logo, which is printed on your bilti and invoices.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      "./plugins/withAndroidBuildTuning"
+    ],
+    "owner": "bharat-rail-gos-team",
+    "extra": {
+      "eas": {
+        "projectId": "b2a84ce6-3472-4036-9acc-28b7c9d71676"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b2a84ce6-3472-4036-9acc-28b7c9d71676"
+    }
   }
 }
